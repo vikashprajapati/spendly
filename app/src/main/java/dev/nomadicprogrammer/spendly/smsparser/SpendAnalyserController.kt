@@ -4,9 +4,10 @@ import android.content.Context
 import android.util.Log
 import dev.nomadicprogrammer.spendly.smsparser.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.smsparser.data.SmsInbox
-import dev.nomadicprogrammer.spendly.smsparser.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.smsparser.parsers.AmountParser
+import dev.nomadicprogrammer.spendly.smsparser.parsers.BankNameParser
+import dev.nomadicprogrammer.spendly.smsparser.parsers.DateParser
 import dev.nomadicprogrammer.spendly.smsparser.usecases.LocalRegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.usecases.TransactionalSmsClassifier
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +31,12 @@ class SpendAnalyserController(
             return
         }
 
-        val transactionalSmsClassifier = TransactionalSmsClassifier(LocalRegexProvider(), AmountParser())
+        val transactionalSmsClassifier = TransactionalSmsClassifier(
+            LocalRegexProvider(),
+            AmountParser(),
+            BankNameParser(),
+            DateParser()
+        )
 
         val filteredSms : MutableList<TransactionalSms> = mutableListOf()
 
