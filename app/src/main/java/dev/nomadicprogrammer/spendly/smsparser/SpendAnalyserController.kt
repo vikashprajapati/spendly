@@ -5,12 +5,15 @@ import android.util.Log
 import dev.nomadicprogrammer.spendly.smsparser.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.smsparser.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.smsparser.parsers.AmountParser
 import dev.nomadicprogrammer.spendly.smsparser.usecases.LocalRegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.usecases.SpendAnalyser
+import dev.nomadicprogrammer.spendly.smsparser.usecases.TransactionalSmsClassifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -27,32 +30,32 @@ class SpendAnalyserController(
             return
         }
 
-        val spendAnalyser = SpendAnalyser(LocalRegexProvider())
+        val transactionalSmsClassifier = TransactionalSmsClassifier(LocalRegexProvider(), AmountParser())
 
-        val filteredSms : MutableList<Sms> = mutableListOf()
+        val filteredSms : MutableList<TransactionalSms> = mutableListOf()
 
         withContext(Dispatchers.Default){
             SmsInbox(context)
-                .readSms(spendAnalyser.readSmsRange(), spendAnalyser.inboxReadSortOrder())
-                .onStart { spendAnalyser.personalSmsExclusionRegex }
+                .readSms(transactionalSmsClassifier.readSmsRange(), transactionalSmsClassifier.inboxReadSortOrder())
+                .onStart { transactionalSmsClassifier.personalSmsExclusionRegex }
                 .onEach {
                     val progress = (it.first.toFloat() / it.second.toFloat()) * 100
-                    spendAnalyser.onProgress(progress.toInt())
+                    transactionalSmsClassifier.onProgress(progress.toInt())
                 }
                 .map { it.third }
                 .filter {sms ->
                     Log.d(TAG, "Filtering sms: $sms")
-                    val isNonPersonalSms = spendAnalyser.personalSmsExclusionRegex.isPositiveSender(sms.senderId) &&
-                            !spendAnalyser.personalSmsExclusionRegex.isNegativeSender(sms.senderId)
+                    val isNonPersonalSms = transactionalSmsClassifier.personalSmsExclusionRegex.isPositiveSender(sms.senderId) &&
+                            !transactionalSmsClassifier.personalSmsExclusionRegex.isNegativeSender(sms.senderId)
 
                     isNonPersonalSms
                 }
-                .filter {sms -> spendAnalyser.filter(sms) }
+                .mapNotNull {sms -> transactionalSmsClassifier.filterMap(sms) as TransactionalSms? }
                 .onCompletion { error ->
                     if (error == null) {
-                        spendAnalyser.onComplete(filteredSms)
+                        transactionalSmsClassifier.onComplete(filteredSms)
                     } else {
-                        spendAnalyser.onError(error)
+                        transactionalSmsClassifier.onError(error)
                     }
                 }
                 .flowOn(Dispatchers.IO)
