@@ -1,17 +1,18 @@
-package dev.nomadicprogrammer.spendly.smsparser.usecases
+package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
 import android.provider.Telephony
 import android.util.Log
-import dev.nomadicprogrammer.spendly.smsparser.exceptions.RegexFetchException
-import dev.nomadicprogrammer.spendly.smsparser.model.CREDIT
-import dev.nomadicprogrammer.spendly.smsparser.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.model.DEBIT
-import dev.nomadicprogrammer.spendly.smsparser.model.Range
-import dev.nomadicprogrammer.spendly.smsparser.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.model.SmsRegex
-import dev.nomadicprogrammer.spendly.smsparser.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
-import dev.nomadicprogrammer.spendly.smsparser.usecases.base.SmsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
+import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.CREDIT
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBIT
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import java.util.Calendar
 
 class TransactionalSmsClassifier(

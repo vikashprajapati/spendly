@@ -1,12 +1,12 @@
-package dev.nomadicprogrammer.spendly.smsparser.data
+package dev.nomadicprogrammer.spendly.smsparser.common.data
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.provider.Telephony
 import android.util.Log
-import dev.nomadicprogrammer.spendly.smsparser.model.Range
-import dev.nomadicprogrammer.spendly.smsparser.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

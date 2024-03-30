@@ -1,8 +1,8 @@
-package dev.nomadicprogrammer.spendly.smsparser.usecases.base
+package dev.nomadicprogrammer.spendly.smsparser.common.base
 
-import dev.nomadicprogrammer.spendly.smsparser.model.Range
-import dev.nomadicprogrammer.spendly.smsparser.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.model.SmsRegex
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
 
 interface SmsUseCase<T> {
     fun readSmsRange() : Range

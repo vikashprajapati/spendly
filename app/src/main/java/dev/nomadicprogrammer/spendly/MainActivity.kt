@@ -19,8 +19,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import dev.nomadicprogrammer.spendly.smsparser.SpendAnalyserController
-import dev.nomadicprogrammer.spendly.smsparser.Util.smsReadPermissionAvailable
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
+import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.ui.theme.SpendlyTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.smsparser.model
+package dev.nomadicprogrammer.spendly.smsparser.common.model
 
 data class Sms(
     val id: String,

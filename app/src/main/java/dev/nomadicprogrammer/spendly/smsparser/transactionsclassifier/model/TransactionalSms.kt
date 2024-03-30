@@ -1,4 +1,7 @@
-package dev.nomadicprogrammer.spendly.smsparser.model
+package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
+
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 
 const val DEFAULT_CURRENCY = "INR"
 

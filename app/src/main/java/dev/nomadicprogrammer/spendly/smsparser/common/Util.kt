@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.smsparser
+package dev.nomadicprogrammer.spendly.smsparser.common
 
 import android.content.Context
 import android.content.pm.PackageManager

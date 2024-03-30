@@ -1,16 +1,15 @@
-package dev.nomadicprogrammer.spendly.smsparser
+package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
 import android.content.Context
 import android.util.Log
-import dev.nomadicprogrammer.spendly.smsparser.Util.smsReadPermissionAvailable
-import dev.nomadicprogrammer.spendly.smsparser.data.SmsInbox
-import dev.nomadicprogrammer.spendly.smsparser.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
+import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.parsers.AmountParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.BankNameParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.DateParser
-import dev.nomadicprogrammer.spendly.smsparser.usecases.LocalRegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.usecases.TransactionalSmsClassifier
-import dev.nomadicprogrammer.spendly.smsparser.usecases.base.SmsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
+import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn

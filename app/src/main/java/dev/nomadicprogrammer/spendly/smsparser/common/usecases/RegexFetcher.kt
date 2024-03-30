@@ -1,6 +1,6 @@
-package dev.nomadicprogrammer.spendly.smsparser.usecases
+package dev.nomadicprogrammer.spendly.smsparser.common.usecases
 
-import dev.nomadicprogrammer.spendly.smsparser.model.SmsRegex
+import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
 
 interface RegexProvider {
     fun getRegex() : SmsRegex?
