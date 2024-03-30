@@ -8,6 +8,8 @@ interface SmsUseCase {
     fun readSmsRange() : Range
     fun inboxReadSortOrder(): String
     fun onProgress(progress: Int)
+
+    fun filter(sms : Sms): Boolean
     fun onComplete(filteredSms: List<Sms>)
     fun onError(throwable: Throwable)
 }

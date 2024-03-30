@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.smsparser
 
 import android.content.Context
+import android.util.Log
 import dev.nomadicprogrammer.spendly.smsparser.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.smsparser.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.model.Sms
@@ -9,6 +10,7 @@ import dev.nomadicprogrammer.spendly.smsparser.usecases.SpendAnalyser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -27,26 +29,28 @@ class SpendAnalyserController(
 
         val spendAnalyser = SpendAnalyser(LocalRegexProvider())
 
-        val filteredSms : MutableList<Triple<Int, Int, Sms>> = mutableListOf()
+        val filteredSms : MutableList<Sms> = mutableListOf()
 
         withContext(Dispatchers.Default){
             SmsInbox(context)
                 .readSms(spendAnalyser.readSmsRange(), spendAnalyser.inboxReadSortOrder())
-                .onStart { spendAnalyser.regex }
+                .onStart { spendAnalyser.personalSmsExclusionRegex }
                 .onEach {
                     val progress = (it.first.toFloat() / it.second.toFloat()) * 100
                     spendAnalyser.onProgress(progress.toInt())
                 }
-                .filter {
-                    val sms = it.third
-                    spendAnalyser.regex.isPositiveSender(sms.senderId) &&
-                            !spendAnalyser.regex.isNegativeSender(sms.senderId) &&
-                            spendAnalyser.regex.isPositiveMsgBody(sms.msgBody) &&
-                            !spendAnalyser.regex.isNegativeMsgBody(sms.msgBody)
+                .map { it.third }
+                .filter {sms ->
+                    Log.d(TAG, "Filtering sms: $sms")
+                    val isNonPersonalSms = spendAnalyser.personalSmsExclusionRegex.isPositiveSender(sms.senderId) &&
+                            !spendAnalyser.personalSmsExclusionRegex.isNegativeSender(sms.senderId)
+
+                    isNonPersonalSms
                 }
+                .filter {sms -> spendAnalyser.filter(sms) }
                 .onCompletion { error ->
                     if (error == null) {
-                        spendAnalyser.onComplete(filteredSms.map { it.third })
+                        spendAnalyser.onComplete(filteredSms)
                     } else {
                         spendAnalyser.onError(error)
                     }

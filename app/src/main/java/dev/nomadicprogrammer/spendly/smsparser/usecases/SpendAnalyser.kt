@@ -5,16 +5,23 @@ import android.util.Log
 import dev.nomadicprogrammer.spendly.smsparser.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.model.SmsRegex
 import dev.nomadicprogrammer.spendly.smsparser.usecases.base.SmsUseCase
 import java.util.Calendar
 
 class SpendAnalyser(
-    val regexProvider: RegexProvider
+    private val regexProvider: RegexProvider
 ) : SmsUseCase {
     private val TAG = SpendAnalyser::class.simpleName
 
-    val regex by lazy { regexProvider.getRegex() ?: throw RegexFetchException("Regex not found") }
+    val personalSmsExclusionRegex by lazy { regexProvider.getRegex() ?: throw RegexFetchException("Regex not found") }
+    private val debitTransactionIdentifierRegex by lazy { regexProvider.getDebitTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
+    private val creditTransactionIdentifierRegex by lazy { regexProvider.getCreditTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
+
+    private var totalDebitAmount : Long = 0L
+    private val debitTransactionList : MutableList<Sms> = mutableListOf()
+
+    private var totalCreditAmount : Long = 0L
+    private val creditTransactionList : MutableList<Sms> = mutableListOf()
 
     override fun inboxReadSortOrder(): String {
         return "${ Telephony.Sms.Inbox.DATE} ASC"
@@ -22,7 +29,7 @@ class SpendAnalyser(
 
     override fun readSmsRange(): Range {
         val sixMonthsBefore = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_MONTH, -3)
+            add(Calendar.DAY_OF_MONTH, -2)
             time
         }
         return Range(sixMonthsBefore.time, System.currentTimeMillis())
@@ -30,6 +37,21 @@ class SpendAnalyser(
 
     override fun onProgress(progress: Int) {
         Log.d(TAG, "Progress: $progress")
+    }
+
+    override fun filter(sms: Sms): Boolean {
+        val isDebitTransaction = debitTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
+        if (isDebitTransaction){
+
+            return true
+        }
+        val isCreditTransaction = creditTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
+        if (isCreditTransaction){
+
+            return true
+        }
+
+        return false
     }
 
     override fun onComplete(filteredSms: List<Sms>) {
