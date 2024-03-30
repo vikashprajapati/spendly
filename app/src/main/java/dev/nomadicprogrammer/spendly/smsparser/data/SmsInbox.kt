@@ -1,0 +1,43 @@
+package dev.nomadicprogrammer.spendly.smsparser.data
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.Uri
+import android.provider.Telephony
+import android.util.Log
+import dev.nomadicprogrammer.spendly.smsparser.model.Range
+import dev.nomadicprogrammer.spendly.smsparser.model.Sms
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+
+
+class SmsInbox(val context: Context) : SmsDataSource {
+    private val TAG = SmsInbox::class.simpleName
+
+    private fun getRangeFilter(range: Range): String {
+        return "${Telephony.Sms.Inbox.DATE} >= ${range.start} AND ${Telephony.Sms.Inbox.DATE} <= ${range.end}"
+    }
+
+    @SuppressLint("Range")
+    override fun readSms(range : Range, sortOrder : String): Flow<Triple<Int, Int, Sms>>  = flow{
+        val inboxUri = Uri.parse("content://sms/inbox")
+        val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)
+        val cursor = context.contentResolver.query(inboxUri, projection, getRangeFilter(range), null, sortOrder)
+        Log.d(TAG, "cursor count: ${cursor?.count}")
+
+        var currentSms = 0
+
+        while (cursor != null && cursor.moveToNext()){
+            Log.d(TAG, "Reading sms: $currentSms")
+            val _id = cursor.getString(cursor.getColumnIndex(Telephony.Sms.Inbox._ID))
+            val address = cursor.getString(cursor.getColumnIndex(Telephony.Sms.Inbox.ADDRESS))
+            val smsBody = cursor.getString(cursor.getColumnIndex(Telephony.Sms.Inbox.BODY))
+            val date = cursor.getString(cursor.getColumnIndex(Telephony.Sms.Inbox.DATE))
+            val sms = Sms(id = _id, senderId = address, msgBody = smsBody, date = date.toLong())
+            currentSms++
+            emit(Triple(currentSms, cursor.count, sms))
+        }
+
+        cursor?.close()
+    }
+}
