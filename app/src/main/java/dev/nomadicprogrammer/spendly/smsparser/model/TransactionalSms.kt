@@ -4,14 +4,14 @@ import dev.nomadicprogrammer.spendly.smsparser.usecases.TransactionalSmsClassifi
 
 sealed class TransactionalSms(
     open val transactionDate: String,
-    open val bankName: String,
+    open val bankName: String? = null,
     open val currencyAmount: TransactionalSmsClassifier.CurrencyAmount,
     open val originalSms: Sms
 ){
     data class Debit(
         override val transactionDate: String,
         val transferredTo: String,
-        override val bankName: String,
+        override val bankName: String? = null,
         override val currencyAmount: TransactionalSmsClassifier.CurrencyAmount,
         override val originalSms: Sms
     ) : TransactionalSms(transactionDate, bankName, currencyAmount, originalSms)
@@ -19,7 +19,7 @@ sealed class TransactionalSms(
     data class Credit(
         override val transactionDate: String,
         val receivedFrom: String,
-        override val bankName: String,
+        override val bankName: String? = null,
         override val currencyAmount: TransactionalSmsClassifier.CurrencyAmount,
         override val originalSms: Sms
     ) : TransactionalSms(transactionDate, bankName, currencyAmount, originalSms)

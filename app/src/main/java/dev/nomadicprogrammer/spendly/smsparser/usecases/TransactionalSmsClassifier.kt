@@ -7,13 +7,15 @@ import dev.nomadicprogrammer.spendly.smsparser.model.DEFAULT_CURRENCY
 import dev.nomadicprogrammer.spendly.smsparser.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.smsparser.parsers.BankNameParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.usecases.base.SmsUseCase
 import java.util.Calendar
 
 class TransactionalSmsClassifier(
     private val regexProvider: RegexProvider,
-    private val amountParser: Parser
+    private val amountParser: Parser,
+    private val bankNameParser: BankNameParser
 ) : SmsUseCase {
     private val TAG = TransactionalSmsClassifier::class.simpleName
 
@@ -39,10 +41,15 @@ class TransactionalSmsClassifier(
 
     override fun <TransactionalSms> filterMap(sms: Sms): TransactionalSms? {
         val currencyAmount = parseCurrencyAmount(sms.msgBody)
+        val bankName = bankNameParser.parse(sms.msgBody)
 
         return when {
-            isDebitTransaction(sms) -> createDebitTransaction(sms = sms, currencyAmount = currencyAmount) as TransactionalSms
-            isCreditTransaction(sms) -> createCreditTransaction(sms, currencyAmount = currencyAmount) as TransactionalSms
+            isDebitTransaction(sms) -> createDebitTransaction(
+                sms = sms, currencyAmount = currencyAmount, bank = bankName
+            ) as TransactionalSms
+            isCreditTransaction(sms) -> createCreditTransaction(
+                sms, currencyAmount = currencyAmount, bank = bankName
+            ) as TransactionalSms
             else -> null
         }
     }
@@ -55,14 +62,14 @@ class TransactionalSmsClassifier(
         return creditTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
     }
 
-    private fun createDebitTransaction(sms: Sms,  currencyAmount: CurrencyAmount): TransactionalSms {
-        return TransactionalSms.Credit(
-            transactionDate = "", receivedFrom = "", bankName = "",
-            currencyAmount = currencyAmount, originalSms = sms
+    private fun createDebitTransaction(sms: Sms, currencyAmount: CurrencyAmount, bank: String?): TransactionalSms {
+        return TransactionalSms.Debit(
+            transactionDate = "", transferredTo = "", bankName = bank,
+            currencyAmount = currencyAmount, originalSms = sms,
         )
     }
 
-    private fun createCreditTransaction(sms: Sms, currencyAmount: CurrencyAmount): TransactionalSms {
+    private fun createCreditTransaction(sms: Sms, currencyAmount: CurrencyAmount, bank: String?): TransactionalSms {
         return TransactionalSms.Credit(
             transactionDate = "", receivedFrom = "", bankName = "",
             currencyAmount = currencyAmount, originalSms = sms
