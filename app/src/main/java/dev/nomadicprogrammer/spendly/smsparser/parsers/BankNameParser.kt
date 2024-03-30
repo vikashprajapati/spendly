@@ -1,28 +1,27 @@
 package dev.nomadicprogrammer.spendly.smsparser.parsers
 
-import dev.nomadicprogrammer.spendly.smsparser.model.Sms
-
 class BankNameParser : Parser {
+    private val banks = mapOf(
+        "ICICI" to "ICICI",
+        "HDFC" to "HDFC",
+        "SBI" to "SBI",
+        "AXIS" to "AXIS",
+        "KOTAK" to "KOTAK",
+        "BOI" to "BOI",
+        "PNB" to "PNB",
+        "CITI" to "CITI",
+        "BOB" to "BOB",
+        "UBI" to "UBI",
+        "IDBI" to "IDBI",
+        "YES" to "YES",
+        "INDUSIND" to "INDUSIND",
+        "BANK OF INDIA" to "BOI",
+        "BANK OF BARODA" to "BOB",
+        "UNITED BANK OF INDIA" to "UBI",
+        "INDUSTRIAL DEVELOPMENT BANK OF INDIA" to "IDBI"
+    )
+
     override fun parse(text: String): String? {
-        return when {
-            text.contains("ICICI") -> "ICICI"
-            text.contains("HDFC") -> "HDFC"
-            text.contains("SBI") -> "SBI"
-            text.contains("AXIS") -> "AXIS"
-            text.contains("KOTAK") -> "KOTAK"
-            text.contains("BOI") -> "BOI"
-            text.contains("PNB") -> "PNB"
-            text.contains("CITI") -> "CITI"
-            text.contains("BOB") -> "BOB"
-            text.contains("UBI") -> "UBI"
-            text.contains("IDBI") -> "IDBI"
-            text.contains("YES") -> "YES"
-            text.contains("INDUSIND") -> "INDUSIND"
-            text.contains("BANK OF INDIA") -> "BOI"
-            text.contains("BANK OF BARODA") -> "BOB"
-            text.contains("UNITED BANK OF INDIA") -> "UBI"
-            text.contains("INDUSTRIAL DEVELOPMENT BANK OF INDIA") -> "IDBI"
-            else -> null
-        }
+        return banks.entries.firstOrNull { it.key in text }?.value
     }
 }
