@@ -1,18 +1,22 @@
 package dev.nomadicprogrammer.spendly.smsparser.model
 
-import dev.nomadicprogrammer.spendly.smsparser.usecases.TransactionalSmsClassifier
+const val DEFAULT_CURRENCY = "INR"
+
+
+const val DEBIT = "debit"
+const val CREDIT = "credit"
 
 sealed class TransactionalSms(
     open val transactionDate: String?,
     open val bankName: String? = null,
-    open val currencyAmount: TransactionalSmsClassifier.CurrencyAmount,
+    open val currencyAmount: CurrencyAmount,
     open val originalSms: Sms
 ){
     data class Debit(
         override val transactionDate: String?,
         val transferredTo: String,
         override val bankName: String? = null,
-        override val currencyAmount: TransactionalSmsClassifier.CurrencyAmount,
+        override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms
     ) : TransactionalSms(transactionDate, bankName, currencyAmount, originalSms)
 
@@ -20,9 +24,29 @@ sealed class TransactionalSms(
         override val transactionDate: String?,
         val receivedFrom: String,
         override val bankName: String? = null,
-        override val currencyAmount: TransactionalSmsClassifier.CurrencyAmount,
+        override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms
     ) : TransactionalSms(transactionDate, bankName, currencyAmount, originalSms)
-}
 
-const val DEFAULT_CURRENCY = "INR"
+    companion object {
+        fun create(
+            type: String,
+            sms: Sms,
+            currencyAmount: CurrencyAmount,
+            bank: String?,
+            transactionDate: String?
+        ): TransactionalSms? {
+            return when(type){
+                DEBIT -> Debit(
+                    transactionDate = transactionDate, transferredTo = "", bankName = bank,
+                    currencyAmount = currencyAmount, originalSms = sms,
+                )
+                CREDIT -> Credit(
+                    transactionDate = transactionDate, receivedFrom = "", bankName = bank,
+                    currencyAmount = currencyAmount, originalSms = sms
+                )
+                else -> null
+            }
+        }
+    }
+}

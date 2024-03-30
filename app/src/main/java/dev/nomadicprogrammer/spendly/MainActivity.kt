@@ -8,12 +8,13 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import dev.nomadicprogrammer.spendly.smsparser.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.ui.theme.SpendlyTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -33,32 +35,34 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
-                    LaunchSpendAnalyser()
+                    val context = LocalContext.current
+                    val coroutineScope = rememberCoroutineScope()
+                    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+                        if (it) {
+                            coroutineScope.launch {
+                                SpendAnalyserController(context).launchTransactionalSmsClassifier()
+                            }
+                        } else {
+                            Log.d("MainActivity", "Permission denied")
+                        }
+                    }
+                    Column {
+                        Button(
+                            onClick = { launchSpendAnalyser(context, coroutineScope, launcher) }
+                        ) {
+                            Text(text = "Click me")
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-private fun LaunchSpendAnalyser() {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-            if (it) {
-                coroutineScope.launch {
-                    SpendAnalyserController(context).launch()
-                }
-            } else {
-                Log.d("MainActivity", "Permission denied")
-            }
-    }
-    LaunchedEffect(key1 = true){
-        checkAndRequestSmsPermission(context, launcher) {
-            coroutineScope.launch {
-                SpendAnalyserController(context).launch()
-            }
+private fun launchSpendAnalyser(context: Context, coroutineScope: CoroutineScope, launcher: ManagedActivityResultLauncher<String, Boolean>) {
+    checkAndRequestSmsPermission(context, launcher) {
+        coroutineScope.launch {
+            SpendAnalyserController(context).launchTransactionalSmsClassifier()
         }
     }
 }
