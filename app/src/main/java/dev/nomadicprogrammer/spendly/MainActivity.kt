@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     val recentTransaction = remember { mutableStateOf(listOf<TransactionalSms>()) }
-                    Home(name = "Vikash", income = 340000.0 , spent = 100324.4 , recentTransactions = recentTransaction)
+                    Home(name = "Vikash", recentTransactions = recentTransaction)
                     LaunchedEffect(key1 = true){
                         launchSpendAnalyser(context, coroutineScope, launcher){
                             recentTransaction.value = it
