@@ -9,12 +9,15 @@ data class CurrencyAmount(val currency: String = DEFAULT_CURRENCY, val amount: D
 
     companion object CurrencyAmountParser{
         fun parse(messageBody: String, amountParser : Parser): CurrencyAmount {
-            val parts = amountParser.parse(messageBody)?.split("\\s")
+            val parts = amountParser.parse(messageBody)?.split(" ")
             val indianLocale = Locale("en", "IN")
             val indianFormat: NumberFormat = NumberFormat.getInstance(indianLocale)
 
             return if (parts != null && parts.size == 2) {
-                CurrencyAmount(currency = parts[0], amount = parts[1].toDoubleOrNull())
+                val amountNumber: Double? = parts[1].let {
+                    indianFormat.parse(it)?.toDouble() ?: it.toDoubleOrNull()
+                }
+                CurrencyAmount(currency = parts[0], amount = amountNumber)
             } else {
                 val amountNumber: Double? = parts?.get(0)?.let {
                     indianFormat.parse(it)?.toDouble() ?: it.toDoubleOrNull()
