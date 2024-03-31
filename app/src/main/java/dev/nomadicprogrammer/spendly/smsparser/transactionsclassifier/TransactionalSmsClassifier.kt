@@ -2,6 +2,7 @@ package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
 import android.provider.Telephony
 import android.util.Log
+import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
@@ -38,7 +39,7 @@ class TransactionalSmsClassifier(
 
     override fun readSmsRange(): Range {
         val sixMonthsBefore = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_MONTH, -10)
+            add(Calendar.DAY_OF_MONTH, -12)
             time
         }
         return Range(sixMonthsBefore.time, System.currentTimeMillis())
@@ -51,7 +52,7 @@ class TransactionalSmsClassifier(
     override fun filterMap(sms: Sms): TransactionalSms? {
         val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)
         val bankName = bankNameParser.parse(sms.msgBody)
-        val transactionDate = dateParser.parse(sms.msgBody)
+        val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
 
         val transactionType = when {
             isDebitTransaction(sms) -> DEBIT
@@ -74,30 +75,6 @@ class TransactionalSmsClassifier(
 
     private fun isCreditTransaction(sms: Sms): Boolean {
         return creditTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
-    }
-
-    private fun createDebitTransaction(
-        sms: Sms,
-        currencyAmount: CurrencyAmount,
-        bank: String?,
-        transactionDate: String?
-    ): TransactionalSms {
-        return TransactionalSms.Debit(
-            transactionDate = transactionDate, transferredTo = "", bankName = bank,
-            currencyAmount = currencyAmount, originalSms = sms,
-        )
-    }
-
-    private fun createCreditTransaction(
-        sms: Sms,
-        currencyAmount: CurrencyAmount,
-        bank: String?,
-        transactionDate: String?
-    ): TransactionalSms {
-        return TransactionalSms.Credit(
-            transactionDate = transactionDate, receivedFrom = "", bankName = bank,
-            currencyAmount = currencyAmount, originalSms = sms
-        )
     }
 
     override fun onComplete(filteredSms: List<TransactionalSms>) {

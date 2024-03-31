@@ -9,7 +9,7 @@ class DateParser : Parser{
     override fun parse(text: String): String? {
         val matcher = pattern.matcher(text)
         return if (matcher.find()) {
-            matcher.group()
+            matcher.group().trim()
         } else {
             null
         }
