@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.smsparser.common.model
 
+import dev.nomadicprogrammer.spendly.base.LocaleUtils
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEFAULT_CURRENCY
 import java.text.NumberFormat
@@ -14,17 +15,15 @@ data class CurrencyAmount(val currency: String = DEFAULT_CURRENCY, val amount: D
     companion object CurrencyAmountParser{
         fun parse(messageBody: String, amountParser : Parser): CurrencyAmount {
             val parts = amountParser.parse(messageBody)?.split(" ")
-            val indianLocale = Locale("en", "IN")
-            val indianFormat: NumberFormat = NumberFormat.getInstance(indianLocale)
 
             return if (parts != null && parts.size == 2) {
-                val amountNumber: Double? = parts[1].let {
-                    indianFormat.parse(it)?.toDouble() ?: it.toDoubleOrNull()
+                val amountNumber: Double? = parts[1].let { amount ->
+                    LocaleUtils.parseNumber(amount).getOrNull()
                 }
                 CurrencyAmount(currency = parts[0], amount = amountNumber)
             } else {
-                val amountNumber: Double? = parts?.get(0)?.let {
-                    indianFormat.parse(it)?.toDouble() ?: it.toDoubleOrNull()
+                val amountNumber: Double? = parts?.get(0)?.let { amount ->
+                    LocaleUtils.parseNumber(amount).getOrNull()
                 }
                 CurrencyAmount(amount = amountNumber)
             }
