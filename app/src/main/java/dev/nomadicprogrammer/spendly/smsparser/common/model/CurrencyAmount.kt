@@ -7,6 +7,10 @@ import java.util.Locale
 
 data class CurrencyAmount(val currency: String = DEFAULT_CURRENCY, val amount: Double?){
 
+    override fun toString(): String {
+        return "$currency $amount"
+    }
+
     companion object CurrencyAmountParser{
         fun parse(messageBody: String, amountParser : Parser): CurrencyAmount {
             val parts = amountParser.parse(messageBody)?.split(" ")

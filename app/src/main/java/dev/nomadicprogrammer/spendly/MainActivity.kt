@@ -8,19 +8,22 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import dev.nomadicprogrammer.spendly.screen.Home
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.theme.SpendlyTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -46,11 +49,11 @@ class MainActivity : ComponentActivity() {
                             Log.d("MainActivity", "Permission denied")
                         }
                     }
-                    Column {
-                        Button(
-                            onClick = { launchSpendAnalyser(context, coroutineScope, launcher) }
-                        ) {
-                            Text(text = "Click me")
+                    val recentTransaction = remember { mutableStateOf(listOf<TransactionalSms>()) }
+                    Home(name = "Vikash", income = 340000.0 , spent = 100324.4 , recentTransactions = recentTransaction)
+                    LaunchedEffect(key1 = true){
+                        launchSpendAnalyser(context, coroutineScope, launcher){
+                            recentTransaction.value = it
                         }
                     }
                 }
@@ -59,10 +62,18 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun launchSpendAnalyser(context: Context, coroutineScope: CoroutineScope, launcher: ManagedActivityResultLauncher<String, Boolean>) {
+private fun launchSpendAnalyser(
+    context: Context,
+    coroutineScope: CoroutineScope,
+    launcher: ManagedActivityResultLauncher<String, Boolean>,
+    onReportGenerated: (transactionalSms : List<TransactionalSms>) -> Unit
+) {
     checkAndRequestSmsPermission(context, launcher) {
         coroutineScope.launch {
-            SpendAnalyserController(context).launchTransactionalSmsClassifier()
+            val spendAnalyserController = SpendAnalyserController(context)
+            spendAnalyserController.launchTransactionalSmsClassifier()
+            val data = spendAnalyserController.generateReport()
+            onReportGenerated.invoke(data)
         }
     }
 }
