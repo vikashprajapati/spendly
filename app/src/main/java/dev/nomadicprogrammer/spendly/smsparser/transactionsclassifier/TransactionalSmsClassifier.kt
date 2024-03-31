@@ -39,7 +39,7 @@ class TransactionalSmsClassifier(
 
     override fun readSmsRange(): Range {
         val sixMonthsBefore = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_MONTH, -12)
+            add(Calendar.DAY_OF_MONTH, -10)
             time
         }
         return Range(sixMonthsBefore.time, System.currentTimeMillis())
@@ -50,15 +50,15 @@ class TransactionalSmsClassifier(
     }
 
     override fun filterMap(sms: Sms): TransactionalSms? {
-        val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)
-        val bankName = bankNameParser.parse(sms.msgBody)
-        val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
-
         val transactionType = when {
             isDebitTransaction(sms) -> DEBIT
             isCreditTransaction(sms) -> CREDIT
-            else -> "none"
+            else -> return null
         }
+
+        val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)
+        val bankName = bankNameParser.parse(sms.msgBody)
+        val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
 
         return TransactionalSms.create(
             type = transactionType,
