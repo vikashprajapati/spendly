@@ -23,16 +23,23 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.Account
+import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
+import java.util.UUID
 
 @Composable
 fun Home(
@@ -53,7 +60,8 @@ fun Home(
         Text(
             text = name,
             color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.displaySmall
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight(800)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -71,7 +79,7 @@ fun Home(
         ) {
             Text(
                 text = "Recent transactions",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             
@@ -88,64 +96,62 @@ fun Home(
         }
         LazyColumn() {
             items(recentTransactions.value) { transaction ->
-                TransactionItem(transaction)
+                TransactionItemCard(transaction)
             }
         }
     }
 }
 
-@Composable
-fun TransactionItem(transaction: TransactionalSms) {
-    Log.d("TransactionItem", "Transaction: $transaction")
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.ShoppingCart,
-            modifier = Modifier
-                .size(48.dp)
-                .background(MaterialTheme.colorScheme.inversePrimary, MaterialTheme.shapes.large)
-                .padding(12.dp),
-            contentDescription = "Shopping",
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-        Column(
-            modifier = Modifier.padding(start = 8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = transaction.bankName ?: transaction.originalSms.senderId,
-                    style = MaterialTheme.typography.titleSmall
-                )
-                Text(
-                    text = "${transaction.currencyAmount}",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = if (transaction is TransactionalSms.Debit) MaterialTheme.colorScheme.error else Color.Green
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = transaction.originalSms.senderId,
-                    style = MaterialTheme.typography.labelSmall
-                )
-                Text(
-                    text = transaction.transactionDate ?: transaction.originalSms.date.toString(),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-        }
-    }
+@Preview
+@Composable fun HomePreview() {
+    Home(
+        name = "John Doe",
+        recentTransactions = remember { mutableStateOf(listOf(
+            TransactionalSms.Debit(
+                originalSms = Sms(
+                    id = UUID.randomUUID().toString(),
+                    senderId = "Amazon",
+                    date = System.currentTimeMillis(),
+                    msgBody = "You've spent 1000 INR on Amazon"
+                ),
+                currencyAmount = CurrencyAmount(
+                    amount = 1000.0,
+                    currency = "INR"
+                ),
+                bankName = "ICICI Bank",
+                transactionDate = "2021-09-01",
+                transferredTo = ""
+            ),
+            TransactionalSms.Credit(
+                originalSms = Sms(
+                    id = UUID.randomUUID().toString(),
+                    senderId = "Google",
+                    date = System.currentTimeMillis(),
+                    msgBody = "You've received 1000 INR from Google"
+                ),
+                currencyAmount = CurrencyAmount(
+                    amount = 1000.0,
+                    currency = "INR"
+                ),
+                bankName = "ICICI Bank",
+                transactionDate = "2021-09-01",
+                receivedFrom = ""
+            ),
+            TransactionalSms.Debit(
+                originalSms = Sms(
+                    id = UUID.randomUUID().toString(),
+                    senderId = "Amazon",
+                    date = System.currentTimeMillis(),
+                    msgBody = "You've spent 1000 INR on Amazon"
+                ),
+                currencyAmount = CurrencyAmount(
+                    amount = 1000.0,
+                    currency = "INR"
+                ),
+                bankName = "ICICI Bank",
+                transactionDate = "2021-09-01",
+                transferredTo = ""
+            ),
+        )) }
+    )
 }
