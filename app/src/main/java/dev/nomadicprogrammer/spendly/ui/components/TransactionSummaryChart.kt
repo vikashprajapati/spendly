@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +34,11 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionSummaryChart(
-    income: Account.Income,
-    spent: Account.Expense,
+    income: MutableState<Account.Income>,
+    spent: MutableState<Account.Expense>,
     onChartClick: () -> Unit
 ) {
+    Log.d("TransactionSummaryChart", "Income: ${income.value.balance}, Spent: ${spent.value.balance}")
     val incomeColor = MaterialTheme.colorScheme.primary
     val expenseColor = MaterialTheme.colorScheme.error
     ElevatedCard(
@@ -72,7 +77,7 @@ fun TransactionSummaryChart(
                         Text(text = "Income", style = MaterialTheme.typography.titleMedium)
                     }
                     Text(
-                        text = "₹ ${income.balance}",
+                        text = "₹ ${income.value.balance}",
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.headlineMedium
                     )
@@ -99,7 +104,7 @@ fun TransactionSummaryChart(
                         Text(text = "Spent", style = MaterialTheme.typography.titleMedium)
                     }
                     Text(
-                        text = "₹ ${spent.balance}",
+                        text = "₹ ${spent.value.balance}",
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.headlineMedium
                     )
@@ -111,9 +116,9 @@ fun TransactionSummaryChart(
                     .fillMaxWidth()
                     .fillMaxHeight(),
             ) {
-                val total = income.balance + spent.balance
-                val arcRatioIncome = income.balance / total
-                val arcRatioSpent = spent.balance / total
+                val total = income.value.balance + spent.value.balance
+                val arcRatioIncome = income.value.balance / total
+                val arcRatioSpent = spent.value.balance / total
                 val slices = listOf(
                     Slice(arcRatioIncome*360, incomeColor),
                     Slice(arcRatioSpent*360, expenseColor),
@@ -135,7 +140,7 @@ sealed class Account(
 @Preview
 @Composable
 fun CardWithChartPreview() {
-    val income = remember { Account.Income(1000f) }
-    val spent = remember { Account.Expense(100f) }
+    val income = remember { mutableStateOf(Account.Income(1000f)) }
+    val spent = remember { mutableStateOf(Account.Expense(100f)) }
     TransactionSummaryChart(income, spent = spent) {}
 }

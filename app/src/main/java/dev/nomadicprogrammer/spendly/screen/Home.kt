@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -68,9 +69,23 @@ fun Home(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+        val income = remember{ mutableStateOf(Account.Income(0f)) }
+        val spent = remember { mutableStateOf(Account.Expense(0f)) }
 
-        val income = remember { Account.Income(1000f) }
-        val spent = remember { Account.Expense(100f) }
+        val creditedIncome = recentTransactions.value
+            .filterIsInstance<TransactionalSms.Credit>()
+            .sumOf { it.currencyAmount.amount }
+            .toFloat()
+        income.value = income.value.copy(balance = creditedIncome)
+
+        val debitedIncome = recentTransactions.value
+            .filterIsInstance<TransactionalSms.Debit>()
+            .sumOf { it.currencyAmount.amount }
+            .toFloat()
+        spent.value = spent.value.copy(balance = debitedIncome)
+        Log.d("Home", "Credited income: $creditedIncome, Debited income: $debitedIncome")
+
+
         TransactionSummaryChart(income, spent, onChartClick = {})
 
         Spacer(modifier = Modifier.height(24.dp))

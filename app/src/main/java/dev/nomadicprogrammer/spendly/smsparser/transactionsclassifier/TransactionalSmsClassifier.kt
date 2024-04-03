@@ -56,7 +56,10 @@ class TransactionalSmsClassifier(
             else -> return null
         }
 
-        val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)
+        val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)?:run {
+            Log.d(TAG, "Currency amount not found in sms: ${sms.msgBody}, sms doesn't seems valid")
+            return null
+        }
         val bankName = bankNameParser.parse(sms.msgBody)?:run {
             Log.d(TAG, "Bank name not found in sms: ${sms.msgBody}, sms doesn't seems valid")
             return null
