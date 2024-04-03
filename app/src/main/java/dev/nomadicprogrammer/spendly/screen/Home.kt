@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.screen
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -80,17 +83,26 @@ fun Home(
             Text(
                 text = "Recent transactions",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
-            OutlinedButton(onClick = { /*TODO*/ }) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedButton(
+                onClick = { /*TODO*/ },
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "See all",
-                        style = MaterialTheme.typography.labelLarge,
+                        text = "See All",
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    Icon(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = "See all transactions")
+                    Icon(
+                        imageVector = Icons.Outlined.KeyboardArrowRight,
+                        modifier = Modifier.size(16.dp),
+                        contentDescription = "See all transactions"
+                    )
                 }
             }
         }
@@ -102,7 +114,7 @@ fun Home(
     }
 }
 
-@Preview
+@Preview()
 @Composable fun HomePreview() {
     Home(
         name = "John Doe",

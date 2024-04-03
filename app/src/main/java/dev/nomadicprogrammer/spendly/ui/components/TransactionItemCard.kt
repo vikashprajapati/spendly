@@ -39,7 +39,7 @@ fun TransactionItemCard(transaction: TransactionalSms) {
         Icon(
             imageVector = Icons.Outlined.ShoppingCart,
             modifier = Modifier
-                .size(64.dp)
+                .size(60.dp)
                 .background(MaterialTheme.colorScheme.inversePrimary, MaterialTheme.shapes.large)
                 .padding(20.dp),
             contentDescription = "Shopping",
@@ -60,7 +60,7 @@ fun TransactionItemCard(transaction: TransactionalSms) {
                 Text(
                     text = "$transactionSymbol ${transaction.currencyAmount}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (transaction is TransactionalSms.Debit) MaterialTheme.colorScheme.error else Color.Green
+                    color = if (transaction is TransactionalSms.Debit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -106,6 +106,31 @@ fun TransactionItemCard(transaction: TransactionalSms) {
             bankName = "ICICI Bank",
             transactionDate = "2021-09-01",
             transferredTo = ""
+        ))
+
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
+    showSystemUi = false
+)
+@Composable fun CreditTransactionItemCardPreview() {
+    TransactionItemCard(
+        transaction = TransactionalSms.Credit(
+            originalSms = Sms(
+                id = UUID.randomUUID().toString(),
+                senderId = "Amazon",
+                date = System.currentTimeMillis(),
+                msgBody = "You've spent 1000 INR on Amazon"
+            ),
+            currencyAmount = CurrencyAmount(
+                amount = 1000.0,
+                currency = "INR"
+            ),
+            bankName = "ICICI Bank",
+            transactionDate = "2021-09-01",
+            receivedFrom = ""
         ))
 
 }
