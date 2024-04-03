@@ -57,7 +57,10 @@ class TransactionalSmsClassifier(
         }
 
         val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)
-        val bankName = bankNameParser.parse(sms.msgBody)
+        val bankName = bankNameParser.parse(sms.msgBody)?:run {
+            Log.d(TAG, "Bank name not found in sms: ${sms.msgBody}, sms doesn't seems valid")
+            return null
+        }
         val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
 
         return TransactionalSms.create(
