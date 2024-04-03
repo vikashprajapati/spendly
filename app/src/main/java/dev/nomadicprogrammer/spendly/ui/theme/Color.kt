@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.ui.theme
 import androidx.compose.ui.graphics.Color
+import kotlin.random.Random
 
 val md_theme_light_primary = Color(0xFF2A6B29)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
@@ -65,3 +66,11 @@ val md_theme_dark_scrim = Color(0xFF000000)
 
 
 val seed = Color(0xFFB7D9AE)
+fun randomPastelColor(): Color {
+    // Generate random RGB values in the range of 200-255 to get pastel colors
+    val red = Random.nextInt(200, 256)
+    val green = Random.nextInt(200, 256)
+    val blue = Random.nextInt(200, 256)
+    return Color(red, green, blue)
+}
+

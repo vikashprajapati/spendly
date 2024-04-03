@@ -39,7 +39,7 @@ class TransactionalSmsClassifier(
 
     override fun readSmsRange(): Range {
         val sixMonthsBefore = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_MONTH, -10)
+            add(Calendar.DAY_OF_MONTH, -31)
             time
         }
         return Range(sixMonthsBefore.time, System.currentTimeMillis())

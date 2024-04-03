@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.Account
+import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
 import java.util.UUID
@@ -69,6 +71,25 @@ fun Home(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        val viewBy = listOf("Daily", "Weekly", "Monthly", "Yearly")
+        val selectedTab = remember { mutableIntStateOf(0) }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            viewBy.forEachIndexed { index, tab ->
+                TabButton(
+                    isSelected = index == selectedTab.intValue, text = tab,
+                    modifier = Modifier.padding(end = 12.dp),
+                ) {
+                    selectedTab.intValue = index
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         val income = remember{ mutableStateOf(Account.Income(0f)) }
         val spent = remember { mutableStateOf(Account.Expense(0f)) }
 
