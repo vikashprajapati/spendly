@@ -34,6 +34,8 @@ fun TransactionSummaryChart(
     spent: Account.Expense,
     onChartClick: () -> Unit
 ) {
+    val incomeColor = MaterialTheme.colorScheme.primary
+    val expenseColor = MaterialTheme.colorScheme.error
     ElevatedCard(
         onClick = onChartClick,
     ) {
@@ -64,7 +66,7 @@ fun TransactionSummaryChart(
                             modifier = Modifier
                                 .width(8.dp)
                                 .fillMaxHeight()
-                                .background(income.color, RoundedCornerShape(3.dp))
+                                .background(incomeColor, RoundedCornerShape(3.dp))
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Income", style = MaterialTheme.typography.titleMedium)
@@ -91,7 +93,7 @@ fun TransactionSummaryChart(
                             modifier = Modifier
                                 .width(8.dp)
                                 .fillMaxHeight()
-                                .background(spent.color, RoundedCornerShape(3.dp))
+                                .background(expenseColor, RoundedCornerShape(3.dp))
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Spent", style = MaterialTheme.typography.titleMedium)
@@ -113,27 +115,21 @@ fun TransactionSummaryChart(
                 val arcRatioIncome = income.balance / total
                 val arcRatioSpent = spent.balance / total
                 val slices = listOf(
-                    Slice(arcRatioIncome*360, income.color),
-                    Slice(arcRatioSpent*360, spent.color),
+                    Slice(arcRatioIncome*360, incomeColor),
+                    Slice(arcRatioSpent*360, expenseColor),
                 )
 
-                PieChart(slices,
-                    style = Stroke(
-                        width = 80f,
-                        cap = StrokeCap.Round
-                    )
-                )
+                PieChart(slices, useCenter = true)
             }
         }
     }
 }
 
 sealed class Account(
-    open val balance: Float,
-    val color : Color
+    open val balance: Float
 ){
-    data class Income(override val balance: Float) : Account(balance, Color.Green)
-    data class Expense(override val balance: Float) : Account(balance, Color.Red)
+    data class Income(override val balance: Float) : Account(balance)
+    data class Expense(override val balance: Float) : Account(balance)
 }
 
 @Preview
