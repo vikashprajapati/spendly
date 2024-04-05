@@ -23,12 +23,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.Account
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
@@ -50,12 +54,20 @@ enum class ViewBy(val days : Int) {
 @Composable
 fun Home(
     name: String,
-    recentTransactions: MutableState<List<TransactionalSms>>,
-    onViewByChange : (viewBy : ViewBy) -> Unit = {}
+    readSmsPermissionAvailable: Boolean,
 ) {
+    if (!readSmsPermissionAvailable) {
+        return
+    }
+    val viewModel : HomeViewModel = viewModel(
+        key = "HomeViewModel",
+        factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
+    )
+    LaunchedEffect(key1 = readSmsPermissionAvailable){
+        viewModel.onEvent(HomeEvent.PageLoad)
+    }
+    val recentTransactions = viewModel.recentTransactions
     Log.d("Home", "Recent transactions: $recentTransactions")
-
-//    val viewModel : HomeViewModel = viewModel(key = "homeViewModel")
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.surface)
@@ -87,7 +99,7 @@ fun Home(
                     modifier = Modifier.padding(end = 12.dp),
                 ) {
                     selectedTab.intValue = index
-                    onViewByChange(tab)
+                    viewModel.onEvent(HomeEvent.ViewBySelected(tab))
                 }
             }
         }
@@ -97,13 +109,13 @@ fun Home(
         val income = remember{ mutableStateOf(Account.Income(0f)) }
         val spent = remember { mutableStateOf(Account.Expense(0f)) }
 
-        val creditedIncome = recentTransactions.value
+        val creditedIncome = recentTransactions
             .filterIsInstance<TransactionalSms.Credit>()
             .sumOf { it.currencyAmount.amount }
             .toFloat()
         income.value = income.value.copy(balance = creditedIncome)
 
-        val debitedIncome = recentTransactions.value
+        val debitedIncome = recentTransactions
             .filterIsInstance<TransactionalSms.Debit>()
             .sumOf { it.currencyAmount.amount }
             .toFloat()
@@ -147,7 +159,7 @@ fun Home(
             }
         }
         LazyColumn() {
-            items(recentTransactions.value) { transaction ->
+            items(recentTransactions) { transaction ->
                 TransactionItemCard(transaction)
             }
         }
@@ -157,53 +169,53 @@ fun Home(
 @Preview()
 @Composable fun HomePreview() {
     Home(
-        name = "John Doe",
-        recentTransactions = remember { mutableStateOf(listOf(
-            TransactionalSms.Debit(
-                originalSms = Sms(
-                    id = UUID.randomUUID().toString(),
-                    senderId = "Amazon",
-                    date = System.currentTimeMillis(),
-                    msgBody = "You've spent 1000 INR on Amazon"
-                ),
-                currencyAmount = CurrencyAmount(
-                    amount = 1000.0,
-                    currency = "INR"
-                ),
-                bankName = "ICICI Bank",
-                transactionDate = "2021-09-01",
-                transferredTo = ""
-            ),
-            TransactionalSms.Credit(
-                originalSms = Sms(
-                    id = UUID.randomUUID().toString(),
-                    senderId = "Google",
-                    date = System.currentTimeMillis(),
-                    msgBody = "You've received 1000 INR from Google"
-                ),
-                currencyAmount = CurrencyAmount(
-                    amount = 1000.0,
-                    currency = "INR"
-                ),
-                bankName = "ICICI Bank",
-                transactionDate = "2021-09-01",
-                receivedFrom = ""
-            ),
-            TransactionalSms.Debit(
-                originalSms = Sms(
-                    id = UUID.randomUUID().toString(),
-                    senderId = "Amazon",
-                    date = System.currentTimeMillis(),
-                    msgBody = "You've spent 1000 INR on Amazon"
-                ),
-                currencyAmount = CurrencyAmount(
-                    amount = 1000.0,
-                    currency = "INR"
-                ),
-                bankName = "ICICI Bank",
-                transactionDate = "2021-09-01",
-                transferredTo = ""
-            ),
-        )) }
+        name = "John Doe",true
+//        recentTransactions = remember { mutableStateOf(listOf(
+//            TransactionalSms.Debit(
+//                originalSms = Sms(
+//                    id = UUID.randomUUID().toString(),
+//                    senderId = "Amazon",
+//                    date = System.currentTimeMillis(),
+//                    msgBody = "You've spent 1000 INR on Amazon"
+//                ),
+//                currencyAmount = CurrencyAmount(
+//                    amount = 1000.0,
+//                    currency = "INR"
+//                ),
+//                bankName = "ICICI Bank",
+//                transactionDate = "2021-09-01",
+//                transferredTo = ""
+//            ),
+//            TransactionalSms.Credit(
+//                originalSms = Sms(
+//                    id = UUID.randomUUID().toString(),
+//                    senderId = "Google",
+//                    date = System.currentTimeMillis(),
+//                    msgBody = "You've received 1000 INR from Google"
+//                ),
+//                currencyAmount = CurrencyAmount(
+//                    amount = 1000.0,
+//                    currency = "INR"
+//                ),
+//                bankName = "ICICI Bank",
+//                transactionDate = "2021-09-01",
+//                receivedFrom = ""
+//            ),
+//            TransactionalSms.Debit(
+//                originalSms = Sms(
+//                    id = UUID.randomUUID().toString(),
+//                    senderId = "Amazon",
+//                    date = System.currentTimeMillis(),
+//                    msgBody = "You've spent 1000 INR on Amazon"
+//                ),
+//                currencyAmount = CurrencyAmount(
+//                    amount = 1000.0,
+//                    currency = "INR"
+//                ),
+//                bankName = "ICICI Bank",
+//                transactionDate = "2021-09-01",
+//                transferredTo = ""
+//            ),
+//        )) }
     )
 }

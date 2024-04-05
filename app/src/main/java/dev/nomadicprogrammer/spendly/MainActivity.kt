@@ -14,9 +14,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,67 +38,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SpendlyTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val context = LocalContext.current
-                    val coroutineScope = rememberCoroutineScope()
+                    var isPermissionAvailable by remember { mutableStateOf(false) }
+
                     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-                        if (it) {
-                            coroutineScope.launch {
-                                SpendAnalyserController(context).launchTransactionalSmsClassifier()
-                            }
-                        } else {
-                            Log.d("MainActivity", "Permission denied")
-                        }
+                        isPermissionAvailable = it
                     }
-                    val allTransactions = remember { mutableStateOf(listOf<TransactionalSms>()) }
-                    val recentTransactions = remember { mutableStateOf(listOf<TransactionalSms>()) }
-                    Home(name = "Vikash", recentTransactions = recentTransactions){
-                        val takeFrom = DateUtils.Local.getPreviousDate(it.days)
-                        recentTransactions.value = allTransactions.value.filter {
-                            // Todo: remove transaction date is null check
-                            filterTransactionsByDate(it, takeFrom)
-                        }
-                    }
+
+                    Home(name = "Vikash", isPermissionAvailable)
+
                     LaunchedEffect(key1 = true){
-                        launchSpendAnalyser(context, coroutineScope, launcher){
-                            allTransactions.value = it.reversed()
-                            val takeFrom = DateUtils.Local.getPreviousDate(ViewBy.DAILY.days)
-                            recentTransactions.value = allTransactions.value.filter {
-                                // Todo: remove transaction date is null check
-                                filterTransactionsByDate(it, takeFrom)
-                            }
+                        checkAndRequestSmsPermission(context, launcher) {
+                            isPermissionAvailable = true
                         }
                     }
                 }
             }
-        }
-    }
-
-    private fun filterTransactionsByDate(
-        it: TransactionalSms,
-        takeFrom: LocalDate?
-    ) = it.transactionDate?.let { date ->
-        val transactionDate = DateUtils.Local.getLocalDate(date)
-        transactionDate.isAfter(takeFrom) || transactionDate.isEqual(takeFrom)
-    } ?: false
-}
-
-private fun launchSpendAnalyser(
-    context: Context,
-    coroutineScope: CoroutineScope,
-    launcher: ManagedActivityResultLauncher<String, Boolean>,
-    onReportGenerated: (transactionalSms : List<TransactionalSms>) -> Unit
-) {
-    checkAndRequestSmsPermission(context, launcher) {
-        coroutineScope.launch {
-            val spendAnalyserController = SpendAnalyserController(context)
-            spendAnalyserController.launchTransactionalSmsClassifier()
-            val data = spendAnalyserController.generateReport()
-            onReportGenerated.invoke(data)
         }
     }
 }
@@ -110,21 +71,5 @@ fun checkAndRequestSmsPermission(
         launcher.launch(android.Manifest.permission.READ_SMS)
     }else{
         onPermissionAvailable.invoke()
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SpendlyTheme {
-        Greeting("Android")
     }
 }
