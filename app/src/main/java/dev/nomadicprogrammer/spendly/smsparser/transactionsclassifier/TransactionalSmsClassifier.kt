@@ -3,24 +3,28 @@ package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 import android.provider.Telephony
 import android.util.Log
 import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
-import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.CREDIT
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBIT
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import java.util.Calendar
 
+enum class TransactionViewPeriod(val days : Int) {
+    DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
+}
 class TransactionalSmsClassifier(
     private val regexProvider: RegexProvider,
     private val amountParser: Parser,
     private val bankNameParser: Parser,
-    private val dateParser: Parser
+    private val dateParser: Parser,
+    private val readFromPreviousDays : TransactionViewPeriod = TransactionViewPeriod.MidYear
 ) : SmsUseCase<TransactionalSms> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
 
@@ -39,7 +43,7 @@ class TransactionalSmsClassifier(
 
     override fun readSmsRange(): Range {
         val sixMonthsBefore = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_MONTH, -31)
+            add(Calendar.DAY_OF_MONTH, -readFromPreviousDays.days)
             time
         }
         return Range(sixMonthsBefore.time, System.currentTimeMillis())

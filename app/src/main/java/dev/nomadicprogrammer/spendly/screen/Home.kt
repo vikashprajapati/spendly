@@ -13,8 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ShoppingCart
@@ -47,10 +50,15 @@ import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
 import java.util.UUID
 
+enum class ViewBy(val days : Int) {
+    DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
+}
+
 @Composable
 fun Home(
     name: String,
-    recentTransactions: MutableState<List<TransactionalSms>>
+    recentTransactions: MutableState<List<TransactionalSms>>,
+    onViewByChange : (viewBy : ViewBy) -> Unit = {}
 ) {
     Log.d("Home", "Recent transactions: $recentTransactions")
     Column(modifier = Modifier
@@ -72,18 +80,19 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val viewBy = listOf("Daily", "Weekly", "Monthly", "Yearly")
+        val viewBy = ViewBy.entries.toTypedArray()
         val selectedTab = remember { mutableIntStateOf(0) }
-        Row(
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            viewBy.forEachIndexed { index, tab ->
+            itemsIndexed(viewBy){index, tab ->
                 TabButton(
-                    isSelected = index == selectedTab.intValue, text = tab,
+                    isSelected = index == selectedTab.intValue, text = tab.name,
                     modifier = Modifier.padding(end = 12.dp),
                 ) {
                     selectedTab.intValue = index
+                    onViewByChange(tab)
                 }
             }
         }

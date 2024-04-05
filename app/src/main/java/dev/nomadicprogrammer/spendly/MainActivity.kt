@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import dev.nomadicprogrammer.spendly.screen.Home
+import dev.nomadicprogrammer.spendly.screen.ViewBy
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
@@ -49,11 +50,15 @@ class MainActivity : ComponentActivity() {
                             Log.d("MainActivity", "Permission denied")
                         }
                     }
-                    val recentTransaction = remember { mutableStateOf(listOf<TransactionalSms>()) }
-                    Home(name = "Vikash", recentTransactions = recentTransaction)
+                    val allTransactions = remember { mutableStateOf(listOf<TransactionalSms>()) }
+                    val recentTransactions = remember { mutableStateOf(listOf<TransactionalSms>()) }
+                    Home(name = "Vikash", recentTransactions = recentTransactions){
+                        recentTransactions.value = allTransactions.value.take(it.days)
+                    }
                     LaunchedEffect(key1 = true){
                         launchSpendAnalyser(context, coroutineScope, launcher){
-                            recentTransaction.value = it
+                            allTransactions.value = it.reversed()
+                            recentTransactions.value = allTransactions.value.take(ViewBy.DAILY.days)
                         }
                     }
                 }
