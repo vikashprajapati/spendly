@@ -1,13 +1,10 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.Icon
@@ -24,32 +20,20 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
-import dev.nomadicprogrammer.spendly.ui.components.Account
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
-import java.util.UUID
-
-enum class ViewBy(val days : Int) {
-    DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
-}
+import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
 @Composable
 fun Home(
@@ -63,18 +47,18 @@ fun Home(
         key = "HomeViewModel",
         factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
     )
-    LaunchedEffect(key1 = readSmsPermissionAvailable){
+
+    LaunchedEffect(key1 = true){
         viewModel.onEvent(HomeEvent.PageLoad)
     }
+
     val recentTransactions = viewModel.recentTransactions
-    Log.d("Home", "Recent transactions: $recentTransactions")
+
     Column(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.surface)
         .padding(16.dp)
     ) {
         Text(
-            text = "Hello,",
+            text = stringResource(id = R.string.greeting_hello),
             style = MaterialTheme.typography.headlineMedium
         )
 
@@ -87,43 +71,25 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val viewBy = ViewBy.entries.toTypedArray()
-        val selectedTab = remember { mutableIntStateOf(0) }
+        val selectedTab = viewModel.selectedTabIndex
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            itemsIndexed(viewBy){index, tab ->
+            items(ViewBy.entries.toTypedArray().indices.last){ index ->
+                val tab = ViewBy.entries[index]
                 TabButton(
-                    isSelected = index == selectedTab.intValue, text = tab.name,
-                    modifier = Modifier.padding(end = 12.dp),
+                    isSelected = index == selectedTab, text = stringResource(id = tab.resId),
+                    modifier = Modifier.padding(end = 8.dp),
                 ) {
-                    selectedTab.intValue = index
-                    viewModel.onEvent(HomeEvent.ViewBySelected(tab))
+                    viewModel.onEvent(HomeEvent.ViewBySelected(tab, index))
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val income = remember{ mutableStateOf(Account.Income(0f)) }
-        val spent = remember { mutableStateOf(Account.Expense(0f)) }
-
-        val creditedIncome = recentTransactions
-            .filterIsInstance<TransactionalSms.Credit>()
-            .sumOf { it.currencyAmount.amount }
-            .toFloat()
-        income.value = income.value.copy(balance = creditedIncome)
-
-        val debitedIncome = recentTransactions
-            .filterIsInstance<TransactionalSms.Debit>()
-            .sumOf { it.currencyAmount.amount }
-            .toFloat()
-        spent.value = spent.value.copy(balance = debitedIncome)
-        Log.d("Home", "Credited income: $creditedIncome, Debited income: $debitedIncome")
-
-
-        TransactionSummaryChart(income, spent, onChartClick = {})
+        TransactionSummaryChart(viewModel.income, viewModel.expense, onChartClick = {})
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -133,7 +99,7 @@ fun Home(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Recent transactions",
+                text = stringResource(id = R.string.recent_transactions),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -146,9 +112,8 @@ fun Home(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "See All",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        text = stringResource(id = R.string.see_all),
+                        style = MaterialTheme.typography.labelMedium
                     )
                     Icon(
                         imageVector = Icons.Outlined.KeyboardArrowRight,
@@ -159,7 +124,7 @@ fun Home(
             }
         }
         LazyColumn() {
-            items(recentTransactions) { transaction ->
+            items(recentTransactions.value) { transaction ->
                 TransactionItemCard(transaction)
             }
         }
@@ -170,7 +135,8 @@ fun Home(
 @Composable fun HomePreview() {
     Home(
         name = "John Doe",true
-//        recentTransactions = remember { mutableStateOf(listOf(
+//        transactionViewBy
+    //       = remember { mutableStateOf(listOf(
 //            TransactionalSms.Debit(
 //                originalSms = Sms(
 //                    id = UUID.randomUUID().toString(),
