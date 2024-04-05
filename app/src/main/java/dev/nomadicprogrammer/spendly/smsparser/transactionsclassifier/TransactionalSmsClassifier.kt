@@ -16,15 +16,14 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBI
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import java.util.Calendar
 
-enum class TransactionViewPeriod(val days : Int) {
+enum class SmsReadPeriod(val days : Int) {
     DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
 }
 class TransactionalSmsClassifier(
     private val regexProvider: RegexProvider,
     private val amountParser: Parser,
     private val bankNameParser: Parser,
-    private val dateParser: Parser,
-    private val readFromPreviousDays : TransactionViewPeriod = TransactionViewPeriod.MidYear
+    private val dateParser: Parser
 ) : SmsUseCase<TransactionalSms> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
 
@@ -41,12 +40,12 @@ class TransactionalSmsClassifier(
         return "${ Telephony.Sms.Inbox.DATE} ASC"
     }
 
-    override fun readSmsRange(): Range {
-        val sixMonthsBefore = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_MONTH, -readFromPreviousDays.days)
+    override fun readSmsRange(smsReadPeriod: SmsReadPeriod): Range {
+        val from = Calendar.getInstance().run {
+            add(Calendar.DAY_OF_YEAR, -smsReadPeriod.days)
             time
         }
-        return Range(sixMonthsBefore.time, System.currentTimeMillis())
+        return Range(from.time, System.currentTimeMillis())
     }
 
     override fun onProgress(progress: Int) {

@@ -20,14 +20,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import dev.nomadicprogrammer.spendly.screen.Home
-import dev.nomadicprogrammer.spendly.screen.ViewBy
+import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.home.presentation.Home
+import dev.nomadicprogrammer.spendly.home.presentation.ViewBy
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.theme.SpendlyTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,18 +55,34 @@ class MainActivity : ComponentActivity() {
                     val allTransactions = remember { mutableStateOf(listOf<TransactionalSms>()) }
                     val recentTransactions = remember { mutableStateOf(listOf<TransactionalSms>()) }
                     Home(name = "Vikash", recentTransactions = recentTransactions){
-                        recentTransactions.value = allTransactions.value.take(it.days)
+                        val takeFrom = DateUtils.Local.getPreviousDate(it.days)
+                        recentTransactions.value = allTransactions.value.filter {
+                            // Todo: remove transaction date is null check
+                            filterTransactionsByDate(it, takeFrom)
+                        }
                     }
                     LaunchedEffect(key1 = true){
                         launchSpendAnalyser(context, coroutineScope, launcher){
                             allTransactions.value = it.reversed()
-                            recentTransactions.value = allTransactions.value.take(ViewBy.DAILY.days)
+                            val takeFrom = DateUtils.Local.getPreviousDate(ViewBy.DAILY.days)
+                            recentTransactions.value = allTransactions.value.filter {
+                                // Todo: remove transaction date is null check
+                                filterTransactionsByDate(it, takeFrom)
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+    private fun filterTransactionsByDate(
+        it: TransactionalSms,
+        takeFrom: LocalDate?
+    ) = it.transactionDate?.let { date ->
+        val transactionDate = DateUtils.Local.getLocalDate(date)
+        transactionDate.isAfter(takeFrom) || transactionDate.isEqual(takeFrom)
+    } ?: false
 }
 
 private fun launchSpendAnalyser(

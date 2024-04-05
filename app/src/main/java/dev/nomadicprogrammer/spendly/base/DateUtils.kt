@@ -26,13 +26,14 @@ object DateUtils {
         "yyyy/MM/dd",
         "yyyy.MM.dd",
         "yyyy MM dd",
-        "dd-MM-yyyy"
+        "dd-MM-yyyy",
+        "dd/MM/yy"
     )
 
     object Local{
         private val TAG = Local::class.java.simpleName
-        const val DATE_FORMAT = "dd/MMM/yyyy"
-        private val outputFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT)
+        const val APP_DATE_FORMAT = "dd/MMM/yyyy"
+        private val outputFormatter = DateTimeFormatter.ofPattern(APP_DATE_FORMAT)
 
         fun getFormattedDate(dateString: String): String? {
             for (pattern in potentialInputPatterns) {
@@ -52,6 +53,18 @@ object DateUtils {
             val inputFormatter = DateTimeFormatter.ofPattern(inputPattern)
             val date = LocalDate.parse(dateString, inputFormatter)
             return date.format(outputFormatter)
+        }
+
+        /**
+         * Considers the date string to be in the format of [APP_DATE_FORMAT]
+         */
+        fun getLocalDate(dateString : String) : LocalDate{
+            return LocalDate.parse(dateString, outputFormatter)
+        }
+
+        fun getPreviousDate(day: Int): LocalDate? {
+            val currentDate = LocalDate.now()
+            return currentDate.minusDays(day.toLong())
         }
     }
 

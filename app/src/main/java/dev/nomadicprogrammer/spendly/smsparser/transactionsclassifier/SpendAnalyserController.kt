@@ -28,7 +28,8 @@ class SpendAnalyserController(
         AmountParser(),
         BankNameParser(),
         DateParser()
-    )
+    ),
+    private val readPeriod: SmsReadPeriod = SmsReadPeriod.Yearly
 ){
     private val TAG = SpendAnalyserController::class.simpleName
 
@@ -41,7 +42,7 @@ class SpendAnalyserController(
 
         withContext(Dispatchers.Default){
             SmsInbox(context)
-                .readSms(transactionalSmsClassifier.readSmsRange(), transactionalSmsClassifier.inboxReadSortOrder())
+                .readSms(transactionalSmsClassifier.readSmsRange(readPeriod), transactionalSmsClassifier.inboxReadSortOrder())
                 .onStart { transactionalSmsClassifier.getRegex() }
                 .onEach {
                     val progress = (it.first.toFloat() / it.second.toFloat()) * 100
