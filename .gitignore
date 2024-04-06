@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+/app/release/app-release.apk
+/keystore
+/app/release/output-metadata.json
+/private_key.pepk

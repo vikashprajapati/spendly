@@ -30,27 +30,30 @@ class HomeViewModel(
     var selectedTabIndex by mutableIntStateOf(0)
         private set
 
-    var selectedViewBy by mutableStateOf(ViewBy.DAILY)
-        private set
+    private var selectedViewBy = ViewBy.DAILY
 
     var income = mutableStateOf(Account.Income(0f))
         get() {
-            field.value = Account.Income(transactionsViewBy
-                .filterIsInstance<TransactionalSms.Credit>()
-                .sumOf { it.currencyAmount.amount }
-                .toFloat()
-            )
+            viewModelScope.launch {
+                field.value = Account.Income(transactionsViewBy
+                    .filterIsInstance<TransactionalSms.Credit>()
+                    .sumOf { it.currencyAmount.amount }
+                    .toFloat()
+                )
+            }
             return field
         }
         private set
 
     var expense = mutableStateOf(Account.Expense(0f))
         get() {
-            field.value = Account.Expense(transactionsViewBy
-                .filterIsInstance<TransactionalSms.Debit>()
-                .sumOf { it.currencyAmount.amount }
-                .toFloat()
-            )
+            viewModelScope.launch {
+                field.value = Account.Expense(transactionsViewBy
+                    .filterIsInstance<TransactionalSms.Debit>()
+                    .sumOf { it.currencyAmount.amount }
+                    .toFloat()
+                )
+            }
             return field
         }
         private set
@@ -62,7 +65,7 @@ class HomeViewModel(
             is HomeEvent.PageLoad -> {
                 viewModelScope.launch {
                     spendAnalyserController.launchTransactionalSmsClassifier()
-                    allTransactions = spendAnalyserController.generateReport()
+                    allTransactions = spendAnalyserController.generateReport().reversed()
                     val takeFrom = DateUtils.Local.getPreviousDate(ViewBy.DAILY.days)
                     transactionsViewBy = allTransactions.filter {
                         // Todo: remove transaction date is null check
