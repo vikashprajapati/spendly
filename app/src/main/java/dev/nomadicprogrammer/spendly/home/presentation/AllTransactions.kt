@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,9 +25,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
+import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTransactions(navController: NavController){
     val backStackEntry = remember(navController.currentBackStackEntryAsState()) {
@@ -53,9 +57,20 @@ fun AllTransactions(navController: NavController){
         LazyColumn() {
             items(homeViewModel.transactionsViewBy) { transaction ->
                 TransactionItemCard(transaction){
-                    navController.navigate(Screen.TransactionDetail.route)
+                    homeViewModel.onEvent(HomeEvent.TransactionSelected(transaction))
                 }
             }
         }
+    }
+
+    val sheetState = rememberModalBottomSheetState()
+    if (homeViewModel.dialogTransactionSms.value != null) {
+        TransactionDetails(
+            homeViewModel.dialogTransactionSms.value!!,
+            sheetState = sheetState,
+            onDismiss = {
+                homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+            }
+        )
     }
 }

@@ -23,7 +23,9 @@ class TransactionalSmsClassifier(
     private val regexProvider: RegexProvider,
     private val amountParser: Parser,
     private val bankNameParser: Parser,
-    private val dateParser: Parser
+    private val dateParser: Parser,
+    private val receiverDetailsParser : Parser,
+    private val senderDetailsParser : Parser,
 ) : SmsUseCase<TransactionalSms> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
 
@@ -74,7 +76,9 @@ class TransactionalSmsClassifier(
             sms = sms,
             currencyAmount = currencyAmount,
             bank = bankName,
-            transactionDate = transactionDate
+            transactionDate = transactionDate,
+            receivedFrom = if (transactionType == CREDIT) receiverDetailsParser.parse(sms.msgBody) else null,
+            transferredTo = if (transactionType == DEBIT) senderDetailsParser.parse(sms.msgBody) else null
         )
     }
 

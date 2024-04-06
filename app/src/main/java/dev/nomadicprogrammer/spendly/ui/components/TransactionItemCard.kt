@@ -90,6 +90,11 @@ fun TransactionItemCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+//                val transactionParticipant = when(transaction){
+//                    is TransactionalSms.Debit -> transaction.transferredTo
+//                    is TransactionalSms.Credit -> transaction.receivedFrom
+//
+//                }
                 Text(
                     text = transaction.originalSms.senderId,
                     style = MaterialTheme.typography.bodySmall,

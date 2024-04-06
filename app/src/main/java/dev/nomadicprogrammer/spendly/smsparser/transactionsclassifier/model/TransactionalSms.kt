@@ -7,10 +7,11 @@ import java.io.Serializable
 const val DEFAULT_CURRENCY = "₹"
 
 
-const val DEBIT = "debit"
-const val CREDIT = "credit"
+const val DEBIT = "Debit"
+const val CREDIT = "Credit"
 
 sealed class TransactionalSms(
+    val type: String,
     open val transactionDate: String?,
     open val bankName: String? = null,
     open val currencyAmount: CurrencyAmount,
@@ -18,19 +19,19 @@ sealed class TransactionalSms(
 ) : Serializable{
     data class Debit(
         override val transactionDate: String?,
-        val transferredTo: String,
+        val transferredTo: String?,
         override val bankName: String? = null,
         override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms
-    ) : TransactionalSms(transactionDate, bankName, currencyAmount, originalSms)
+    ) : TransactionalSms(DEBIT, transactionDate, bankName, currencyAmount, originalSms)
 
     data class Credit(
         override val transactionDate: String?,
-        val receivedFrom: String,
+        val receivedFrom: String?,
         override val bankName: String? = null,
         override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms
-    ) : TransactionalSms(transactionDate, bankName, currencyAmount, originalSms)
+    ) : TransactionalSms(CREDIT, transactionDate, bankName, currencyAmount, originalSms)
 
     companion object {
         fun create(
@@ -38,15 +39,17 @@ sealed class TransactionalSms(
             sms: Sms,
             currencyAmount: CurrencyAmount,
             bank: String?,
-            transactionDate: String?
+            transactionDate: String?,
+            transferredTo: String? = null,
+            receivedFrom: String? = null
         ): TransactionalSms? {
             return when(type){
                 DEBIT -> Debit(
-                    transactionDate = transactionDate, transferredTo = "", bankName = bank,
-                    currencyAmount = currencyAmount, originalSms = sms,
+                    transactionDate = transactionDate, transferredTo = transferredTo, bankName = bank,
+                    currencyAmount = currencyAmount, originalSms = sms
                 )
                 CREDIT -> Credit(
-                    transactionDate = transactionDate, receivedFrom = "", bankName = bank,
+                    transactionDate = transactionDate, receivedFrom = receivedFrom, bankName = bank,
                     currencyAmount = currencyAmount, originalSms = sms
                 )
                 else -> null

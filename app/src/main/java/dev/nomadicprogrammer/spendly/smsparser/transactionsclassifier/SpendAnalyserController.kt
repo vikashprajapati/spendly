@@ -9,6 +9,8 @@ import dev.nomadicprogrammer.spendly.smsparser.parsers.BankNameParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.DateParser
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.parsers.ReceiverDetailsParser
+import dev.nomadicprogrammer.spendly.smsparser.parsers.SenderDetailsParser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -27,7 +29,9 @@ class SpendAnalyserController(
         LocalRegexProvider(),
         AmountParser(),
         BankNameParser(),
-        DateParser()
+        DateParser(),
+        ReceiverDetailsParser(),
+        SenderDetailsParser()
     ),
     private val readPeriod: SmsReadPeriod = SmsReadPeriod.Yearly
 ){
