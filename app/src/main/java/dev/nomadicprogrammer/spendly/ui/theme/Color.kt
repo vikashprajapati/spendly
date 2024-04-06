@@ -2,7 +2,7 @@ package dev.nomadicprogrammer.spendly.ui.theme
 import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
 
-val md_theme_light_primary = Color(0xFF2A6B29)
+val md_theme_light_primary = Color(0xff92c891)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFACF4A2)
 val md_theme_light_onPrimaryContainer = Color(0xFF002203)
@@ -29,7 +29,7 @@ val md_theme_light_inverseOnSurface = Color(0xFFD6F6FF)
 val md_theme_light_inverseSurface = Color(0xFF00363F)
 val md_theme_light_inversePrimary = Color(0xFF91D888)
 val md_theme_light_shadow = Color(0xFF000000)
-val md_theme_light_surfaceTint = Color(0xFF2A6B29)
+val md_theme_light_surfaceTint = Color(0xff85a784)
 val md_theme_light_outlineVariant = Color(0xFFC2C8BD)
 val md_theme_light_scrim = Color(0xFF000000)
 

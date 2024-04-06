@@ -20,33 +20,42 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
+import java.time.LocalDate
 
 @Composable
 fun Home(
     name: String,
     readSmsPermissionAvailable: Boolean,
+    viewModel : HomeViewModel = viewModel(
+        key = "HomeViewModel",
+        factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
+    )
 ) {
     if (!readSmsPermissionAvailable) {
         return
     }
-    val viewModel : HomeViewModel = viewModel(
-        key = "HomeViewModel",
-        factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
-    )
 
     LaunchedEffect(key1 = true){
         viewModel.onEvent(HomeEvent.PageLoad)
@@ -93,6 +102,13 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        RecentTransactions(recentTransactions)
+    }
+}
+
+@Composable
+fun RecentTransactions(recentTransactions: MutableState<List<TransactionalSms>>) {
+    Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -103,7 +119,7 @@ fun Home(
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             OutlinedButton(
                 onClick = { /*TODO*/ },
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
@@ -131,57 +147,26 @@ fun Home(
     }
 }
 
-@Preview()
+@Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
 @Composable fun HomePreview() {
     Home(
-        name = "John Doe",true
-//        transactionViewBy
-    //       = remember { mutableStateOf(listOf(
-//            TransactionalSms.Debit(
-//                originalSms = Sms(
-//                    id = UUID.randomUUID().toString(),
-//                    senderId = "Amazon",
-//                    date = System.currentTimeMillis(),
-//                    msgBody = "You've spent 1000 INR on Amazon"
-//                ),
-//                currencyAmount = CurrencyAmount(
-//                    amount = 1000.0,
-//                    currency = "INR"
-//                ),
-//                bankName = "ICICI Bank",
-//                transactionDate = "2021-09-01",
-//                transferredTo = ""
-//            ),
-//            TransactionalSms.Credit(
-//                originalSms = Sms(
-//                    id = UUID.randomUUID().toString(),
-//                    senderId = "Google",
-//                    date = System.currentTimeMillis(),
-//                    msgBody = "You've received 1000 INR from Google"
-//                ),
-//                currencyAmount = CurrencyAmount(
-//                    amount = 1000.0,
-//                    currency = "INR"
-//                ),
-//                bankName = "ICICI Bank",
-//                transactionDate = "2021-09-01",
-//                receivedFrom = ""
-//            ),
-//            TransactionalSms.Debit(
-//                originalSms = Sms(
-//                    id = UUID.randomUUID().toString(),
-//                    senderId = "Amazon",
-//                    date = System.currentTimeMillis(),
-//                    msgBody = "You've spent 1000 INR on Amazon"
-//                ),
-//                currencyAmount = CurrencyAmount(
-//                    amount = 1000.0,
-//                    currency = "INR"
-//                ),
-//                bankName = "ICICI Bank",
-//                transactionDate = "2021-09-01",
-//                transferredTo = ""
-//            ),
-//        )) }
+        name = "John Doe", readSmsPermissionAvailable = true,
+        HomeViewModel(SpendAnalyserController(LocalContext.current.applicationContext))
     )
+}
+
+@Preview(showBackground = true, showSystemUi = false)
+@Composable fun RecentPreview(){
+    val transactions : MutableState<List<TransactionalSms>> = remember {
+        mutableStateOf(
+            listOf(
+                TransactionalSms.create(
+                    "debit", Sms("dfd", "Amazon", "Hello", System.currentTimeMillis()), CurrencyAmount("INR", 100.0), "", ""
+                )!!
+            )
+        )
+    }
+    Column(modifier = Modifier.padding(16.dp)) {
+        RecentTransactions(recentTransactions = transactions)
+    }
 }

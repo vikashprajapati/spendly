@@ -40,7 +40,11 @@ class MainActivity : ComponentActivity() {
                     Home(name = "Vikash", isPermissionAvailable)
 
                     LaunchedEffect(key1 = true){
-                        checkAndRequestSmsPermission(context, launcher) {
+                        checkAndRequestPermission(
+                            context,
+                            android.Manifest.permission.READ_SMS,
+                            launcher
+                        ) {
                             isPermissionAvailable = true
                         }
                     }
@@ -50,13 +54,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun checkAndRequestSmsPermission(
+fun checkAndRequestPermission(
     context: Context,
+    permission : String,
     launcher: ManagedActivityResultLauncher<String, Boolean>,
     onPermissionAvailable: () -> Unit,
 ){
     if(!smsReadPermissionAvailable(context)){
-        launcher.launch(android.Manifest.permission.READ_SMS)
+        launcher.launch(permission)
     }else{
         onPermissionAvailable.invoke()
     }

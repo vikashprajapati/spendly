@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -48,7 +49,8 @@ fun TransactionSummaryChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier
@@ -113,12 +115,12 @@ fun TransactionSummaryChart(
 
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
+                    .width(200.dp)
+                    .height(200.dp),
             ) {
-                val total = income.value.balance + spent.value.balance
-                val arcRatioIncome = income.value.balance / total
-                val arcRatioSpent = spent.value.balance / total
+                val total = remember { mutableFloatStateOf(income.value.balance + spent.value.balance) }
+                val arcRatioIncome = remember { income.value.balance / total.floatValue }
+                val arcRatioSpent = remember { spent.value.balance / total.floatValue }
                 val slices = listOf(
                     Slice(arcRatioIncome*360, incomeColor),
                     Slice(arcRatioSpent*360, expenseColor),
