@@ -25,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +32,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
@@ -42,16 +44,13 @@ import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
-import java.time.LocalDate
 
 @Composable
 fun Home(
+    navController : NavController,
     name: String,
     readSmsPermissionAvailable: Boolean,
-    viewModel : HomeViewModel = viewModel(
-        key = "HomeViewModel",
-        factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
-    )
+    viewModel : HomeViewModel
 ) {
     if (!readSmsPermissionAvailable) {
         return
@@ -102,12 +101,25 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        RecentTransactions(recentTransactions)
+        RecentTransactions(
+            recentTransactions,
+            onTransactionSmsClick = {
+                viewModel.onEvent(HomeEvent.TransactionSelected(it))
+                navController.navigate(Screen.TransactionDetail.route)
+            },
+            onSeeAllClick = {
+                navController.navigate(Screen.SeeAllTransaction.route)
+            }
+        )
     }
 }
 
 @Composable
-fun RecentTransactions(recentTransactions: MutableState<List<TransactionalSms>>) {
+fun RecentTransactions(
+    recentTransactions: MutableState<List<TransactionalSms>>,
+    onTransactionSmsClick : (TransactionalSms) -> Unit,
+    onSeeAllClick : () -> Unit
+) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -121,7 +133,7 @@ fun RecentTransactions(recentTransactions: MutableState<List<TransactionalSms>>)
             )
 
             OutlinedButton(
-                onClick = { /*TODO*/ },
+                onClick = onSeeAllClick,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
             ) {
                 Row(
@@ -141,7 +153,7 @@ fun RecentTransactions(recentTransactions: MutableState<List<TransactionalSms>>)
         }
         LazyColumn() {
             items(recentTransactions.value) { transaction ->
-                TransactionItemCard(transaction)
+                TransactionItemCard(transaction, onTransactionSmsClick)
             }
         }
     }
@@ -150,6 +162,7 @@ fun RecentTransactions(recentTransactions: MutableState<List<TransactionalSms>>)
 @Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
 @Composable fun HomePreview() {
     Home(
+        rememberNavController(),
         name = "John Doe", readSmsPermissionAvailable = true,
         HomeViewModel(SpendAnalyserController(LocalContext.current.applicationContext))
     )
@@ -167,6 +180,10 @@ fun RecentTransactions(recentTransactions: MutableState<List<TransactionalSms>>)
         )
     }
     Column(modifier = Modifier.padding(16.dp)) {
-        RecentTransactions(recentTransactions = transactions)
+        RecentTransactions(
+            recentTransactions = transactions,
+            onTransactionSmsClick = {},
+            onSeeAllClick = {}
+        )
     }
 }

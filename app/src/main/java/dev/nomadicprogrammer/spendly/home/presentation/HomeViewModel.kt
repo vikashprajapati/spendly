@@ -60,6 +60,8 @@ class HomeViewModel(
 
     private val transactionViewByMap = mutableMapOf<ViewBy, List<TransactionalSms>>()
 
+    val dialogTransactionSms = mutableStateOf<TransactionalSms?>(null)
+
     fun onEvent(event: HomeEvent) {
         when(event) {
             is HomeEvent.PageLoad -> {
@@ -89,6 +91,14 @@ class HomeViewModel(
                     }
                 }
             }
+
+            is HomeEvent.TransactionSelected -> {
+                dialogTransactionSms.value = event.transactionalSms
+            }
+
+            is HomeEvent.TransactionDialogDismissed -> {
+                dialogTransactionSms.value = null
+            }
         }
     }
 
@@ -104,4 +114,8 @@ class HomeViewModel(
 sealed class HomeEvent{
     data object PageLoad : HomeEvent()
     data class ViewBySelected(val viewBy: ViewBy,val index : Int) : HomeEvent()
+
+    data class TransactionSelected(val transactionalSms: TransactionalSms) : HomeEvent()
+
+    data object TransactionDialogDismissed : HomeEvent()
 }

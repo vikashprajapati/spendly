@@ -2,6 +2,7 @@ package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
 
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import java.io.Serializable
 
 const val DEFAULT_CURRENCY = "₹"
 
@@ -14,7 +15,7 @@ sealed class TransactionalSms(
     open val bankName: String? = null,
     open val currencyAmount: CurrencyAmount,
     open val originalSms: Sms
-){
+) : Serializable{
     data class Debit(
         override val transactionDate: String?,
         val transferredTo: String,

@@ -4,10 +4,11 @@
     <string name="daily">Daily</string>
     <string name="weekly">Weekly</string>
     <string name="monthly">Monthly</string>
-    <string name="quarter">Quarter</string>
-<string name="mid_year">MidYear</string>
+    <string name="quarter">Quarterly</string>
+    <string name="mid_year">MidYear</string>
     <string name="yearly">Yearly</string>
-    <string name="recent_transactions">Recent transactions</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="custom_transactions">%s Transactions</string>
     <string name="see_all">See All</string>
 
 </resources>

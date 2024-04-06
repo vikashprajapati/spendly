@@ -3,6 +3,7 @@ package dev.nomadicprogrammer.spendly.ui.components
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
@@ -33,7 +37,10 @@ import java.util.UUID
 import kotlin.random.Random
 
 @Composable
-fun TransactionItemCard(transaction: TransactionalSms) {
+fun TransactionItemCard(
+    transaction: TransactionalSms,
+    onTransactionClick : (TransactionalSms) -> Unit = {}
+){
     Log.d("TransactionItem", "Transaction: $transaction")
     val iconList = listOf(
         Icons.Outlined.ShoppingCart,
@@ -45,7 +52,8 @@ fun TransactionItemCard(transaction: TransactionalSms) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable { onTransactionClick(transaction) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -118,7 +126,8 @@ fun TransactionItemCard(transaction: TransactionalSms) {
             bankName = "ICICI Bank",
             transactionDate = "2021-09-01",
             transferredTo = ""
-        ))
+        )
+    )
 
 }
 
@@ -143,6 +152,7 @@ fun TransactionItemCard(transaction: TransactionalSms) {
             bankName = "ICICI Bank",
             transactionDate = "2021-09-01",
             receivedFrom = ""
-        ))
+        )
+    )
 
 }
