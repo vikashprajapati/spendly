@@ -32,7 +32,6 @@ fun AppNavigator(){
 
     NavHost(navController = navigationController, startDestination = Screen.Home.route){
         homeNavGraph(navigationController)
-        transactionDetailsNavGraph(navigationController)
         seeAllTransactions(navigationController)
     }
 }
@@ -67,11 +66,5 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
                 isPermissionAvailable = true
             }
         }
-    }
-}
-
-fun NavGraphBuilder.transactionDetailsNavGraph(navigationController: NavHostController) {
-    dialog(Screen.TransactionDetail.route) {
-        TransactionDetails(navigationController)
     }
 }

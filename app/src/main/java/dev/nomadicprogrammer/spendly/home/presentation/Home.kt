@@ -14,15 +14,20 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,11 +45,13 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(
     navController : NavController,
@@ -101,11 +108,21 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val sheetState = rememberModalBottomSheetState()
+        if (viewModel.dialogTransactionSms.value != null) {
+                TransactionDetails(
+                    viewModel.dialogTransactionSms.value!!,
+                    sheetState = sheetState,
+                    onDismiss = {
+                        viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+                    }
+                )
+        }
+
         RecentTransactions(
             recentTransactions,
             onTransactionSmsClick = {
                 viewModel.onEvent(HomeEvent.TransactionSelected(it))
-                navController.navigate(Screen.TransactionDetail.route)
             },
             onSeeAllClick = {
                 navController.navigate(Screen.SeeAllTransaction.route)
@@ -161,11 +178,15 @@ fun RecentTransactions(
 
 @Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
 @Composable fun HomePreview() {
+    val viewModel = HomeViewModel(SpendAnalyserController(LocalContext.current.applicationContext))
     Home(
         rememberNavController(),
         name = "John Doe", readSmsPermissionAvailable = true,
-        HomeViewModel(SpendAnalyserController(LocalContext.current.applicationContext))
+        viewModel
     )
+    LaunchedEffect(key1 = true){
+        viewModel.onEvent(HomeEvent.PageLoad)
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = false)

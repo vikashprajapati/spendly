@@ -1,9 +1,14 @@
 package dev.nomadicprogrammer.spendly.base
 
 import android.util.Log
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.util.Calendar
+import java.util.Date
 
 
 object DateUtils {
@@ -34,6 +39,12 @@ object DateUtils {
         private val TAG = Local::class.java.simpleName
         const val APP_DATE_FORMAT = "dd/MMM/yyyy"
         private val outputFormatter = DateTimeFormatter.ofPattern(APP_DATE_FORMAT)
+
+        fun formattedDateFromTimestamp(timestamp: Long): String {
+            val date = Instant.ofEpochMilli(timestamp)
+            val localDate = LocalDateTime.ofInstant(date, ZoneId.systemDefault())
+            return outputFormatter.format(localDate)
+        }
 
         fun getFormattedDate(dateString: String): String? {
             for (pattern in potentialInputPatterns) {
