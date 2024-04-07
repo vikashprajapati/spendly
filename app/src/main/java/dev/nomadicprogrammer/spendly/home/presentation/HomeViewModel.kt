@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -18,6 +19,8 @@ import java.time.LocalDate
 class HomeViewModel(
     private val spendAnalyserController: SpendAnalyserController
 ) : ViewModel() {
+    private val TAG = HomeViewModel::class.java.simpleName
+
     private var allTransactions by mutableStateOf(emptyList<TransactionalSms>())
 
     var recentTransactions = mutableStateOf(emptyList<TransactionalSms>())
@@ -65,10 +68,11 @@ class HomeViewModel(
     fun onEvent(event: HomeEvent) {
         when(event) {
             is HomeEvent.PageLoad -> {
+                Log.d(TAG, "PageLoad")
                 viewModelScope.launch {
                     spendAnalyserController.launchTransactionalSmsClassifier()
                     allTransactions = spendAnalyserController.generateReport().reversed()
-                    val takeFrom = DateUtils.Local.getPreviousDate(ViewBy.DAILY.days)
+                    val takeFrom = DateUtils.Local.getPreviousDate(selectedViewBy.days)
                     transactionsViewBy = allTransactions.filter {
                         // Todo: remove transaction date is null check
                         filterTransactionsByDate(it, takeFrom)
