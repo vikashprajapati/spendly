@@ -3,12 +3,12 @@ package dev.nomadicprogrammer.spendly.home.presentation
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.Account
@@ -17,7 +17,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class HomeViewModel(
-    private val spendAnalyserController: SpendAnalyserController
+    private val spendAnalyserController: SpendAnalyserController,
+    private val storeTransactionUseCase: StoreTransactionUseCase
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
@@ -72,6 +73,8 @@ class HomeViewModel(
                 viewModelScope.launch {
                     spendAnalyserController.launchTransactionalSmsClassifier()
                     allTransactions = spendAnalyserController.generateReport().reversed()
+                    val transactions = allTransactions.mapNotNull { it.mapToTransaction() }
+                    storeTransactionUseCase.saveTransactions(transactions)
                     val takeFrom = DateUtils.Local.getPreviousDate(selectedViewBy.days)
                     transactionsViewBy = allTransactions.filter {
                         // Todo: remove transaction date is null check

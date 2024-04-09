@@ -6,7 +6,10 @@ import androidx.room.Insert
 @Dao
 interface TransactionDao {
     @Insert
-    suspend fun insertTransaction(transaction: Transaction)
+    suspend fun insertTransaction(transactionEntity: TransactionEntity)
 
-    suspend fun getAllTransactions(): List<Transaction>
+    @Insert
+    suspend fun insertTransactions(transactionEntities: List<TransactionEntity>)
+
+    suspend fun getAllTransactions(): List<TransactionEntity>
 }
