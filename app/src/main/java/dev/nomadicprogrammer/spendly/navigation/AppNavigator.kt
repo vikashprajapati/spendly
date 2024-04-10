@@ -52,7 +52,10 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
         val homeViewModel : HomeViewModel = viewModel(
             viewModelStoreOwner = it,
             key = "HomeViewModel",
-            factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
+            factory = HomeViewModelFactory(
+                SpendAnalyserController(LocalContext.current.applicationContext),
+                LocalContext.current.applicationContext
+            )
     )
 
         Home(navController, name = "Vikash", isPermissionAvailable, homeViewModel)

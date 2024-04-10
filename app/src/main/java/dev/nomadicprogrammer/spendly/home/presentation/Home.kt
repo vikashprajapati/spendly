@@ -36,7 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.database.AppDatabase
+import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
+import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
+import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
+import dev.nomadicprogrammer.spendly.home.data.mappers.TransactionMapper
 import dev.nomadicprogrammer.spendly.navigation.Screen
+import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
@@ -174,7 +180,13 @@ fun RecentTransactions(
 
 @Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
 @Composable fun HomePreview() {
-    val viewModel = HomeViewModel(SpendAnalyserController(LocalContext.current.applicationContext))
+    val viewModel = HomeViewModel(
+        SpendAnalyserController(LocalContext.current.applicationContext),
+        StoreTransactionUseCase(LocalTransactionRepository(
+            AppDatabase.getInstance(LocalContext.current.applicationContext).transactionDao(),
+         TransactionMapper(SmsInbox(LocalContext.current.applicationContext)),
+            SmsInbox(LocalContext.current.applicationContext)
+        )))
     Home(
         rememberNavController(),
         name = "John Doe", readSmsPermissionAvailable = true,

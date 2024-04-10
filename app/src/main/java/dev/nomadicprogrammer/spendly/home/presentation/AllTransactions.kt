@@ -38,7 +38,10 @@ fun AllTransactions(navController: NavController){
     val homeViewModel : HomeViewModel = viewModel(
         viewModelStoreOwner = backStackEntry,
         key = "HomeViewModel",
-        factory = HomeViewModelFactory(SpendAnalyserController(LocalContext.current.applicationContext))
+        factory = HomeViewModelFactory(
+            SpendAnalyserController(LocalContext.current.applicationContext),
+            LocalContext.current.applicationContext
+            )
 
     )
     val customFilter = stringResource(id = ViewBy.entries.toTypedArray()[homeViewModel.selectedTabIndex].resId)

@@ -64,4 +64,28 @@ class SmsInbox(val context: Context) : SmsDataSource {
 
         return null
     }
+
+    override fun getSmsByIds(ids: List<Int>): List<Sms>? {
+        val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)
+
+        val cursor = context.contentResolver.query(
+            Telephony.Sms.CONTENT_URI,
+            projection,
+            "${Telephony.Sms._ID} in ?",
+            arrayOf(ids.toString()),
+            null
+        )
+        val smsList = mutableListOf<Sms>()
+        cursor?.use {
+            while (it.moveToFirst()) {
+                val smsInboxId = it.getString(it.getColumnIndex(Telephony.Sms._ID))
+                val senderId = it.getString(it.getColumnIndex(Telephony.Sms.ADDRESS))
+                val body = it.getString(it.getColumnIndex(Telephony.Sms.BODY))
+                val date = it.getLong(it.getColumnIndex(Telephony.Sms.DATE))
+                smsList.add(Sms(smsInboxId, senderId, body, date))
+            }
+        }
+
+        return smsList
+    }
 }

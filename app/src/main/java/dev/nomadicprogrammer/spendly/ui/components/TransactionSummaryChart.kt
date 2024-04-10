@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -118,12 +119,12 @@ fun TransactionSummaryChart(
                     .width(200.dp)
                     .height(200.dp),
             ) {
-                val total = remember { mutableFloatStateOf(income.value.balance + spent.value.balance) }
-                val arcRatioIncome = remember { income.value.balance / total.floatValue }
-                val arcRatioSpent = remember { spent.value.balance / total.floatValue }
+                val total = remember { derivedStateOf { income.value.balance + spent.value.balance } }
+                val arcRatioIncome = remember { derivedStateOf { income.value.balance / total.value } }
+                val arcRatioSpent = remember { derivedStateOf { spent.value.balance / total.value } }
                 val slices = listOf(
-                    Slice(arcRatioIncome*360, incomeColor),
-                    Slice(arcRatioSpent*360, expenseColor),
+                    Slice(arcRatioIncome.value*360, incomeColor),
+                    Slice(arcRatioSpent.value*360, expenseColor),
                 )
 
                 PieChart(slices, useCenter = true)
