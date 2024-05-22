@@ -2,13 +2,17 @@ package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
 import android.content.Context
 import android.util.Log
+import dev.nomadicprogrammer.spendly.MainApp
+import dev.nomadicprogrammer.spendly.database.TransactionEntity
+import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
+import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
+import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
 import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
+import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.parsers.AmountParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.BankNameParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.DateParser
-import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.parsers.ReceiverDetailsParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.SenderDetailsParser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
@@ -25,14 +29,7 @@ import kotlinx.coroutines.withContext
 
 class SpendAnalyserController(
     private val context: Context,
-    private val transactionalSmsClassifier: SmsUseCase<TransactionalSms> = TransactionalSmsClassifier(
-        LocalRegexProvider(),
-        AmountParser(),
-        BankNameParser(),
-        DateParser(),
-        ReceiverDetailsParser(),
-        SenderDetailsParser()
-    ),
+    private val transactionalSmsClassifier: SmsUseCase<TransactionalSms> = MainApp.transactionalSmsClassifier,
     private val readPeriod: SmsReadPeriod = SmsReadPeriod.Yearly
 ){
     private val TAG = SpendAnalyserController::class.simpleName

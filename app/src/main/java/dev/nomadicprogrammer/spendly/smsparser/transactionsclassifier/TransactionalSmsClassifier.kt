@@ -1,31 +1,48 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
+import android.content.Context
 import android.provider.Telephony
 import android.util.Log
+import androidx.datastore.preferences.core.edit
 import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.base.LAST_PROCESSED_SMS
+import dev.nomadicprogrammer.spendly.base.appSettings
+import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.CREDIT
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBIT
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
 enum class SmsReadPeriod(val days : Int) {
     DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
 }
 class TransactionalSmsClassifier(
-    private val regexProvider: RegexProvider,
+    private val context: Context,
+    private val regexProvider: RegexProvider = LocalRegexProvider(),
     private val amountParser: Parser,
     private val bankNameParser: Parser,
     private val dateParser: Parser,
     private val receiverDetailsParser : Parser,
     private val senderDetailsParser : Parser,
+    private val storeTransactionUseCase: StoreTransactionUseCase,
+    private val scope : CoroutineScope
 ) : SmsUseCase<TransactionalSms> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
 
@@ -43,11 +60,21 @@ class TransactionalSmsClassifier(
     }
 
     override fun readSmsRange(smsReadPeriod: SmsReadPeriod): Range {
-        val from = Calendar.getInstance().run {
-            add(Calendar.DAY_OF_YEAR, -smsReadPeriod.days)
-            time
+        val from = runBlocking {
+            scope.async {
+                context.appSettings.data
+                    .first()[LAST_PROCESSED_SMS]
+                    ?: run {
+                        Log.d(TAG, "Last processed sms not found, reading sms for last ${smsReadPeriod.days} days")
+                        Calendar.getInstance().run {
+                            add(Calendar.DAY_OF_YEAR, -smsReadPeriod.days)
+                            time.time
+                        }
+                    }
+            }.await()
         }
-        return Range(from.time, System.currentTimeMillis())
+
+        return Range(from, System.currentTimeMillis())
     }
 
     override fun onProgress(progress: Int) {
@@ -91,8 +118,14 @@ class TransactionalSmsClassifier(
     }
 
     override fun onComplete(filteredSms: List<TransactionalSms>) {
-        Log.d(TAG, "Filtered Sms: $filteredSms")
-        this.filteredSms = filteredSms
+        scope.launch {
+            context.appSettings.edit { settings ->
+                settings[LAST_PROCESSED_SMS] = filteredSms.last().originalSms.date
+            }
+            Log.d(TAG, "Filtered Sms: $filteredSms")
+            this@TransactionalSmsClassifier.filteredSms = filteredSms
+            storeTransactionUseCase.saveTransactions(filteredSms.mapNotNull { it.mapToTransaction() })
+        }
     }
 
     override fun getFilteredResult(): List<TransactionalSms> {
