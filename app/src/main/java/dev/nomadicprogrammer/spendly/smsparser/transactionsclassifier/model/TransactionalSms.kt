@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
 
-import dev.nomadicprogrammer.spendly.home.data.Transaction
+import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
+import dev.nomadicprogrammer.spendly.home.data.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import java.io.Serializable
@@ -62,10 +63,10 @@ sealed class TransactionalSms(
         }
     }
 
-    fun mapToTransaction(): Transaction? {
+    fun mapToTransaction(): TransactionSmsUiModel? {
         if (this is Debit){
-            return Transaction(
-                type = type,
+            return TransactionSmsUiModel(
+                type = TransactionType.fromString(type),
                 originalSms = originalSms,
                 currencyAmount = currencyAmount,
                 bankName = bankName,
@@ -74,8 +75,8 @@ sealed class TransactionalSms(
                 category = category
             )
         }else if(this is Credit){
-            Transaction(
-                type = type,
+            TransactionSmsUiModel(
+                type = TransactionType.fromString(type),
                 originalSms = originalSms,
                 currencyAmount = currencyAmount,
                 bankName = bankName,

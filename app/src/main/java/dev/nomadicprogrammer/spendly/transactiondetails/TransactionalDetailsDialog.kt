@@ -39,6 +39,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
+import dev.nomadicprogrammer.spendly.home.data.TransactionType
 import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModelFactory
@@ -52,7 +54,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetails(
-    transactionalSms: TransactionalSms,
+    transactionalSms: TransactionSmsUiModel,
     sheetState : SheetState,
     onDismiss : () -> Unit
 ) {
@@ -79,12 +81,12 @@ fun TransactionDetails(
                 )
 
                 Text(
-                    text = transactionalSms.type,
-                    color = if (transactionalSms is TransactionalSms.Debit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                    text = transactionalSms.type.value,
+                    color = if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier
                         .background(
-                        color = if (transactionalSms is TransactionalSms.Debit) MaterialTheme.colorScheme.error.copy(alpha = 0.1f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        color = if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error.copy(alpha = 0.1f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                         shape = MaterialTheme.shapes.small
                     ).padding(horizontal = 8.dp, vertical = 4.dp)
                 )

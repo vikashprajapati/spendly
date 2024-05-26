@@ -8,7 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.nomadicprogrammer.spendly.base.DateUtils
-import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
+import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
+import dev.nomadicprogrammer.spendly.home.data.TransactionUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.Account
@@ -18,17 +19,17 @@ import java.time.LocalDate
 
 class HomeViewModel(
     private val spendAnalyserController: SpendAnalyserController,
-    private val storeTransactionUseCase: StoreTransactionUseCase
+    private val transactionUseCase: TransactionUseCase
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
-    private var allTransactions by mutableStateOf(emptyList<TransactionalSms>())
+    private var allTransactions by mutableStateOf(emptyList<TransactionSmsUiModel>())
 
-    var recentTransactions = mutableStateOf(emptyList<TransactionalSms>())
+    var recentTransactions = mutableStateOf(emptyList<TransactionSmsUiModel>())
         get() = mutableStateOf(transactionsViewBy.take(5))
         private set
 
-    var transactionsViewBy by mutableStateOf(emptyList<TransactionalSms>())
+    var transactionsViewBy by mutableStateOf(emptyList<TransactionSmsUiModel>())
         private set
 
     var selectedTabIndex by mutableIntStateOf(0)
@@ -62,9 +63,9 @@ class HomeViewModel(
         }
         private set
 
-    private val transactionViewByMap = mutableMapOf<ViewBy, List<TransactionalSms>>()
+    private val transactionViewByMap = mutableMapOf<ViewBy, List<TransactionSmsUiModel>>()
 
-    val dialogTransactionSms = mutableStateOf<TransactionalSms?>(null)
+    val dialogTransactionSms = mutableStateOf<TransactionSmsUiModel?>(null)
 
     fun onEvent(event: HomeEvent) {
         when(event) {
@@ -72,14 +73,17 @@ class HomeViewModel(
                 Log.d(TAG, "PageLoad")
                 viewModelScope.launch {
                     spendAnalyserController.launchTransactionalSmsClassifier()
-                    allTransactions = spendAnalyserController.generateReport().reversed()
-                    val transactions = allTransactions.mapNotNull { it.mapToTransaction() }
-                    storeTransactionUseCase.saveTransactions(transactions)
-                    val takeFrom = DateUtils.Local.getPreviousDate(selectedViewBy.days)
-                    transactionsViewBy = allTransactions.filter {
-                        // Todo: remove transaction date is null check
-                        filterTransactionsByDate(it, takeFrom)
-                    }
+
+                    transactionUseCase
+                        .getTransactions()
+                        .collect{
+                            allTransactions = it ?: emptyList()
+                            val takeFrom = DateUtils.Local.getPreviousDate(selectedViewBy.days)
+                            transactionsViewBy = allTransactions.filter {
+                                // Todo: remove transaction date is null check
+                                filterTransactionsByDate(it, takeFrom)
+                            }
+                        }
                 }
             }
 
@@ -110,7 +114,7 @@ class HomeViewModel(
     }
 
     private fun filterTransactionsByDate(
-        it: TransactionalSms,
+        it: TransactionSmsUiModel,
         takeFrom: LocalDate?
     ) = it.transactionDate?.let { date ->
         val transactionDate = DateUtils.Local.getLocalDate(date)
@@ -122,7 +126,7 @@ sealed class HomeEvent{
     data object PageLoad : HomeEvent()
     data class ViewBySelected(val viewBy: ViewBy,val index : Int) : HomeEvent()
 
-    data class TransactionSelected(val transactionalSms: TransactionalSms) : HomeEvent()
+    data class TransactionSelected(val transactionalSms: TransactionSmsUiModel) : HomeEvent()
 
     data object TransactionDialogDismissed : HomeEvent()
 }

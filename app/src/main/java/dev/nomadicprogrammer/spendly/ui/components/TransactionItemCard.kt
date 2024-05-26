@@ -28,6 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
+import dev.nomadicprogrammer.spendly.home.data.TransactionType
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
@@ -38,8 +40,8 @@ import kotlin.random.Random
 
 @Composable
 fun TransactionItemCard(
-    transaction: TransactionalSms,
-    onTransactionClick : (TransactionalSms) -> Unit = {}
+    transaction: TransactionSmsUiModel,
+    onTransactionClick : (TransactionSmsUiModel) -> Unit = {}
 ){
     Log.d("TransactionItem", "Transaction: $transaction")
     val iconList = listOf(
@@ -76,11 +78,11 @@ fun TransactionItemCard(
                     text = transaction.bankName ?: transaction.originalSms.senderId,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                val transactionSymbol = if (transaction is TransactionalSms.Debit) "-" else "+"
+                val transactionSymbol = if (transaction.type == TransactionType.DEBIT) "-" else "+"
                 Text(
                     text = "$transactionSymbol ${transaction.currencyAmount}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (transaction is TransactionalSms.Debit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    color = if (transaction.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -110,6 +112,7 @@ fun TransactionItemCard(
     }
 }
 
+/*
 @Preview(
     showBackground = true,
     uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
@@ -160,4 +163,4 @@ fun TransactionItemCard(
         )
     )
 
-}
+}*/

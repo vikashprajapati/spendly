@@ -1,9 +1,11 @@
 package dev.nomadicprogrammer.spendly.home.data
 
+import kotlinx.coroutines.flow.Flow
+
 interface TransactionRepository {
-    suspend fun saveTransaction(transactionalSms: Transaction)
+    suspend fun saveTransaction(transactionalSms: TransactionSmsUiModel)
 
-    suspend fun saveTransactions(transactionalSms: List<Transaction>)
+    suspend fun saveTransactions(transactionalSms: List<TransactionSmsUiModel>)
 
-    suspend fun getTransactions(): List<Transaction>?
+    suspend fun getTransactions(): Flow<List<TransactionSmsUiModel>?>
 }

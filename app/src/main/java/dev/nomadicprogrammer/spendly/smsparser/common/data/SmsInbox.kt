@@ -68,11 +68,19 @@ class SmsInbox(val context: Context) : SmsDataSource {
     override fun getSmsByIds(ids: List<Int>): List<Sms>? {
         val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)
 
+        val selectionArgs = arrayOf(ids.toString())
+
+        val questionmark = mutableListOf<String>()
+        for(element in selectionArgs){
+            questionmark.add("?")
+        }
+
+
         val cursor = context.contentResolver.query(
             Telephony.Sms.CONTENT_URI,
             projection,
-            "${Telephony.Sms._ID} in ?",
-            arrayOf(ids.toString()),
+            "${Telephony.Sms._ID} IN (${questionmark.joinToString(",")})",
+            selectionArgs,
             null
         )
         val smsList = mutableListOf<Sms>()

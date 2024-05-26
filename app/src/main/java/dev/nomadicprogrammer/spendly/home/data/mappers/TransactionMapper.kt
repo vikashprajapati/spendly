@@ -1,7 +1,9 @@
 package dev.nomadicprogrammer.spendly.home.data.mappers
 
+import android.util.Log
 import dev.nomadicprogrammer.spendly.database.TransactionEntity
-import dev.nomadicprogrammer.spendly.home.data.Transaction
+import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
+import dev.nomadicprogrammer.spendly.home.data.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
@@ -9,22 +11,22 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 class TransactionMapper(
     private val smsInbox: SmsInbox
 ) {
-    fun toTransactionEntity(transaction: Transaction): TransactionEntity {
+    fun toTransactionEntity(transactionSmsUiModel: TransactionSmsUiModel): TransactionEntity {
         return TransactionEntity(
-            type = transaction.type,
-            transactionDate = transaction.transactionDate,
-            bankName = transaction.bankName,
-            currency = transaction.currencyAmount.currency,
-            amount = transaction.currencyAmount.amount.toFloat(),
-            originalSmsId = transaction.originalSms.id.toLong(),
-            category = transaction.category
+            type = transactionSmsUiModel.type.value,
+            transactionDate = transactionSmsUiModel.transactionDate,
+            bankName = transactionSmsUiModel.bankName,
+            currency = transactionSmsUiModel.currencyAmount.currency,
+            amount = transactionSmsUiModel.currencyAmount.amount.toFloat(),
+            originalSmsId = transactionSmsUiModel.originalSms.id.toLong(),
+            category = transactionSmsUiModel.category
         )
     }
 
-    fun toTransaction(transactionEntity: TransactionEntity): Transaction {
+    fun toTransaction(transactionEntity: TransactionEntity): TransactionSmsUiModel {
         val originalSms : Sms = smsInbox.getSmsById(transactionEntity.originalSmsId.toInt())!!
-        return Transaction(
-            type = transactionEntity.type,
+        return TransactionSmsUiModel(
+            type = TransactionType.valueOf(transactionEntity.type),
             transactionDate = transactionEntity.transactionDate,
             bankName = transactionEntity.bankName,
             currencyAmount = CurrencyAmount(transactionEntity.currency, transactionEntity.amount.toDouble()),
@@ -33,14 +35,15 @@ class TransactionMapper(
         )
     }
 
-    fun toTransactions(transactionEntity: List<TransactionEntity>, originalSmsList : List<Sms>): List<Transaction> {
+    fun toTransactions(transactionEntity: List<TransactionEntity>, originalSmsList : List<Sms>): List<TransactionSmsUiModel> {
         return transactionEntity.mapIndexed { index, it ->
-            Transaction(
-                type = it.type,
+            Log.d("TransactionMapper", "toTransactions: }")
+            TransactionSmsUiModel(
+                type = TransactionType.fromString(it.type),
                 transactionDate = it.transactionDate,
                 bankName = it.bankName,
                 currencyAmount = CurrencyAmount(it.currency, it.amount.toDouble()),
-                originalSms = originalSmsList[index],
+                originalSms = Sms("", "", "", 0),
                 category = it.category
             )
         }

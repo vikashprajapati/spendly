@@ -4,24 +4,8 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 
-class StoreTransactionUseCase(
-    private val transactionEntityRepository: TransactionRepository
-) {
-    suspend fun saveTransaction(transaction : Transaction) {
-        transactionEntityRepository.saveTransaction(transaction)
-    }
-
-    suspend fun saveTransactions(transactions: List<Transaction>) {
-        transactionEntityRepository.saveTransactions(transactions)
-    }
-
-    suspend fun getTransactions(): List<Transaction>? {
-        return transactionEntityRepository.getTransactions()
-    }
-}
-
-data class Transaction(
-    val type: String,
+data class TransactionSmsUiModel(
+    val type: TransactionType,
     val transactionDate: String?,
     val bankName: String? = null,
     val currencyAmount: CurrencyAmount,
@@ -30,9 +14,9 @@ data class Transaction(
     val transferredTo : String? = null,
     val receivedFrom : String? = null
 ){
-    fun mapToTransactionalSms() : TransactionalSms{
+    fun mapToTransactionalSms() : TransactionalSms {
         return TransactionalSms.create(
-            type = type,
+            type = type.value,
             sms = originalSms,
             currencyAmount = currencyAmount,
             bank = bankName,
@@ -41,5 +25,15 @@ data class Transaction(
             receivedFrom = receivedFrom,
             category = category
         )!!
+    }
+}
+
+enum class TransactionType(val value: String) {
+    DEBIT("Debit"),
+    CREDIT("Credit"),
+    TRANSFER("Transfer");
+
+    companion object {
+        fun fromString(value: String) = values().first { it.value == value }
     }
 }

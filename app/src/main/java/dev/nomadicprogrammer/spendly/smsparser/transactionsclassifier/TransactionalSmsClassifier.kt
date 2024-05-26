@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.LAST_PROCESSED_SMS
 import dev.nomadicprogrammer.spendly.base.appSettings
-import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
+import dev.nomadicprogrammer.spendly.home.data.TransactionUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
@@ -22,9 +22,6 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBI
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -41,7 +38,7 @@ class TransactionalSmsClassifier(
     private val dateParser: Parser,
     private val receiverDetailsParser : Parser,
     private val senderDetailsParser : Parser,
-    private val storeTransactionUseCase: StoreTransactionUseCase,
+    private val transactionUseCase: TransactionUseCase,
     private val scope : CoroutineScope
 ) : SmsUseCase<TransactionalSms> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
@@ -124,7 +121,7 @@ class TransactionalSmsClassifier(
             }
             Log.d(TAG, "Filtered Sms: $filteredSms")
             this@TransactionalSmsClassifier.filteredSms = filteredSms
-            storeTransactionUseCase.saveTransactions(filteredSms.mapNotNull { it.mapToTransaction() })
+            transactionUseCase.saveTransactions(filteredSms.mapNotNull { it.mapToTransaction() })
         }
     }
 

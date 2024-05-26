@@ -38,8 +38,8 @@ import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.database.AppDatabase
 import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
-import dev.nomadicprogrammer.spendly.home.data.StoreTransactionUseCase
-import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
+import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
+import dev.nomadicprogrammer.spendly.home.data.TransactionUseCase
 import dev.nomadicprogrammer.spendly.home.data.mappers.TransactionMapper
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
@@ -135,8 +135,8 @@ fun Home(
 
 @Composable
 fun RecentTransactions(
-    recentTransactions: MutableState<List<TransactionalSms>>,
-    onTransactionSmsClick : (TransactionalSms) -> Unit,
+    recentTransactions: MutableState<List<TransactionSmsUiModel>>,
+    onTransactionSmsClick : (TransactionSmsUiModel) -> Unit,
     onSeeAllClick : () -> Unit
 ) {
     Column {
@@ -182,7 +182,7 @@ fun RecentTransactions(
 @Composable fun HomePreview() {
     val viewModel = HomeViewModel(
         SpendAnalyserController(LocalContext.current.applicationContext),
-        StoreTransactionUseCase(LocalTransactionRepository(
+        TransactionUseCase(LocalTransactionRepository(
             AppDatabase.getInstance(LocalContext.current.applicationContext).transactionDao(),
          TransactionMapper(SmsInbox(LocalContext.current.applicationContext)),
             SmsInbox(LocalContext.current.applicationContext)
@@ -197,22 +197,22 @@ fun RecentTransactions(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = false)
-@Composable fun RecentPreview(){
-    val transactions : MutableState<List<TransactionalSms>> = remember {
-        mutableStateOf(
-            listOf(
-                TransactionalSms.create(
-                    "debit", Sms("dfd", "Amazon", "Hello", System.currentTimeMillis()), CurrencyAmount("INR", 100.0), "", ""
-                )!!
-            )
-        )
-    }
-    Column(modifier = Modifier.padding(16.dp)) {
-        RecentTransactions(
-            recentTransactions = transactions,
-            onTransactionSmsClick = {},
-            onSeeAllClick = {}
-        )
-    }
-}
+//@Preview(showBackground = true, showSystemUi = false)
+//@Composable fun RecentPreview(){
+//    val transactions : MutableState<List<TransactionSmsUiModel>> = remember {
+//        mutableStateOf(
+//            listOf(
+//                TransactionSmsUiModel(
+//                    "debit", Sms("dfd", "Amazon", "Hello", System.currentTimeMillis()), CurrencyAmount("INR", 100.0), "", ""
+//                )!!
+//            )
+//        )
+//    }
+//    Column(modifier = Modifier.padding(16.dp)) {
+//        RecentTransactions(
+//            recentTransactions = transactions,
+//            onTransactionSmsClick = {},
+//            onSeeAllClick = {}
+//        )
+//    }
+//}
