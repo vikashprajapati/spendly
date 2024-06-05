@@ -22,9 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,17 +36,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.database.AppDatabase
+import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
-import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
-import dev.nomadicprogrammer.spendly.home.data.TransactionUseCase
 import dev.nomadicprogrammer.spendly.home.data.mappers.TransactionMapper
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
-import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
-import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
@@ -68,8 +63,8 @@ fun Home(
     LaunchedEffect(null){
         viewModel.onEvent(HomeEvent.PageLoad)
     }
-
-    val recentTransactions = viewModel.recentTransactions
+    val uiState by viewModel.state.collectAsState()
+    val recentTransactions = uiState.recentTransactions
 
     Column(modifier = Modifier
         .padding(16.dp)
@@ -88,7 +83,7 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val selectedTab = viewModel.selectedTabIndex
+        val selectedTab = uiState.selectedTabIndex
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -106,23 +101,23 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TransactionSummaryChart(viewModel.income, viewModel.expense, onChartClick = {})
+        TransactionSummaryChart(1000f, 12f, onChartClick = {})
 
         Spacer(modifier = Modifier.height(24.dp))
 
         val sheetState = rememberModalBottomSheetState()
-        if (viewModel.dialogTransactionSms.value != null) {
-                TransactionDetails(
-                    viewModel.dialogTransactionSms.value!!,
-                    sheetState = sheetState,
-                    onDismiss = {
-                        viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
-                    }
-                )
-        }
+//        if (viewModel.dialogTransactionSms.value != null) {
+//                TransactionDetails(
+//                    viewModel.dialogTransactionSms.value!!,
+//                    sheetState = sheetState,
+//                    onDismiss = {
+//                        viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+//                    }
+//                )
+//        }
 
         RecentTransactions(
-            recentTransactions,
+            uiState.recentTransactions,
             onTransactionSmsClick = {
                 viewModel.onEvent(HomeEvent.TransactionSelected(it))
             },
@@ -135,8 +130,8 @@ fun Home(
 
 @Composable
 fun RecentTransactions(
-    recentTransactions: MutableState<List<TransactionSmsUiModel>>,
-    onTransactionSmsClick : (TransactionSmsUiModel) -> Unit,
+    recentTransactions: List<Transaction>,
+    onTransactionSmsClick : (Transaction) -> Unit,
     onSeeAllClick : () -> Unit
 ) {
     Column {
@@ -171,7 +166,7 @@ fun RecentTransactions(
             }
         }
         LazyColumn {
-            items(recentTransactions.value) { transaction ->
+            items(recentTransactions) { transaction ->
                 TransactionItemCard(transaction, onTransactionSmsClick)
             }
         }
@@ -181,8 +176,8 @@ fun RecentTransactions(
 @Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
 @Composable fun HomePreview() {
     val viewModel = HomeViewModel(
-        SpendAnalyserController(LocalContext.current.applicationContext),
-        TransactionUseCase(LocalTransactionRepository(
+        SpendAnalyserUseCase(LocalContext.current.applicationContext),
+        GetAllTransactionsUseCase(LocalTransactionRepository(
             AppDatabase.getInstance(LocalContext.current.applicationContext).transactionDao(),
          TransactionMapper(SmsInbox(LocalContext.current.applicationContext)),
             SmsInbox(LocalContext.current.applicationContext)

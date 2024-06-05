@@ -1,7 +1,5 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
 
-import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
-import dev.nomadicprogrammer.spendly.home.data.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import java.io.Serializable
@@ -12,7 +10,7 @@ const val DEFAULT_CURRENCY = "₹"
 const val DEBIT = "Debit"
 const val CREDIT = "Credit"
 
-sealed class TransactionalSms(
+sealed class Transaction(
     val type: String,
     open val transactionDate: String?,
     open val bankName: String? = null,
@@ -27,7 +25,7 @@ sealed class TransactionalSms(
         override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms,
         override val category: String? = null
-    ) : TransactionalSms(DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
+    ) : Transaction(DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
 
     data class Credit(
         override val transactionDate: String?,
@@ -36,7 +34,7 @@ sealed class TransactionalSms(
         override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms,
         override val category: String? = null
-    ) : TransactionalSms(CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)
+    ) : Transaction(CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)
 
     companion object {
         fun create(
@@ -48,7 +46,7 @@ sealed class TransactionalSms(
             transferredTo: String? = null,
             receivedFrom: String? = null,
             category: String? = null
-        ): TransactionalSms? {
+        ): Transaction? {
             return when(type){
                 DEBIT -> Debit(
                     transactionDate = transactionDate, transferredTo = transferredTo, bankName = bank,
@@ -61,31 +59,5 @@ sealed class TransactionalSms(
                 else -> null
             }
         }
-    }
-
-    fun mapToTransaction(): TransactionSmsUiModel? {
-        if (this is Debit){
-            return TransactionSmsUiModel(
-                type = TransactionType.fromString(type),
-                originalSms = originalSms,
-                currencyAmount = currencyAmount,
-                bankName = bankName,
-                transactionDate = transactionDate,
-                transferredTo = transferredTo,
-                category = category
-            )
-        }else if(this is Credit){
-            TransactionSmsUiModel(
-                type = TransactionType.fromString(type),
-                originalSms = originalSms,
-                currencyAmount = currencyAmount,
-                bankName = bankName,
-                transactionDate = transactionDate,
-                receivedFrom = receivedFrom,
-                category = category
-            )
-        }
-
-        return null
     }
 }

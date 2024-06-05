@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PieChart(slices: List<Slice>, useCenter : Boolean = false, style : DrawStyle = Fill) {
+fun PieChart(slices: List<Slice>, useCenter : Boolean = false, style : DrawStyle = Stroke(width = 16f, cap = StrokeCap.Round)) {
     val totalAngle = 360f
     var startAngle = 0f
     val canvasSize = remember { mutableStateOf(Size.Zero) }

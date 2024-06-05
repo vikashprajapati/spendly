@@ -13,18 +13,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.checkAndRequestPermission
 import dev.nomadicprogrammer.spendly.home.presentation.AllTransactions
 import dev.nomadicprogrammer.spendly.home.presentation.Home
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModelFactory
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
-import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 
 @Composable
 fun AppNavigator(){
@@ -53,7 +50,7 @@ fun NavGraphBuilder.homeNavGraph(navController: NavController){
             viewModelStoreOwner = it,
             key = "HomeViewModel",
             factory = HomeViewModelFactory(
-                SpendAnalyserController(LocalContext.current.applicationContext),
+                SpendAnalyserUseCase(LocalContext.current.applicationContext),
                 LocalContext.current.applicationContext
             )
     )

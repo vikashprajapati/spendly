@@ -1,6 +1,5 @@
 package dev.nomadicprogrammer.spendly.ui.components
 
-import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,18 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
 import dev.nomadicprogrammer.spendly.home.data.TransactionType
-import dev.nomadicprogrammer.spendly.navigation.Screen
-import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
-import java.util.UUID
 import kotlin.random.Random
 
 @Composable

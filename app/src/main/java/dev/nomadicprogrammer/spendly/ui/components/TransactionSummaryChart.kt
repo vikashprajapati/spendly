@@ -19,15 +19,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,11 +32,11 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionSummaryChart(
-    income: MutableState<Account.Income>,
-    spent: MutableState<Account.Expense>,
+    income: Float,
+    spent: Float,
     onChartClick: () -> Unit
 ) {
-    Log.d("TransactionSummaryChart", "Income: ${income.value.balance}, Spent: ${spent.value.balance}")
+    Log.d("TransactionSummaryChart", "Income: $income, Spent: $spent")
     val incomeColor = MaterialTheme.colorScheme.primary
     val expenseColor = MaterialTheme.colorScheme.error
     ElevatedCard(
@@ -80,7 +76,7 @@ fun TransactionSummaryChart(
                         Text(text = "Income", style = MaterialTheme.typography.titleMedium)
                     }
                     Text(
-                        text = "₹ ${income.value.balance}",
+                        text = "₹ $income",
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.headlineMedium
                     )
@@ -107,7 +103,7 @@ fun TransactionSummaryChart(
                         Text(text = "Spent", style = MaterialTheme.typography.titleMedium)
                     }
                     Text(
-                        text = "₹ ${spent.value.balance}",
+                        text = "₹ $spent",
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.headlineMedium
                     )
@@ -119,15 +115,15 @@ fun TransactionSummaryChart(
                     .width(200.dp)
                     .height(200.dp),
             ) {
-                val total = remember { derivedStateOf { income.value.balance + spent.value.balance } }
-                val arcRatioIncome = remember { derivedStateOf { income.value.balance / total.value } }
-                val arcRatioSpent = remember { derivedStateOf { spent.value.balance / total.value } }
+                val total = remember { derivedStateOf { income + spent } }
+                val arcRatioIncome = remember { derivedStateOf { income/ total.value } }
+                val arcRatioSpent = remember { derivedStateOf { spent / total.value } }
                 val slices = listOf(
                     Slice(arcRatioIncome.value*360, incomeColor),
                     Slice(arcRatioSpent.value*360, expenseColor),
                 )
 
-                PieChart(slices, useCenter = true)
+                PieChart(slices, useCenter = false, style = Stroke(width = 16f, cap = StrokeCap.Round))
             }
         }
     }
@@ -143,7 +139,5 @@ sealed class Account(
 @Preview
 @Composable
 fun CardWithChartPreview() {
-    val income = remember { mutableStateOf(Account.Income(1000f)) }
-    val spent = remember { mutableStateOf(Account.Expense(100f)) }
-    TransactionSummaryChart(income, spent = spent) {}
+    TransactionSummaryChart(100f, spent = 12f) {}
 }

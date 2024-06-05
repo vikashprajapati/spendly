@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import dev.nomadicprogrammer.spendly.database.AppDatabase
 import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
-import dev.nomadicprogrammer.spendly.home.data.TransactionUseCase
+import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.mappers.TransactionMapper
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
@@ -34,7 +34,7 @@ class MainApp : Application() {
         val receiverDetailsParser = ReceiverDetailsParser()
         val senderDetailsParser = SenderDetailsParser()
         val smsInbox = SmsInbox(context)
-        val transactionUseCase = TransactionUseCase(
+        val getAllTransactionsUseCase = GetAllTransactionsUseCase(
             transactionEntityRepository = LocalTransactionRepository(
                 AppDatabase.getInstance(context).transactionDao(),
                 TransactionMapper(smsInbox),
@@ -51,7 +51,7 @@ class MainApp : Application() {
             dateParser,
             receiverDetailsParser,
             senderDetailsParser,
-            transactionUseCase,
+            getAllTransactionsUseCase,
             scope
         )
     }

@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.LAST_PROCESSED_SMS
 import dev.nomadicprogrammer.spendly.base.appSettings
-import dev.nomadicprogrammer.spendly.home.data.TransactionUseCase
+import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
@@ -19,7 +19,7 @@ import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.CREDIT
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBIT
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -38,15 +38,15 @@ class TransactionalSmsClassifier(
     private val dateParser: Parser,
     private val receiverDetailsParser : Parser,
     private val senderDetailsParser : Parser,
-    private val transactionUseCase: TransactionUseCase,
+    private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
     private val scope : CoroutineScope
-) : SmsUseCase<TransactionalSms> {
+) : SmsUseCase<Transaction> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
 
     private val personalSmsExclusionRegex by lazy { regexProvider.getRegex() ?: throw RegexFetchException("Regex not found") }
     private val debitTransactionIdentifierRegex by lazy { regexProvider.getDebitTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
     private val creditTransactionIdentifierRegex by lazy { regexProvider.getCreditTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
-    private var filteredSms: List<TransactionalSms> = emptyList()
+    private var filteredSms: List<Transaction> = emptyList()
 
     override fun getRegex(): SmsRegex {
         return personalSmsExclusionRegex
@@ -78,7 +78,7 @@ class TransactionalSmsClassifier(
         Log.d(TAG, "Progress: $progress")
     }
 
-    override fun filterMap(sms: Sms): TransactionalSms? {
+    override fun filterMap(sms: Sms): Transaction? {
         val transactionType = when {
             isDebitTransaction(sms) -> DEBIT
             isCreditTransaction(sms) -> CREDIT
@@ -95,7 +95,7 @@ class TransactionalSmsClassifier(
         }
         val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
 
-        return TransactionalSms.create(
+        return Transaction.create(
             type = transactionType,
             sms = sms,
             currencyAmount = currencyAmount,
@@ -114,18 +114,18 @@ class TransactionalSmsClassifier(
         return creditTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
     }
 
-    override fun onComplete(filteredSms: List<TransactionalSms>) {
+    override fun onComplete(filteredSms: List<Transaction>) {
         scope.launch {
             context.appSettings.edit { settings ->
                 settings[LAST_PROCESSED_SMS] = filteredSms.last().originalSms.date
             }
             Log.d(TAG, "Filtered Sms: $filteredSms")
             this@TransactionalSmsClassifier.filteredSms = filteredSms
-            transactionUseCase.saveTransactions(filteredSms.mapNotNull { it.mapToTransaction() })
+            getAllTransactionsUseCase.saveTransactions(filteredSms.mapNotNull { it.mapToTransaction() })
         }
     }
 
-    override fun getFilteredResult(): List<TransactionalSms> {
+    override fun getFilteredResult(): List<Transaction> {
         return filteredSms
     }
 

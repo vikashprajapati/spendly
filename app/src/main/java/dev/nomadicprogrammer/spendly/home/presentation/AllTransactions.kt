@@ -7,14 +7,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,7 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.navigation.Screen
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserController
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
@@ -39,12 +37,13 @@ fun AllTransactions(navController: NavController){
         viewModelStoreOwner = backStackEntry,
         key = "HomeViewModel",
         factory = HomeViewModelFactory(
-            SpendAnalyserController(LocalContext.current.applicationContext),
+            SpendAnalyserUseCase(LocalContext.current.applicationContext),
             LocalContext.current.applicationContext
             )
 
     )
-    val customFilter = stringResource(id = ViewBy.entries.toTypedArray()[homeViewModel.selectedTabIndex].resId)
+    val uiState by homeViewModel.state.collectAsState()
+    val customFilter = stringResource(id = ViewBy.entries.toTypedArray()[uiState.selectedTabIndex].resId)
     
     Column(
         modifier = Modifier.padding(16.dp)
@@ -58,7 +57,7 @@ fun AllTransactions(navController: NavController){
         Spacer(modifier = Modifier.padding(8.dp))
 
         LazyColumn() {
-            items(homeViewModel.transactionsViewBy) { transaction ->
+            items(uiState.allTransactions) { transaction ->
                 TransactionItemCard(transaction){
                     homeViewModel.onEvent(HomeEvent.TransactionSelected(transaction))
                 }
@@ -66,14 +65,14 @@ fun AllTransactions(navController: NavController){
         }
     }
 
-    val sheetState = rememberModalBottomSheetState()
-    if (homeViewModel.dialogTransactionSms.value != null) {
-        TransactionDetails(
-            homeViewModel.dialogTransactionSms.value!!,
-            sheetState = sheetState,
-            onDismiss = {
-                homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
-            }
-        )
-    }
+//    val sheetState = rememberModalBottomSheetState()
+//    if (homeViewModel.dialogTransactionSms.value != null) {
+//        TransactionDetails(
+//            homeViewModel.dialogTransactionSms.value!!,
+//            sheetState = sheetState,
+//            onDismiss = {
+//                homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+//            }
+//        )
+//    }
 }
