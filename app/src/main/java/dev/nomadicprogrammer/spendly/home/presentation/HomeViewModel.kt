@@ -30,6 +30,7 @@ class HomeViewModel @Inject constructor(
     private var getAllTransactionJob : Job?= null
 
     init {
+        Log.d(TAG, "HomeViewModel created")
         launchClassifier()
     }
 
@@ -44,14 +45,16 @@ class HomeViewModel @Inject constructor(
                 Log.d(TAG, "PageLoad")
                 getAllTransactionJob?.cancel()
                 getAllTransactionJob = viewModelScope.launch {
-                    val allTransactions = getAllTransactionsUseCase()
-                    Log.d(TAG, "All transactions: $allTransactions")
-                    _state.value = _state.value.copy(allTransactions = allTransactions ?: emptyList())
+                    getAllTransactionsUseCase()
+                        .collect{
+                            Log.d(TAG, "All transactions: $it")
+                            _state.value = _state.value.copy(allTransactions = it ?: emptyList())
 //                            val takeFrom = DateUtils.Local.getPreviousDate(_state.value.currentViewBy.days)
 //                            transactionsViewBy = _state.value.allTransactions.filter {
 //                                // Todo: remove transaction date is null check
 //                                filterTransactionsByDate(it, takeFrom)
 //                            }
+                        }
                 }
             }
 

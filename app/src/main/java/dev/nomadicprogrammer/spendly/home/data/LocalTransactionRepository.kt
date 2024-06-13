@@ -4,8 +4,11 @@ import android.util.Log
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.database.TransactionEntity
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsDataSource
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class LocalTransactionRepository @Inject constructor(
@@ -24,13 +27,17 @@ class LocalTransactionRepository @Inject constructor(
         transactionDao.insertTransactions(transactionEntities)
     }
 
-    override suspend fun getAllTransactions(): List<Transaction> {
-        val transactionEntities = transactionDao.getAllTransactions().first()
-        val smsIds = transactionEntities.map { it.originalSmsId.toInt() }
-        val originalSmsList = smsInbox.getSmsByIds(smsIds)?: emptyList()
-        Log.d(TAG, "getAllTransactions: originalSmsList: $originalSmsList")
-        val transactionModel =  transactionEntities.zip(originalSmsList){transactionEntity, originalSms -> transactionEntity.toModel(originalSms) }
-        Log.d(TAG, "getAllTransactions: transactionModel: $transactionModel")
-        return transactionModel
+    override suspend fun getAllTransactions(): Flow<List<Transaction>> = flow{
+        transactionDao.getAllTransactions().collect{ transactionEntities->
+
+            Log.d(TAG, "getAllTransactions: transactionEntities size: ${transactionEntities.size}")
+            Log.d(TAG, "getAllTransactions: transactionEntities: ${transactionEntities}")
+            val smsIds = transactionEntities.map { it.originalSmsId.toInt() }
+            val originalSmsList = smsInbox.getSmsByIds(smsIds)?: List(transactionEntities.size){Sms("qwerty", "", "", System.currentTimeMillis())}
+            Log.d(TAG, "getAllTransactions: originalSmsList: $originalSmsList")
+            val transactionModel =  transactionEntities.zip(originalSmsList){transactionEntity, originalSms -> transactionEntity.toModel(originalSms) }
+            Log.d(TAG, "getAllTransactions: transactionModel: $transactionModel")
+            emit(transactionModel)
+        }
     }
 }

@@ -122,6 +122,7 @@ class TransactionalSmsClassifier @Inject constructor(
 
     override fun onComplete(filteredSms: List<Transaction>) {
         scope.launch {
+            Log.d(TAG, "Saving transactions: $filteredSms")
             context.appSettings.edit { settings ->
                 settings[LAST_PROCESSED_SMS] = try{
                     filteredSms.last().originalSms.date

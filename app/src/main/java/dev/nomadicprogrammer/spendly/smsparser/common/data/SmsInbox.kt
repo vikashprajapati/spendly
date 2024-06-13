@@ -73,7 +73,7 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
         return null
     }
 
-    override fun getSmsByIds(ids: List<Int>): List<Sms>? {
+    override fun getSmsByIds(ids: List<Int>): MutableList<Sms>? {
         val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)
 
         val selectionArgs = arrayOf(ids.toString())
@@ -83,7 +83,7 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
             questionmark.add("?")
         }
 
-
+        // TODO: Fix this query
         val cursor = context.contentResolver.query(
             Telephony.Sms.CONTENT_URI,
             projection,
@@ -91,6 +91,7 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
             selectionArgs,
             null
         )
+        Log.d(TAG, "cursor count: ${cursor?.count}")
         val smsList = mutableListOf<Sms>()
         cursor?.use {
             while (it.moveToFirst()) {
@@ -102,6 +103,6 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
             }
         }
 
-        return smsList
+        return smsList.takeIf { it.isNotEmpty() && it.size == ids.size }
     }
 }
