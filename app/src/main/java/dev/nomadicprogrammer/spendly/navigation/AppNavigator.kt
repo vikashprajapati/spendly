@@ -27,27 +27,27 @@ import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 @Composable
 fun AppNavigator(){
     val navigationController = rememberNavController()
+    val homeViewModel : HomeViewModel = hiltViewModel<HomeViewModel>()
 
     NavHost(navController = navigationController, startDestination = Screen.Home.route){
-        homeNavGraph(navigationController)
-        seeAllTransactions(navigationController)
+        homeNavGraph(navigationController, homeViewModel)
+        seeAllTransactions(homeViewModel)
     }
 }
 
-fun NavGraphBuilder.seeAllTransactions(navController: NavController){
+fun NavGraphBuilder.seeAllTransactions(homeViewModel: HomeViewModel){
     composable(Screen.SeeAllTransaction.route){
-        AllTransactions(navController)
+        AllTransactions(homeViewModel)
     }
 }
 
-fun NavGraphBuilder.homeNavGraph(navController: NavController){
+fun NavGraphBuilder.homeNavGraph(navController: NavController, homeViewModel: HomeViewModel){
     composable(Screen.Home.route){
         var isPermissionAvailable by remember { mutableStateOf(false) }
 
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
             isPermissionAvailable = it
         }
-        val homeViewModel : HomeViewModel = hiltViewModel<HomeViewModel>()
 
         Home(navController, name = "Vikash", isPermissionAvailable, homeViewModel)
         val context = LocalContext.current.applicationContext

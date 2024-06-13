@@ -29,8 +29,7 @@ import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
 @Composable
-fun AllTransactions(navController: NavController){
-    val homeViewModel : HomeViewModel = hiltViewModel()
+fun AllTransactions(homeViewModel: HomeViewModel){
     val uiState by homeViewModel.state.collectAsState()
     val customFilter = stringResource(id = ViewBy.entries.toTypedArray()[uiState.selectedTabIndex].resId)
     
@@ -44,9 +43,9 @@ fun AllTransactions(navController: NavController){
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
-
+        val transactionsToShow = uiState.currentViewTransactions
         LazyColumn() {
-            items(uiState.allTransactions) { transaction ->
+            items(transactionsToShow) { transaction ->
                 TransactionItemCard(transaction){
                     homeViewModel.onEvent(HomeEvent.TransactionSelected(transaction))
                 }

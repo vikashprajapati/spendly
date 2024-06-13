@@ -47,30 +47,30 @@ class HomeViewModel @Inject constructor(
                 getAllTransactionJob = viewModelScope.launch {
                     getAllTransactionsUseCase()
                         .collect{
+                            val sortedTransactions = it?.reversed() ?: emptyList()
                             Log.d(TAG, "All transactions: $it")
-                            _state.value = _state.value.copy(allTransactions = it ?: emptyList())
-//                            val takeFrom = DateUtils.Local.getPreviousDate(_state.value.currentViewBy.days)
-//                            transactionsViewBy = _state.value.allTransactions.filter {
-//                                // Todo: remove transaction date is null check
-//                                filterTransactionsByDate(it, takeFrom)
-//                            }
+                            _state.value = _state.value.copy(
+                                allTransactions = sortedTransactions,
+                                recentTransactions = sortedTransactions.take(5),
+                                todayTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(1)) },
+                                thisWeekTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(7)) },
+                                thisMonthTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(30)) }, // TODO: consider 30 or 31 or leap year,
+                                thisQuarterTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(90)) },
+                                thisHalfYearTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(180)) },
+                                thisYearTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(365)) },
+                                currentViewTransactions = currentViewTransactions(_state.value.currentViewBy)
+                            )
                         }
                 }
             }
 
             is HomeEvent.ViewBySelected -> {
                 viewModelScope.launch {
-//                    selectedViewBy = event.viewBy
-//                    selectedTabIndex = event.index
-//                    if (transactionViewByMap.containsKey(selectedViewBy)) {
-//                        transactionsViewBy = transactionViewByMap[selectedViewBy]!!
-//                    } else {
-//                        val takeFrom = DateUtils.Local.getPreviousDate(selectedViewBy.days)
-//                        transactionsViewBy = allTransactions.filter {
-//                            filterTransactionsByDate(it, takeFrom)
-//                        }
-//                        transactionViewByMap[selectedViewBy] = transactionsViewBy
-//                    }
+                    _state.value = _state.value.copy(
+                        currentViewBy = event.viewBy,
+                        selectedTabIndex = event.index,
+                        currentViewTransactions = currentViewTransactions(event.viewBy)
+                    )
                 }
             }
 
@@ -82,6 +82,15 @@ class HomeViewModel @Inject constructor(
 //                dialogTransactionSms.value = null
             }
         }
+    }
+
+    private fun currentViewTransactions(currentViewBy : ViewBy) = when(currentViewBy){
+        ViewBy.DAILY -> _state.value.todayTransaction
+        ViewBy.WEEKLY -> _state.value.thisWeekTransactions
+        ViewBy.MONTHLY -> _state.value.thisMonthTransactions
+        ViewBy.Quarter -> _state.value.thisQuarterTransactions
+        ViewBy.MidYear -> _state.value.thisHalfYearTransaction
+        ViewBy.Yearly -> _state.value.thisYearTransactions
     }
 
     private fun filterTransactionsByDate(

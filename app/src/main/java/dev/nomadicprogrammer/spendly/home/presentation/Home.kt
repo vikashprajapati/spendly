@@ -24,27 +24,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.R
-import dev.nomadicprogrammer.spendly.database.AppDatabase
-import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
-import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
 import dev.nomadicprogrammer.spendly.navigation.Screen
-import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
@@ -66,7 +59,6 @@ fun Home(
         viewModel.onEvent(HomeEvent.PageLoad)
     }
     val uiState by viewModel.state.collectAsState()
-    val recentTransactions = uiState.recentTransactions
 
     Column(modifier = Modifier
         .padding(16.dp)
@@ -103,7 +95,15 @@ fun Home(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TransactionSummaryChart(1000f, 12f, onChartClick = {})
+        val income = uiState.currentViewTransactions
+            .filter { it.type == TransactionType.CREDIT }
+            .sumOf { it.currencyAmount.amount }
+            .toFloat()
+        val expense = uiState.currentViewTransactions
+            .filter { it.type == TransactionType.DEBIT }
+            .sumOf { it.currencyAmount.amount }
+            .toFloat()
+        TransactionSummaryChart(income, expense, onChartClick = {})
 
         Spacer(modifier = Modifier.height(24.dp))
 
