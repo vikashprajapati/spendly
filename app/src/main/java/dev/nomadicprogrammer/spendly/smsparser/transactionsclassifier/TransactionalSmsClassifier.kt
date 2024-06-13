@@ -4,10 +4,16 @@ import android.content.Context
 import android.provider.Telephony
 import android.util.Log
 import androidx.datastore.preferences.core.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.LAST_PROCESSED_SMS
 import dev.nomadicprogrammer.spendly.base.appSettings
-import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.di.AmountParserQualifier
+import dev.nomadicprogrammer.spendly.smsparser.di.BankNameParserQualifier
+import dev.nomadicprogrammer.spendly.smsparser.di.ReceiverDetailsParserQualifier
+import dev.nomadicprogrammer.spendly.smsparser.di.SenderDetailsParserQualifier
+import dev.nomadicprogrammer.spendly.smsparser.di.TransactionDateParserQualifier
+import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
@@ -17,28 +23,28 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.CREDIT
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.DEBIT
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Calendar
+import javax.inject.Inject
 
 enum class SmsReadPeriod(val days : Int) {
     DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
 }
-class TransactionalSmsClassifier(
-    private val context: Context,
+class TransactionalSmsClassifier @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val regexProvider: RegexProvider = LocalRegexProvider(),
-    private val amountParser: Parser,
-    private val bankNameParser: Parser,
-    private val dateParser: Parser,
-    private val receiverDetailsParser : Parser,
-    private val senderDetailsParser : Parser,
-    private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
+    @AmountParserQualifier private val amountParser: Parser,
+    @BankNameParserQualifier private val bankNameParser: Parser,
+    @TransactionDateParserQualifier private val dateParser: Parser,
+    @ReceiverDetailsParserQualifier private val receiverDetailsParser : Parser,
+    @SenderDetailsParserQualifier private val senderDetailsParser : Parser,
+    private val saveTransactionUseCase : SaveTransactionsUseCase,
     private val scope : CoroutineScope
 ) : SmsUseCase<Transaction> {
     private val TAG = TransactionalSmsClassifier::class.simpleName
@@ -80,8 +86,8 @@ class TransactionalSmsClassifier(
 
     override fun filterMap(sms: Sms): Transaction? {
         val transactionType = when {
-            isDebitTransaction(sms) -> DEBIT
-            isCreditTransaction(sms) -> CREDIT
+            isDebitTransaction(sms) -> TransactionType.DEBIT
+            isCreditTransaction(sms) -> TransactionType.CREDIT
             else -> return null
         }
 
@@ -101,8 +107,8 @@ class TransactionalSmsClassifier(
             currencyAmount = currencyAmount,
             bank = bankName,
             transactionDate = transactionDate,
-            receivedFrom = if (transactionType == CREDIT) receiverDetailsParser.parse(sms.msgBody) else null,
-            transferredTo = if (transactionType == DEBIT) senderDetailsParser.parse(sms.msgBody) else null
+            receivedFrom = if (transactionType == TransactionType.CREDIT) receiverDetailsParser.parse(sms.msgBody) else null,
+            transferredTo = if (transactionType == TransactionType.DEBIT) senderDetailsParser.parse(sms.msgBody) else null
         )
     }
 
@@ -117,11 +123,16 @@ class TransactionalSmsClassifier(
     override fun onComplete(filteredSms: List<Transaction>) {
         scope.launch {
             context.appSettings.edit { settings ->
-                settings[LAST_PROCESSED_SMS] = filteredSms.last().originalSms.date
+                settings[LAST_PROCESSED_SMS] = try{
+                    filteredSms.last().originalSms.date
+                }catch (e: NoSuchElementException){
+                    Log.e(TAG, "No sms found to save last processed sms date", e)
+                    System.currentTimeMillis()
+                }
             }
             Log.d(TAG, "Filtered Sms: $filteredSms")
             this@TransactionalSmsClassifier.filteredSms = filteredSms
-            getAllTransactionsUseCase.saveTransactions(filteredSms.mapNotNull { it.mapToTransaction() })
+            saveTransactionUseCase(filteredSms)
         }
     }
 

@@ -2,8 +2,9 @@ package dev.nomadicprogrammer.spendly.smsparser.parsers
 
 import android.util.Log
 import java.util.regex.Pattern
+import javax.inject.Inject
 
-class ReceiverDetailsParser : Parser {
+class ReceiverDetailsParser @Inject constructor() : Parser {
     private val regex = "\\s(transfer|trf)\\sto\\b\\s(\\w+(\\s*\\w+)*)"
     private val pattern: Pattern = Pattern.compile(regex)
     override fun parse(text: String): String? {

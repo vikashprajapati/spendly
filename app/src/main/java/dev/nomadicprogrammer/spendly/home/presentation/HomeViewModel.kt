@@ -3,6 +3,7 @@ package dev.nomadicprogrammer.spendly.home.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
@@ -13,8 +14,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val spendAnalyserUseCase: SpendAnalyserUseCase,
     private val getAllTransactionsUseCase: GetAllTransactionsUseCase
 ) : ViewModel() {
@@ -41,16 +44,14 @@ class HomeViewModel(
                 Log.d(TAG, "PageLoad")
                 getAllTransactionJob?.cancel()
                 getAllTransactionJob = viewModelScope.launch {
-                    getAllTransactionsUseCase()
-                        .collect {
-                            Log.d(TAG, "All transactions: $it")
-                            _state.value = _state.value.copy(allTransactions = it ?: emptyList())
+                    val allTransactions = getAllTransactionsUseCase()
+                    Log.d(TAG, "All transactions: $allTransactions")
+                    _state.value = _state.value.copy(allTransactions = allTransactions ?: emptyList())
 //                            val takeFrom = DateUtils.Local.getPreviousDate(_state.value.currentViewBy.days)
 //                            transactionsViewBy = _state.value.allTransactions.filter {
 //                                // Todo: remove transaction date is null check
 //                                filterTransactionsByDate(it, takeFrom)
 //                            }
-                        }
                 }
             }
 

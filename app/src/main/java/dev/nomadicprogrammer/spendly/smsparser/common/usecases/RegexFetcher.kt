@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.smsparser.common.usecases
 
 import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
+import javax.inject.Inject
 
 interface RegexProvider {
     fun getRegex() : SmsRegex?
@@ -22,7 +23,7 @@ class NetworkRegexProvider : RegexProvider {
     }
 }
 
-class LocalRegexProvider : RegexProvider {
+class LocalRegexProvider @Inject constructor() : RegexProvider {
     override fun getRegex(): SmsRegex {
         return SmsRegex(
             positiveSenderRegex = "^[^+]{0,9}$",

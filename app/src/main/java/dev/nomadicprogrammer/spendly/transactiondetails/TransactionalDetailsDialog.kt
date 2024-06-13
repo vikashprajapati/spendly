@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.base.DateUtils
-import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
-import dev.nomadicprogrammer.spendly.home.data.TransactionType
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetails(
-    transactionalSms: TransactionSmsUiModel,
+    transactionalSms: Transaction,
     sheetState : SheetState,
     onDismiss : () -> Unit
 ) {
@@ -52,7 +52,7 @@ fun TransactionDetails(
                 )
 
                 Text(
-                    text = transactionalSms.type.value,
+                    text = transactionalSms.type.name,
                     color = if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier

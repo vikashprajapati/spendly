@@ -24,15 +24,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.nomadicprogrammer.spendly.home.data.TransactionSmsUiModel
-import dev.nomadicprogrammer.spendly.home.data.TransactionType
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
 import kotlin.random.Random
 
 @Composable
 fun TransactionItemCard(
-    transaction: TransactionSmsUiModel,
-    onTransactionClick : (TransactionSmsUiModel) -> Unit = {}
+    transaction: Transaction,
+    onTransactionClick : (Transaction) -> Unit = {}
 ){
     Log.d("TransactionItem", "Transaction: $transaction")
     val iconList = listOf(

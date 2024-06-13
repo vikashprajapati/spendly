@@ -1,6 +1,8 @@
 package dev.nomadicprogrammer.spendly.smsparser.parsers
 
-class BankNameParser : Parser {
+import javax.inject.Inject
+
+class BankNameParser @Inject constructor() : Parser {
     private val banks = mapOf(
         "ICICI" to "ICICI",
         "HDFC" to "HDFC",

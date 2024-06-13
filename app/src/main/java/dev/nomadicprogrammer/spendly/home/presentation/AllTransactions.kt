@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -27,21 +28,9 @@ import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTransactions(navController: NavController){
-    val backStackEntry = remember(navController.currentBackStackEntryAsState()) {
-        navController.getBackStackEntry(Screen.Home.route)
-    }
-    val homeViewModel : HomeViewModel = viewModel(
-        viewModelStoreOwner = backStackEntry,
-        key = "HomeViewModel",
-        factory = HomeViewModelFactory(
-            SpendAnalyserUseCase(LocalContext.current.applicationContext),
-            LocalContext.current.applicationContext
-            )
-
-    )
+    val homeViewModel : HomeViewModel = hiltViewModel()
     val uiState by homeViewModel.state.collectAsState()
     val customFilter = stringResource(id = ViewBy.entries.toTypedArray()[uiState.selectedTabIndex].resId)
     

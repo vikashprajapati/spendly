@@ -6,12 +6,13 @@ import java.io.Serializable
 
 const val DEFAULT_CURRENCY = "₹"
 
-
-const val DEBIT = "Debit"
-const val CREDIT = "Credit"
+enum class TransactionType{
+    DEBIT,
+    CREDIT
+}
 
 sealed class Transaction(
-    val type: String,
+    val type: TransactionType,
     open val transactionDate: String?,
     open val bankName: String? = null,
     open val currencyAmount: CurrencyAmount,
@@ -25,7 +26,7 @@ sealed class Transaction(
         override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms,
         override val category: String? = null
-    ) : Transaction(DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
+    ) : Transaction(TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
 
     data class Credit(
         override val transactionDate: String?,
@@ -34,11 +35,11 @@ sealed class Transaction(
         override val currencyAmount: CurrencyAmount,
         override val originalSms: Sms,
         override val category: String? = null
-    ) : Transaction(CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)
+    ) : Transaction(TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)
 
     companion object {
         fun create(
-            type: String,
+            type: TransactionType,
             sms: Sms,
             currencyAmount: CurrencyAmount,
             bank: String?,
@@ -46,17 +47,16 @@ sealed class Transaction(
             transferredTo: String? = null,
             receivedFrom: String? = null,
             category: String? = null
-        ): Transaction? {
+        ): Transaction {
             return when(type){
-                DEBIT -> Debit(
+                TransactionType.DEBIT -> Debit(
                     transactionDate = transactionDate, transferredTo = transferredTo, bankName = bank,
                     currencyAmount = currencyAmount, originalSms = sms, category = category
                 )
-                CREDIT -> Credit(
+                TransactionType.CREDIT -> Credit(
                     transactionDate = transactionDate, receivedFrom = receivedFrom, bankName = bank,
                     currencyAmount = currencyAmount, originalSms = sms, category = category
                 )
-                else -> null
             }
         }
     }

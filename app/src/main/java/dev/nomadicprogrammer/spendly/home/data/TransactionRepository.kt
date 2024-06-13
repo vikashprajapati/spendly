@@ -8,5 +8,5 @@ interface TransactionRepository {
 
     suspend fun saveTransactions(transactionalSms: List<Transaction>)
 
-    suspend fun getAllTransactions(): Flow<List<Transaction>?>
+    suspend fun getAllTransactions(): List<Transaction>?
 }

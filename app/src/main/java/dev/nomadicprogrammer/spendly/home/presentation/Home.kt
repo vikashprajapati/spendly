@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,13 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.database.AppDatabase
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
-import dev.nomadicprogrammer.spendly.home.data.mappers.TransactionMapper
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
@@ -175,21 +177,18 @@ fun RecentTransactions(
 
 @Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
 @Composable fun HomePreview() {
-    val viewModel = HomeViewModel(
-        SpendAnalyserUseCase(LocalContext.current.applicationContext),
-        GetAllTransactionsUseCase(LocalTransactionRepository(
-            AppDatabase.getInstance(LocalContext.current.applicationContext).transactionDao(),
-         TransactionMapper(SmsInbox(LocalContext.current.applicationContext)),
-            SmsInbox(LocalContext.current.applicationContext)
-        )))
-    Home(
-        rememberNavController(),
-        name = "John Doe", readSmsPermissionAvailable = true,
-        viewModel
-    )
-    LaunchedEffect(key1 = true){
-        viewModel.onEvent(HomeEvent.PageLoad)
-    }
+//    val backStackEntry = remember(navController.currentBackStackEntryAsState()) {
+//        navController.getBackStackEntry(Screen.Home.route)
+//    }
+//    val homeViewModel : HomeViewModel = viewModel(viewModelStoreOwner = backStackEntry, key = "HomeViewModel")
+//    Home(
+//        rememberNavController(),
+//        name = "John Doe", readSmsPermissionAvailable = true,
+//        homeViewModel
+//    )
+//    LaunchedEffect(key1 = true){
+//        homeViewModel.onEvent(HomeEvent.PageLoad)
+//    }
 }
 
 //@Preview(showBackground = true, showSystemUi = false)

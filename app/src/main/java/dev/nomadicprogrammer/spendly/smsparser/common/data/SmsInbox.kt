@@ -5,13 +5,19 @@ import android.content.Context
 import android.net.Uri
 import android.provider.Telephony
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SmsReadPeriod
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.TransactionalSmsClassifier
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
 
-class SmsInbox(val context: Context) : SmsDataSource {
+class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : SmsDataSource<Transaction> {
     private val TAG = SmsInbox::class.simpleName
 
     private fun getRangeFilter(range: Range): String {
@@ -19,7 +25,9 @@ class SmsInbox(val context: Context) : SmsDataSource {
     }
 
     @SuppressLint("Range")
-    override fun readSms(range : Range, sortOrder : String): Flow<Triple<Int, Int, Sms>>  = flow{
+    override fun <T> readSms(transactionalSmsClassifier: SmsUseCase<T>): Flow<Triple<Int, Int, Sms>> = flow{
+        val range = transactionalSmsClassifier.readSmsRange(SmsReadPeriod.Yearly)
+        val sortOrder = transactionalSmsClassifier.inboxReadSortOrder()
         val inboxUri = Uri.parse("content://sms/inbox")
         val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)
         val cursor = context.contentResolver.query(inboxUri, projection, getRangeFilter(range), null, sortOrder)

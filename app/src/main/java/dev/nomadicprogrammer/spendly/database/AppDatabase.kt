@@ -1,10 +1,7 @@
 package dev.nomadicprogrammer.spendly.database
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 
 @Database(entities = [TransactionEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
@@ -12,19 +9,5 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "SpendlyDB"
-
-        // For Singleton instantiation
-        @Volatile
-        private var instance: AppDatabase? = null
-
-        fun getInstance(context: Context): AppDatabase {
-            return instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    DATABASE_NAME
-                ).build() .also { instance = it }
-            }
-        }
     }
 }
