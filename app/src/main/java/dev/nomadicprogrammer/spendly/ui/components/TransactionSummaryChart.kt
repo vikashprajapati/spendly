@@ -112,12 +112,12 @@ fun TransactionSummaryChart(
                     .width(200.dp)
                     .height(200.dp),
             ) {
-                val total = remember { derivedStateOf { income + spent } }
-                val arcRatioIncome = remember { derivedStateOf { income/ total.value } }
-                val arcRatioSpent = remember { derivedStateOf { spent / total.value } }
+                val total = income + spent
+                val arcRatioIncome = income / total
+                val arcRatioSpent = spent / total
                 val slices = listOf(
-                    Slice(arcRatioIncome.value*360, incomeColor),
-                    Slice(arcRatioSpent.value*360, expenseColor),
+                    Slice(arcRatioIncome * 360, incomeColor),
+                    Slice(arcRatioSpent * 360, expenseColor),
                 )
 
                 PieChart(slices, useCenter = false, style = Stroke(width = 64f, cap = StrokeCap.Round))

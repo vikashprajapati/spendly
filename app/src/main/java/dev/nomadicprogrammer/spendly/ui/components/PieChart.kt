@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,18 +24,30 @@ fun PieChart(slices: List<Slice>, useCenter : Boolean = false, style : DrawStyle
 
     Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         canvasSize.value = size
-
-        slices.forEachIndexed { index, (value, _) ->
-            val sweepAngle = (value / slices.sumOf { it.value.toInt() }) * totalAngle
+        val totalValue = slices.sumOf { it.value.toInt() }
+        if (totalValue == 0) {
             drawArc(
-                color = slices[index].color,
+                color = Color.LightGray,
                 startAngle = startAngle,
-                sweepAngle = sweepAngle,
+                sweepAngle = totalAngle,
                 useCenter = useCenter,
                 size = canvasSize.value,
                 style = style,
             )
-            startAngle += sweepAngle
+        }else{
+            slices.forEach{ (value, color) ->
+                val sweepAngle = (value / totalValue) * totalAngle
+                Log.d("PieChart", "startAngle: $startAngle, sweepAngle: $sweepAngle")
+                drawArc(
+                    color = color,
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle,
+                    useCenter = useCenter,
+                    size = canvasSize.value,
+                    style = style,
+                )
+                startAngle += sweepAngle
+            }
         }
     }
 }
