@@ -29,11 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.navigation.Screen
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
@@ -174,38 +175,36 @@ fun RecentTransactions(
     }
 }
 
-@Preview(wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE, showBackground = true, showSystemUi = true)
-@Composable fun HomePreview() {
-//    val backStackEntry = remember(navController.currentBackStackEntryAsState()) {
-//        navController.getBackStackEntry(Screen.Home.route)
-//    }
-//    val homeViewModel : HomeViewModel = viewModel(viewModelStoreOwner = backStackEntry, key = "HomeViewModel")
-//    Home(
-//        rememberNavController(),
-//        name = "John Doe", readSmsPermissionAvailable = true,
-//        homeViewModel
-//    )
-//    LaunchedEffect(key1 = true){
-//        homeViewModel.onEvent(HomeEvent.PageLoad)
-//    }
-}
+@Preview(showBackground = true, showSystemUi = false)
+@Composable fun RecentPreview(){
+    val transactions= listOf(
+        Transaction.create(
+            TransactionType.DEBIT,
+            Sms("id", "", "", System.currentTimeMillis()),
+            CurrencyAmount("INR", 100.0),
+            "Amazon",
+            "12-12-2021",
+            "Amit",
+            "Sbi",
+            "Food"
+        ),
 
-//@Preview(showBackground = true, showSystemUi = false)
-//@Composable fun RecentPreview(){
-//    val transactions : MutableState<List<TransactionSmsUiModel>> = remember {
-//        mutableStateOf(
-//            listOf(
-//                TransactionSmsUiModel(
-//                    "debit", Sms("dfd", "Amazon", "Hello", System.currentTimeMillis()), CurrencyAmount("INR", 100.0), "", ""
-//                )!!
-//            )
-//        )
-//    }
-//    Column(modifier = Modifier.padding(16.dp)) {
-//        RecentTransactions(
-//            recentTransactions = transactions,
-//            onTransactionSmsClick = {},
-//            onSeeAllClick = {}
-//        )
-//    }
-//}
+                Transaction.create(
+                TransactionType.CREDIT,
+        Sms("id", "", "", System.currentTimeMillis()),
+        CurrencyAmount("INR", 200.0),
+        "Amazon",
+        "12-12-2021",
+        "Amit",
+        "Sbi",
+        "Food"
+    )
+    )
+    Column(modifier = Modifier.padding(16.dp)) {
+        RecentTransactions(
+            recentTransactions = transactions,
+            onTransactionSmsClick = {},
+            onSeeAllClick = {}
+        )
+    }
+}
