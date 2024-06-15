@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly
+package dev.nomadicprogrammer.spendly.smsparser.common.model
 
 enum class TransactionCategory {
     FOOD,

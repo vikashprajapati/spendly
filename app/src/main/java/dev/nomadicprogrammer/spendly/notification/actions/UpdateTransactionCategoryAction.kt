@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dev.nomadicprogrammer.spendly.TransactionCategory
+import dev.nomadicprogrammer.spendly.smsparser.common.model.TransactionCategory
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
