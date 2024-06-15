@@ -15,4 +15,7 @@ interface TransactionDao {
 
     @Query("SELECT * FROM TransactionEntity")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
+
+    @Query("UPDATE TransactionEntity SET category = :category WHERE transactionId = :transactionId")
+    suspend fun updateTransactionCategory(transactionId: String, category: String) : Int
 }
