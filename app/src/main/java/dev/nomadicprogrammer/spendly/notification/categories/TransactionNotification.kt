@@ -14,13 +14,10 @@ import kotlin.properties.Delegates
 
 class TransactionNotification(
     val transactionId: String,
-    val title: String
+    val title: String = "Transaction Detected"
 ) : Notification() {
-    private val TAG = TransactionNotification::class.java.simpleName
-
     override fun build(context: Context): android.app.Notification {
-        val categories = listOf("Food", "Transport", "Entertainment")
-        val actions = categories.map { createAction(context, it) }
+        val actions = TransactionCategoryProvider.categories.map { createAction(context, it) }
         val mainIntent = PendingIntent.getActivity(
             context,
             Random().nextInt(),

@@ -17,9 +17,9 @@ class LocalTransactionRepository @Inject constructor(
 ) : TransactionRepository {
     private val TAG = LocalTransactionRepository::class.java.simpleName
 
-    override suspend fun saveTransaction(transactionalSms: Transaction) {
+    override suspend fun saveTransaction(transactionalSms: Transaction) : Long {
         val transactionEntity = TransactionEntity.toEntity(transactionalSms)
-        transactionDao.insertTransaction(transactionEntity)
+        return transactionDao.insertTransaction(transactionEntity)
     }
 
     override suspend fun saveTransactions(transactionalSms: List<Transaction>) {

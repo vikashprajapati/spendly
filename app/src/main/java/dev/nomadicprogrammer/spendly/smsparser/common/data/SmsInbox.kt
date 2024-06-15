@@ -10,7 +10,6 @@ import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SmsReadPeriod
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.TransactionalSmsClassifier
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

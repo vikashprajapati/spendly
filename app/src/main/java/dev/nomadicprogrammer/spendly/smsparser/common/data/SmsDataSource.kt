@@ -1,9 +1,7 @@
 package dev.nomadicprogrammer.spendly.smsparser.common.data
 
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.TransactionalSmsClassifier
 import kotlinx.coroutines.flow.Flow
 
 interface SmsDataSource<T> {

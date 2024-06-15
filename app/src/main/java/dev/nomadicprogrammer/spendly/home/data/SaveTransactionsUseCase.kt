@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SaveTransactionsUseCase @Inject constructor(
     private val transactionEntityRepository: TransactionRepository
 ) {
-    suspend operator fun invoke(transaction: Transaction) {
+    suspend operator fun invoke(transaction: Transaction) : Long {
         return transactionEntityRepository.saveTransaction(transaction)
     }
 

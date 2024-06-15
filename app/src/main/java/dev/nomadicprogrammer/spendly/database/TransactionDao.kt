@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
     @Insert
-    suspend fun insertTransaction(transactionEntity: TransactionEntity)
+    suspend fun insertTransaction(transactionEntity: TransactionEntity) : Long
 
     @Insert
     suspend fun insertTransactions(transactionEntities: List<TransactionEntity>)

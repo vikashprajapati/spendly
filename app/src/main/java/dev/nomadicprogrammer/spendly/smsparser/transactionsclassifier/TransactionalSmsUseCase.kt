@@ -36,22 +36,16 @@ import javax.inject.Inject
 enum class SmsReadPeriod(val days : Int) {
     DAILY(1), WEEKLY(7), MONTHLY(31), Quarter(90), MidYear(180), Yearly(365)
 }
-class TransactionalSmsClassifier @Inject constructor(
+class TransactionalSmsUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
     private val regexProvider: RegexProvider = LocalRegexProvider(),
-    @AmountParserQualifier private val amountParser: Parser,
-    @BankNameParserQualifier private val bankNameParser: Parser,
-    @TransactionDateParserQualifier private val dateParser: Parser,
-    @ReceiverDetailsParserQualifier private val receiverDetailsParser : Parser,
-    @SenderDetailsParserQualifier private val senderDetailsParser : Parser,
+    private val transactionSmsClassifier: TransactionSmsClassifier,
     private val saveTransactionUseCase : SaveTransactionsUseCase,
     private val scope : CoroutineScope
 ) : SmsUseCase<Transaction> {
-    private val TAG = TransactionalSmsClassifier::class.simpleName
+    private val TAG = TransactionalSmsUseCase::class.simpleName
 
     private val personalSmsExclusionRegex by lazy { regexProvider.getRegex() ?: throw RegexFetchException("Regex not found") }
-    private val debitTransactionIdentifierRegex by lazy { regexProvider.getDebitTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
-    private val creditTransactionIdentifierRegex by lazy { regexProvider.getCreditTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
     private var filteredSms: List<Transaction> = emptyList()
 
     override fun getRegex(): SmsRegex {
@@ -85,39 +79,7 @@ class TransactionalSmsClassifier @Inject constructor(
     }
 
     override fun filterMap(sms: Sms): Transaction? {
-        val transactionType = when {
-            isDebitTransaction(sms) -> TransactionType.DEBIT
-            isCreditTransaction(sms) -> TransactionType.CREDIT
-            else -> return null
-        }
-
-        val currencyAmount = CurrencyAmount.parse(sms.msgBody, amountParser)?:run {
-            Log.d(TAG, "Currency amount not found in sms: ${sms.msgBody}, sms doesn't seems valid")
-            return null
-        }
-        val bankName = bankNameParser.parse(sms.msgBody)?:run {
-            Log.d(TAG, "Bank name not found in sms: ${sms.msgBody}, sms doesn't seems valid")
-            return null
-        }
-        val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
-
-        return Transaction.create(
-            type = transactionType,
-            sms = sms,
-            currencyAmount = currencyAmount,
-            bank = bankName,
-            transactionDate = transactionDate,
-            receivedFrom = if (transactionType == TransactionType.CREDIT) receiverDetailsParser.parse(sms.msgBody) else null,
-            transferredTo = if (transactionType == TransactionType.DEBIT) senderDetailsParser.parse(sms.msgBody) else null
-        )
-    }
-
-    private fun isDebitTransaction(sms: Sms): Boolean {
-        return debitTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
-    }
-
-    private fun isCreditTransaction(sms: Sms): Boolean {
-        return creditTransactionIdentifierRegex.isPositiveMsgBody(sms.msgBody)
+        return transactionSmsClassifier.classify(sms)
     }
 
     override fun onComplete(filteredSms: List<Transaction>) {
@@ -132,7 +94,7 @@ class TransactionalSmsClassifier @Inject constructor(
                 }
             }
             Log.d(TAG, "Filtered Sms: $filteredSms")
-            this@TransactionalSmsClassifier.filteredSms = filteredSms
+            this@TransactionalSmsUseCase.filteredSms = filteredSms
             saveTransactionUseCase(filteredSms)
         }
     }

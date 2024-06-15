@@ -4,7 +4,7 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Tran
 import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
-    suspend fun saveTransaction(transactionalSms: Transaction)
+    suspend fun saveTransaction(transactionalSms: Transaction) : Long
 
     suspend fun saveTransactions(transactionalSms: List<Transaction>)
 
