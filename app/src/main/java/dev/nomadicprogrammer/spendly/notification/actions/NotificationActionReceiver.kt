@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
-import dev.nomadicprogrammer.spendly.notification.actions.UpdateTransactionCategoryAction.Companion.ACTION_UPDATE_TRANSACTION_CATEGORY
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -15,13 +14,13 @@ class NotificationActionReceiver : BroadcastReceiver(){
     @Inject
     lateinit var updateTransactionCategoryAction: NotificationAction
 
-    private val actions  by lazy { mapOf(ACTION_UPDATE_TRANSACTION_CATEGORY to updateTransactionCategoryAction) }
-
     override fun onReceive(context: Context?, intent: Intent?) {
         Log.d(TAG, "onReceive: ${intent?.action}")
-        val action = intent?.action?:return
+        val action = intent?.action?.let { Actions.from(it) }?:return
         if (context != null) {
-            actions[action]?.invoke(intent)
+            when(action){
+                Actions.ACTION_UPDATE_TRANSACTION_CATEGORY -> updateTransactionCategoryAction(intent)
+            }
         }
     }
 }

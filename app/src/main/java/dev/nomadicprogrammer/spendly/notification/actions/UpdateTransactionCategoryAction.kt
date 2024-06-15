@@ -19,7 +19,8 @@ class UpdateTransactionCategoryAction @Inject constructor(
 ) : NotificationAction {
     private val TAG = UpdateTransactionCategoryAction::class.java.simpleName
     companion object{
-        const val ACTION_UPDATE_TRANSACTION_CATEGORY = "dev.nomadicprogrammer.spendly.UPDATE_TRANSACTION_CATEGORY"
+        const val INTENT_PARAM_TRANSACTION_ID = "transactionId"
+        const val INTENT_PARAM_TRANSACTION_CATEGORY = "transactionCategory"
     }
 
     override operator fun invoke(intent: Intent) {
@@ -46,8 +47,8 @@ class UpdateTransactionCategoryAction @Inject constructor(
     }
 
     private fun getIntentParams(intent: Intent?): Pair<String, String>? {
-        val transactionId = intent?.getStringExtra("transactionId") ?: return null
-        val category = intent.getStringExtra("transactionCategory") ?: TransactionCategory.OTHER.name
+        val transactionId = intent?.getStringExtra(INTENT_PARAM_TRANSACTION_ID) ?: return null
+        val category = intent.getStringExtra(INTENT_PARAM_TRANSACTION_CATEGORY) ?: TransactionCategory.OTHER.name
         Log.d(TAG, "TransactionId: $transactionId, Category: $category")
         return Pair(transactionId, category)
     }

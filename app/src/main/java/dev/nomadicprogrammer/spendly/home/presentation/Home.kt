@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.navigation.Screen
+import dev.nomadicprogrammer.spendly.notification.categories.TransactionNotification
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
@@ -118,10 +120,13 @@ fun Home(
             )
         }
 
+        val appContext = LocalContext.current.applicationContext
         RecentTransactions(
             uiState.recentTransactions,
             onTransactionSmsClick = {
-                viewModel.onEvent(HomeEvent.TransactionSelected(it))
+                val notification = TransactionNotification("1234", "Transaction Detected").build(appContext)
+                appContext.getSystemService(android.app.NotificationManager::class.java).notify(1234, notification)
+//                viewModel.onEvent(HomeEvent.TransactionSelected(it))
             },
             onSeeAllClick = {
                 navController.navigate(Screen.SeeAllTransaction.route)
@@ -189,16 +194,16 @@ fun RecentTransactions(
             "Food"
         ),
 
-                Transaction.create(
-                TransactionType.CREDIT,
-        Sms("id", "", "", System.currentTimeMillis()),
-        CurrencyAmount("INR", 200.0),
-        "Amazon",
-        "12-12-2021",
-        "Amit",
-        "Sbi",
-        "Food"
-    )
+        Transaction.create(
+            TransactionType.CREDIT,
+            Sms("id", "", "", System.currentTimeMillis()),
+            CurrencyAmount("INR", 200.0),
+            "Amazon",
+            "12-12-2021",
+            "Amit",
+            "Sbi",
+            "Food"
+        )
     )
     Column(modifier = Modifier.padding(16.dp)) {
         RecentTransactions(

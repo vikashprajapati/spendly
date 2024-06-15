@@ -14,7 +14,7 @@ class NotificationChannelManager : Initializer<Unit> {
     }
     private lateinit var notificationManager: NotificationManager
 
-    private fun createChannels(context: Context) {
+    fun createChannels(context: Context) {
         notificationManager = context.getSystemService(NotificationManager::class.java)
         createTransactionChannel()
         createGeneralChannel()
