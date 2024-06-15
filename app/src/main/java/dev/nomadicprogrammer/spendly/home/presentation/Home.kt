@@ -24,8 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,6 +36,7 @@ import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
@@ -108,15 +107,15 @@ fun Home(
         Spacer(modifier = Modifier.height(24.dp))
 
         val sheetState = rememberModalBottomSheetState()
-//        if (viewModel.dialogTransactionSms.value != null) {
-//                TransactionDetails(
-//                    viewModel.dialogTransactionSms.value!!,
-//                    sheetState = sheetState,
-//                    onDismiss = {
-//                        viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
-//                    }
-//                )
-//        }
+        if (uiState.dialogTransactionSms != null) {
+            TransactionDetails(
+                uiState.dialogTransactionSms!!,
+                sheetState = sheetState,
+                onDismiss = {
+                    viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+                }
+            )
+        }
 
         RecentTransactions(
             uiState.recentTransactions,

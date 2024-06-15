@@ -75,11 +75,11 @@ class HomeViewModel @Inject constructor(
             }
 
             is HomeEvent.TransactionSelected -> {
-//                dialogTransactionSms.value = event.transactionalSms
+                _state.value = _state.value.copy(dialogTransactionSms = event.transactionalSms)
             }
 
             is HomeEvent.TransactionDialogDismissed -> {
-//                dialogTransactionSms.value = null
+                _state.value = _state.value.copy(dialogTransactionSms = null)
             }
         }
     }

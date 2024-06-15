@@ -14,6 +14,7 @@ data class HomeScreenState(
     val thisYearTransactions: List<Transaction> = mutableListOf(),
     val currentViewBy : ViewBy = ViewBy.DAILY,
     val currentViewTransactions : List<Transaction> = mutableListOf(),
-    val selectedTabIndex : Int = 0
+    val selectedTabIndex : Int = 0,
+    val dialogTransactionSms : Transaction? = null
 ){
 }
