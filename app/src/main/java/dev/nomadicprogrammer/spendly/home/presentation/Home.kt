@@ -120,13 +120,10 @@ fun Home(
             )
         }
 
-        val appContext = LocalContext.current.applicationContext
         RecentTransactions(
             uiState.recentTransactions,
             onTransactionSmsClick = {
-                val notification = TransactionNotification("1234", "Transaction Detected").build(appContext)
-                appContext.getSystemService(android.app.NotificationManager::class.java).notify(1234, notification)
-//                viewModel.onEvent(HomeEvent.TransactionSelected(it))
+                viewModel.onEvent(HomeEvent.TransactionSelected(it))
             },
             onSeeAllClick = {
                 navController.navigate(Screen.SeeAllTransaction.route)

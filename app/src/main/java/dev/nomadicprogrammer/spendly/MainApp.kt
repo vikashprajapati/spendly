@@ -10,6 +10,5 @@ class MainApp : Application() {
     val context : Context = this
     override fun onCreate() {
         super.onCreate()
-        NotificationChannelManager().createChannels(this)
     }
 }

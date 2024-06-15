@@ -7,7 +7,7 @@ interface NotificationAction {
 }
 
 enum class Actions(val actionName: String) {
-    ACTION_UPDATE_TRANSACTION_CATEGORY("UPDATE_TRANSACTION_CATEGORY");
+    ACTION_UPDATE_TRANSACTION_CATEGORY("dev.nomadicprogrammer.spendly.notification.actions.updateTransactionCategory");
 
     companion object {
         fun from(actionName: String): Actions? {

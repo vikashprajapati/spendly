@@ -5,6 +5,8 @@
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_SMS"/>
 
     <application
@@ -28,16 +30,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".notification.actions.NotificationActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="dev.nomadicprogrammer.spendly.notification.actions.updateTransactionCategory"/>
+            </intent-filter>
+        </receiver>
 
-<!--        <provider-->
-<!--            android:name="androidx.startup.InitializationProvider"-->
-<!--            android:authorities="${applicationId}.androidx-startup"-->
-<!--            android:exported="false"-->
-<!--            tools:node="merge">-->
-<!--            <meta-data-->
-<!--                android:name="dev.nomadicprogrammer.spendly.notification.NotificationChannelManager"-->
-<!--                android:value="androidx.startup" />-->
-<!--        </provider>-->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="dev.nomadicprogrammer.spendly.notification.NotificationChannelManager"
+                android:value="androidx.startup" />
+        </provider>
     </application>
 
 </manifest>
