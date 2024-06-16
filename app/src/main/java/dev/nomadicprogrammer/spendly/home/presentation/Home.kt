@@ -39,7 +39,7 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
+import dev.nomadicprogrammer.spendly.transaction.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart

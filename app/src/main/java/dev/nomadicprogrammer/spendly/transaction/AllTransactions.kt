@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.home.presentation
+package dev.nomadicprogrammer.spendly.transaction
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,19 +12,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.nomadicprogrammer.spendly.R
-import dev.nomadicprogrammer.spendly.navigation.Screen
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
-import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
+import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
+import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
+import dev.nomadicprogrammer.spendly.transaction.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 

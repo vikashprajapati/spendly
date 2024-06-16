@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transactiondetails
+package dev.nomadicprogrammer.spendly.transaction.transactiondetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
