@@ -9,5 +9,5 @@ interface SmsDataSource<T> {
 
     fun getSmsById(id: Int) : Sms?
 
-    fun getSmsByIds(ids: List<Int>) : List<Sms>?
+    fun getSmsByIds(ids: List<Int>) : List<Sms?>?
 }

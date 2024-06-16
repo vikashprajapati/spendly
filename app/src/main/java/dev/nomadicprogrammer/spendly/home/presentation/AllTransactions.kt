@@ -28,6 +28,7 @@ import dev.nomadicprogrammer.spendly.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTransactions(homeViewModel: HomeViewModel){
     val uiState by homeViewModel.state.collectAsState()
@@ -53,14 +54,14 @@ fun AllTransactions(homeViewModel: HomeViewModel){
         }
     }
 
-//    val sheetState = rememberModalBottomSheetState()
-//    if (homeViewModel.dialogTransactionSms.value != null) {
-//        TransactionDetails(
-//            homeViewModel.dialogTransactionSms.value!!,
-//            sheetState = sheetState,
-//            onDismiss = {
-//                homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
-//            }
-//        )
-//    }
+    val sheetState = rememberModalBottomSheetState()
+    if (uiState.dialogTransactionSms != null) {
+        TransactionDetails(
+            uiState.dialogTransactionSms!!,
+            sheetState = sheetState,
+            onDismiss = {
+                homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+            }
+        )
+    }
 }

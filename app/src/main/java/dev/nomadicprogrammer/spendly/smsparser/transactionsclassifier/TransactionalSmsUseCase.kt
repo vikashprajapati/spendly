@@ -84,6 +84,9 @@ class TransactionalSmsUseCase @Inject constructor(
 
     override fun onComplete(filteredSms: List<Transaction>) {
         scope.launch {
+            if (filteredSms.isEmpty()) {
+                return@launch
+            }
             Log.d(TAG, "Saving transactions: $filteredSms")
             context.appSettings.edit { settings ->
                 settings[LAST_PROCESSED_SMS] = try{

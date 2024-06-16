@@ -4,6 +4,7 @@ import android.util.Log
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.database.TransactionEntity
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsDataSource
+import dev.nomadicprogrammer.spendly.smsparser.common.model.DEFAULT_UNDEFINED_SMS
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import kotlinx.coroutines.flow.Flow
@@ -31,9 +32,12 @@ class LocalTransactionRepository @Inject constructor(
         transactionDao.getAllTransactions().collect{ transactionEntities->
             Log.d(TAG, "getAllTransactions: transactionEntities size: ${transactionEntities.size}")
             val smsIds = transactionEntities.map { it.originalSmsId.toInt() }
-            val originalSmsList = smsInbox.getSmsByIds(smsIds)?: List(transactionEntities.size){Sms("qwerty", "", "", System.currentTimeMillis())}
+            val originalSmsList = smsInbox.getSmsByIds(smsIds)?: List(transactionEntities.size){DEFAULT_UNDEFINED_SMS}
+            Log.d(TAG, "getAllTransactions: originalSmsList: ${originalSmsList}")
             Log.d(TAG, "getAllTransactions: originalSmsList: ${originalSmsList.size}")
-            val transactionModel =  transactionEntities.zip(originalSmsList){transactionEntity, originalSms -> transactionEntity.toModel(originalSms) }
+            val transactionModel =  transactionEntities.zip(originalSmsList){transactionEntity, originalSms ->
+                transactionEntity.toModel(originalSms?:DEFAULT_UNDEFINED_SMS)
+            }
             Log.d(TAG, "getAllTransactions: transactionModel: $transactionModel")
             emit(transactionModel)
         }

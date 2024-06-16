@@ -72,36 +72,7 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
         return null
     }
 
-    override fun getSmsByIds(ids: List<Int>): MutableList<Sms>? {
-        val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)
-
-        val selectionArgs = arrayOf(ids.toString())
-
-        val questionmark = mutableListOf<String>()
-        for(element in selectionArgs){
-            questionmark.add("?")
-        }
-
-        // TODO: Fix this query
-        val cursor = context.contentResolver.query(
-            Telephony.Sms.CONTENT_URI,
-            projection,
-            "${Telephony.Sms._ID} IN (${questionmark.joinToString(",")})",
-            selectionArgs,
-            null
-        )
-        Log.d(TAG, "cursor count: ${cursor?.count}")
-        val smsList = mutableListOf<Sms>()
-        cursor?.use {
-            while (it.moveToFirst()) {
-                val smsInboxId = it.getString(it.getColumnIndex(Telephony.Sms._ID))
-                val senderId = it.getString(it.getColumnIndex(Telephony.Sms.ADDRESS))
-                val body = it.getString(it.getColumnIndex(Telephony.Sms.BODY))
-                val date = it.getLong(it.getColumnIndex(Telephony.Sms.DATE))
-                smsList.add(Sms(smsInboxId, senderId, body, date))
-            }
-        }
-
-        return smsList.takeIf { it.isNotEmpty() && it.size == ids.size }
+    override fun getSmsByIds(ids: List<Int>): List<Sms?> {
+        return ids.map { getSmsById(it) }
     }
 }
