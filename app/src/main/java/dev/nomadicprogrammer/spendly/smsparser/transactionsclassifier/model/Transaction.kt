@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
 
+import androidx.room.util.copy
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import java.io.Serializable
@@ -12,6 +13,7 @@ enum class TransactionType{
 }
 
 sealed class Transaction(
+    open val id : String?= null,
     val type: TransactionType,
     open val transactionDate: String?,
     open val bankName: String? = null,
@@ -19,26 +21,9 @@ sealed class Transaction(
     open val originalSms: Sms,
     open val category : String? = null
 ) : Serializable{
-    data class Debit(
-        override val transactionDate: String?,
-        val transferredTo: String?,
-        override val bankName: String? = null,
-        override val currencyAmount: CurrencyAmount,
-        override val originalSms: Sms,
-        override val category: String? = null
-    ) : Transaction(TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
-
-    data class Credit(
-        override val transactionDate: String?,
-        val receivedFrom: String?,
-        override val bankName: String? = null,
-        override val currencyAmount: CurrencyAmount,
-        override val originalSms: Sms,
-        override val category: String? = null
-    ) : Transaction(TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)
-
     companion object {
         fun create(
+            id : String?,
             type: TransactionType,
             sms: Sms,
             currencyAmount: CurrencyAmount,
@@ -50,10 +35,12 @@ sealed class Transaction(
         ): Transaction {
             return when(type){
                 TransactionType.DEBIT -> Debit(
+                    id= id,
                     transactionDate = transactionDate, transferredTo = transferredTo, bankName = bank,
                     currencyAmount = currencyAmount, originalSms = sms, category = category
                 )
                 TransactionType.CREDIT -> Credit(
+                    id = id,
                     transactionDate = transactionDate, receivedFrom = receivedFrom, bankName = bank,
                     currencyAmount = currencyAmount, originalSms = sms, category = category
                 )
@@ -61,3 +48,23 @@ sealed class Transaction(
         }
     }
 }
+
+data class Debit(
+    override val id: String?,
+    override val transactionDate: String?,
+    val transferredTo: String?,
+    override val bankName: String? = null,
+    override val currencyAmount: CurrencyAmount,
+    override val originalSms: Sms,
+    override val category: String? = null
+) : Transaction(id, TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
+
+data class Credit(
+    override val id: String?,
+    override val transactionDate: String?,
+    val receivedFrom: String?,
+    override val bankName: String? = null,
+    override val currencyAmount: CurrencyAmount,
+    override val originalSms: Sms,
+    override val category: String? = null
+) : Transaction(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)

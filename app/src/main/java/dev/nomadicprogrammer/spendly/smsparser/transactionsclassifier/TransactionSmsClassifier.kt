@@ -1,8 +1,6 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
-import android.content.Context
 import android.util.Log
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
@@ -18,6 +16,7 @@ import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import javax.inject.Inject
+import kotlin.random.Random
 
 class TransactionSmsClassifier @Inject constructor(
     private val regexProvider: RegexProvider = LocalRegexProvider(),
@@ -50,6 +49,7 @@ class TransactionSmsClassifier @Inject constructor(
         val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
 
         return Transaction.create(
+            id = Random.nextInt().toString(),
             type = transactionType,
             sms = sms,
             currencyAmount = currencyAmount,

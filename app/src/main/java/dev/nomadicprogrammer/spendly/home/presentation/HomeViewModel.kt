@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
+import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val spendAnalyserUseCase: SpendAnalyserUseCase,
-    private val getAllTransactionsUseCase: GetAllTransactionsUseCase
+    private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
+    private val updateTransactionsUseCase: UpdateTransactionsUseCase
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
@@ -36,7 +39,7 @@ class HomeViewModel @Inject constructor(
 
     private fun launchClassifier(){
         transactionClassifierJob?.cancel()
-        transactionClassifierJob = viewModelScope.launch { spendAnalyserUseCase() }
+        transactionClassifierJob = viewModelScope.launch(Dispatchers.IO) { spendAnalyserUseCase() }
     }
 
     fun onEvent(event: HomeEvent) {
@@ -44,7 +47,7 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.PageLoad -> {
                 Log.d(TAG, "PageLoad")
                 getAllTransactionJob?.cancel()
-                getAllTransactionJob = viewModelScope.launch {
+                getAllTransactionJob = viewModelScope.launch(Dispatchers.IO) {
                     getAllTransactionsUseCase()
                         .collect{
                             val sortedTransactions = it?.reversed() ?: emptyList()
@@ -81,6 +84,13 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.TransactionDialogDismissed -> {
                 _state.value = _state.value.copy(dialogTransactionSms = null)
             }
+
+            is HomeEvent.TransactionUpdate -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val rowsUpdated = updateTransactionsUseCase(event.transaction)
+                    Log.d(TAG, "Rows updated: $rowsUpdated")
+                }
+            }
         }
     }
 
@@ -102,6 +112,7 @@ class HomeViewModel @Inject constructor(
     } ?: false
 }
 
+
 sealed class HomeEvent{
     data object PageLoad : HomeEvent()
     data class ViewBySelected(val viewBy: ViewBy,val index : Int) : HomeEvent()
@@ -109,4 +120,6 @@ sealed class HomeEvent{
     data class TransactionSelected(val transactionalSms: Transaction) : HomeEvent()
 
     data object TransactionDialogDismissed : HomeEvent()
+
+    data class TransactionUpdate(val transaction : Transaction) : HomeEvent()
 }

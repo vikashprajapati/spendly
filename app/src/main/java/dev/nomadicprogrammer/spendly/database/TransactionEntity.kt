@@ -35,6 +35,7 @@ data class TransactionEntity(
 
     fun toModel(originalSms : Sms): Transaction {
         return Transaction.create(
+            id = transactionId.toString(),
             type = TransactionType.valueOf(type),
             transactionDate = transactionDate,
             bank = bankName,

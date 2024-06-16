@@ -26,7 +26,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.navigation.Screen
-import dev.nomadicprogrammer.spendly.notification.categories.TransactionNotification
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
@@ -116,6 +114,9 @@ fun Home(
                 sheetState = sheetState,
                 onDismiss = {
                     viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+                },
+                onUpdateClick = {
+                    viewModel.onEvent(HomeEvent.TransactionUpdate(it))
                 }
             )
         }
@@ -181,6 +182,7 @@ fun RecentTransactions(
 @Composable fun RecentPreview(){
     val transactions= listOf(
         Transaction.create(
+            id = "dfd",
             TransactionType.DEBIT,
             Sms("id", "", "", System.currentTimeMillis()),
             CurrencyAmount("INR", 100.0),
@@ -192,6 +194,7 @@ fun RecentTransactions(
         ),
 
         Transaction.create(
+            "idfd",
             TransactionType.CREDIT,
             Sms("id", "", "", System.currentTimeMillis()),
             CurrencyAmount("INR", 200.0),

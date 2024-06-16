@@ -55,6 +55,9 @@ fun AllTransactions(homeViewModel: HomeViewModel){
             sheetState = sheetState,
             onDismiss = {
                 homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+            },
+            onUpdateClick = {
+//                homeViewModel.onEvent(HomeEvent.TransactionUpdateClicked)
             }
         )
     }

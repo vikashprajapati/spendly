@@ -42,4 +42,8 @@ class LocalTransactionRepository @Inject constructor(
             emit(transactionModel)
         }
     }
+
+    override suspend fun updateTransaction(transaction: Transaction): Int {
+        return transactionDao.updateTransactionCategory(transaction.id!!, transaction.category!!)
+    }
 }

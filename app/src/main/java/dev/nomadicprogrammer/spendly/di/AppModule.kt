@@ -14,6 +14,7 @@ import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
+import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
 import javax.inject.Singleton
 
 @Module
@@ -45,5 +46,11 @@ object AppModule {
     @Provides
     fun getAllTransactionUseCase(transactionRepository: TransactionRepository) : GetAllTransactionsUseCase{
         return GetAllTransactionsUseCase(transactionRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun updateTransactionUseCase(transactionRepository: TransactionRepository) : UpdateTransactionsUseCase{
+        return UpdateTransactionsUseCase(transactionRepository)
     }
 }
