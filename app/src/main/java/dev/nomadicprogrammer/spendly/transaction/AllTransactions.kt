@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.transaction
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.R
@@ -50,6 +52,7 @@ fun AllTransactions(homeViewModel: HomeViewModel){
 
     val sheetState = rememberModalBottomSheetState()
     if (uiState.dialogTransactionSms != null) {
+        val context = LocalContext.current
         TransactionDetails(
             uiState.dialogTransactionSms!!,
             sheetState = sheetState,
@@ -57,7 +60,9 @@ fun AllTransactions(homeViewModel: HomeViewModel){
                 homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
             },
             onUpdateClick = {
-//                homeViewModel.onEvent(HomeEvent.TransactionUpdateClicked)
+                homeViewModel.onEvent(HomeEvent.TransactionUpdate(it))
+                Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
+                // TODO: show a snackbar using proper state management
             }
         )
     }
