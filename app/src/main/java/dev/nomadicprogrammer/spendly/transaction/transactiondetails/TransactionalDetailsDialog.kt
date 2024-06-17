@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.smsparser.common.model.TransactionCategory
@@ -36,6 +37,7 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Cred
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.ui.components.TransactionCategoriesGrid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,50 +140,5 @@ fun TransactionDetails(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun TransactionCategoriesGrid(
-    tagCategories: List<String> = TransactionCategory.entries.map { it.name },
-    selectedCategory : String?,
-    onCategorySelected : (String) -> Unit
-) {
-    LazyVerticalStaggeredGrid(
-        modifier = Modifier.padding(vertical = 8.dp),
-        columns = StaggeredGridCells.Adaptive(90.dp),
-        verticalItemSpacing = 8.dp,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(tagCategories.size) { index ->
-            val backgroundColor = if (selectedCategory != null && selectedCategory == tagCategories[index])
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.secondaryContainer
-            Box(
-                modifier = Modifier
-                    .background(
-                        backgroundColor,
-                        MaterialTheme.shapes.small
-                    )
-                    .clickable { onCategorySelected(tagCategories[index]) }
-                    .padding(8.dp)
-                    .width(IntrinsicSize.Min)
-            ) {
-                Text(
-                    text = tagCategories[index],
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun TransactionCategoriesGridPreview() {
-    TransactionCategoriesGrid(selectedCategory = TransactionCategory.ENTERTAINMENT.name) {
-
     }
 }

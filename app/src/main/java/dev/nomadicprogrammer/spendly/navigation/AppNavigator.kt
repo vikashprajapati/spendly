@@ -20,21 +20,29 @@ import dev.nomadicprogrammer.spendly.checkAndRequestPermission
 import dev.nomadicprogrammer.spendly.transaction.AllTransactions
 import dev.nomadicprogrammer.spendly.home.presentation.Home
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
+import dev.nomadicprogrammer.spendly.transaction.CreateTransaction
 
 @Composable
 fun AppNavigator(){
     val navigationController = rememberNavController()
     val homeViewModel : HomeViewModel = hiltViewModel<HomeViewModel>()
 
-    NavHost(navController = navigationController, startDestination = Screen.Home.route){
+    NavHost(navController = navigationController, startDestination = Screen.NewTransaction.route){
         homeNavGraph(navigationController, homeViewModel)
         seeAllTransactions(homeViewModel)
+        newTransaction()
     }
 }
 
 fun NavGraphBuilder.seeAllTransactions(homeViewModel: HomeViewModel){
     composable(Screen.SeeAllTransaction.route){
         AllTransactions(homeViewModel)
+    }
+}
+
+fun NavGraphBuilder.newTransaction(){
+    composable(Screen.NewTransaction.route){
+        CreateTransaction()
     }
 }
 
