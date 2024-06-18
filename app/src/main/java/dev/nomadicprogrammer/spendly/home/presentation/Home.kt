@@ -14,11 +14,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -62,78 +65,89 @@ fun Home(
     }
     val uiState by viewModel.state.collectAsState()
 
-    Column(modifier = Modifier
-        .padding(16.dp)
+    Scaffold(
+        floatingActionButton = { FloatingActionButton(onClick = {
+            navController.navigate(Screen.NewTransaction.route)
+        }) {
+            Icon(
+                imageVector = Icons.Outlined.Add,
+                contentDescription = "Add new transaction"
+            )
+        } }
     ) {
-        Text(
-            text = stringResource(id = R.string.greeting_hello),
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Text(
-            text = name,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight(800)
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        val selectedTab = uiState.selectedTabIndex
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(modifier = Modifier
+            .padding(16.dp)
         ) {
-            items(ViewBy.entries.toTypedArray().indices.last){ index ->
-                val tab = ViewBy.entries[index]
-                TabButton(
-                    isSelected = index == selectedTab, text = stringResource(id = tab.resId),
-                    modifier = Modifier.padding(end = 8.dp),
-                ) {
-                    viewModel.onEvent(HomeEvent.ViewBySelected(tab, index))
+            Text(
+                text = stringResource(id = R.string.greeting_hello),
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Text(
+                text = name,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight(800)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            val selectedTab = uiState.selectedTabIndex
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items(ViewBy.entries.toTypedArray().indices.last){ index ->
+                    val tab = ViewBy.entries[index]
+                    TabButton(
+                        isSelected = index == selectedTab, text = stringResource(id = tab.resId),
+                        modifier = Modifier.padding(end = 8.dp),
+                    ) {
+                        viewModel.onEvent(HomeEvent.ViewBySelected(tab, index))
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        val income = uiState.currentViewTransactions
-            .filter { it.type == TransactionType.CREDIT }
-            .sumOf { it.currencyAmount.amount }
-            .toFloat()
-        val expense = uiState.currentViewTransactions
-            .filter { it.type == TransactionType.DEBIT }
-            .sumOf { it.currencyAmount.amount }
-            .toFloat()
-        TransactionSummaryChart(income, expense, onChartClick = {})
+            val income = uiState.currentViewTransactions
+                .filter { it.type == TransactionType.CREDIT }
+                .sumOf { it.currencyAmount.amount }
+                .toFloat()
+            val expense = uiState.currentViewTransactions
+                .filter { it.type == TransactionType.DEBIT }
+                .sumOf { it.currencyAmount.amount }
+                .toFloat()
+            TransactionSummaryChart(income, expense, onChartClick = {})
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        val sheetState = rememberModalBottomSheetState()
-        val context = LocalContext.current
-        if (uiState.dialogTransactionSms != null) {
-            TransactionDetails(
-                uiState.dialogTransactionSms!!,
-                sheetState = sheetState,
-                onDismiss = {
-                    viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+            val sheetState = rememberModalBottomSheetState()
+            val context = LocalContext.current
+            if (uiState.dialogTransactionSms != null) {
+                TransactionDetails(
+                    uiState.dialogTransactionSms!!,
+                    sheetState = sheetState,
+                    onDismiss = {
+                        viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
+                    },
+                    onUpdateClick = {
+                        viewModel.onEvent(HomeEvent.TransactionUpdate(it))
+                        Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+
+            RecentTransactions(
+                uiState.recentTransactions,
+                onTransactionSmsClick = {
+                    viewModel.onEvent(HomeEvent.TransactionSelected(it))
                 },
-                onUpdateClick = {
-                    viewModel.onEvent(HomeEvent.TransactionUpdate(it))
-                    Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
+                onSeeAllClick = {
+                    navController.navigate(Screen.SeeAllTransaction.route)
                 }
             )
         }
-
-        RecentTransactions(
-            uiState.recentTransactions,
-            onTransactionSmsClick = {
-                viewModel.onEvent(HomeEvent.TransactionSelected(it))
-            },
-            onSeeAllClick = {
-                navController.navigate(Screen.SeeAllTransaction.route)
-            }
-        )
     }
 }
 
