@@ -30,7 +30,7 @@ fun AppNavigator(){
     NavHost(navController = navigationController, startDestination = Screen.Home.route){
         homeNavGraph(navigationController, homeViewModel)
         seeAllTransactions(homeViewModel)
-        newTransaction()
+        newTransaction(navigationController)
     }
 }
 
@@ -40,9 +40,9 @@ fun NavGraphBuilder.seeAllTransactions(homeViewModel: HomeViewModel){
     }
 }
 
-fun NavGraphBuilder.newTransaction(){
+fun NavGraphBuilder.newTransaction(navController: NavController){
     composable(Screen.NewTransaction.route){
-        CreateTransaction()
+        CreateTransaction(navController)
     }
 }
 

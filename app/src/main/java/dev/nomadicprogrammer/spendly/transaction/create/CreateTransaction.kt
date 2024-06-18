@@ -43,11 +43,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.model.DEFAULT_UNDEFINED_SMS
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.ui.components.TransactionCategoriesGrid
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTransaction() {
+fun CreateTransaction(navController: NavController) {
     val viewModel : CreateTransactionViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -56,7 +63,7 @@ fun CreateTransaction() {
     val toastMessage = viewModel.toastMessage.collectAsState(initial = null, coroutineScope.coroutineContext)
     if (toastMessage.value != null){
         Toast.makeText(context, toastMessage.value, Toast.LENGTH_SHORT).show()
-        viewModel.onEvent(CreateTransactionEvents.clearToastMessage)
+        viewModel.onEvent(CreateTransactionEvents.ClearToastMessage)
     }
 
     Scaffold() {
@@ -65,13 +72,15 @@ fun CreateTransaction() {
                 .background(
                     color = MaterialTheme.colorScheme.background
                 )
-                .padding(24.dp)
+                .padding(it)
         ) {
             Text(
                 text = "Create Transaction",
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
+            var amount by rememberSaveable { mutableStateOf(state.value.transactionAmount) }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -79,7 +88,6 @@ fun CreateTransaction() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ){
-                var amount by rememberSaveable { mutableStateOf(state.value.transactionAmount) }
                 Text(
                     text = "Enter Amount",
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -113,15 +121,16 @@ fun CreateTransaction() {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            var selectedTransactionType by rememberSaveable { mutableStateOf("expense") }
-            SpendSelector(selectedTransactionType){
-                selectedTransactionType = it
+            var selectedTransactionType by rememberSaveable { mutableStateOf(state.value.transactionType) }
+            SpendSelector(selectedTransactionType){type ->
+                selectedTransactionType = type
             }
             Spacer(modifier = Modifier.height(16.dp))
 
+            var secondParty by rememberSaveable { mutableStateOf("") }
+
             Row {
-                val secondPartyLabel = if (selectedTransactionType == "expense") "Transferred To" else "Received From"
-                var secondParty by rememberSaveable { mutableStateOf("") }
+                val secondPartyLabel = if (selectedTransactionType == TransactionType.DEBIT) "Transferred To" else "Received From"
                 TextField(
                     value = secondParty,
                     onValueChange = { secondParty = it },
@@ -129,7 +138,7 @@ fun CreateTransaction() {
                         .weight(1f)
                         .padding(vertical = 16.dp),
                     label = { Text(secondPartyLabel) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     singleLine = true,
                     shape = MaterialTheme.shapes.medium,
                     colors = TextFieldDefaults.colors(
@@ -158,7 +167,10 @@ fun CreateTransaction() {
                 selectedCategory.value = it
             }
 
-            val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = System.currentTimeMillis(),
+                initialDisplayMode = DisplayMode.Input
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Enter Transaction Date",
@@ -175,7 +187,21 @@ fun CreateTransaction() {
 
             Button(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = { /*viewModel.onEvent(CreateTransactionEvents.onCreateTransactionClicked())*/  },
+                onClick = {
+                    val transaction = Transaction.create(
+                        id = Random.nextInt().toString(),
+                        type = selectedTransactionType,
+                        sms = DEFAULT_UNDEFINED_SMS,
+                        currencyAmount = CurrencyAmount(amount = amount.toDouble()),
+                        bank = null,
+                        transactionDate = DateUtils.Local.formattedDateFromTimestamp(datePickerState.selectedDateMillis?:System.currentTimeMillis()),
+                        transferredTo = if (selectedTransactionType == TransactionType.DEBIT) secondParty else null,
+                        receivedFrom = if (selectedTransactionType == TransactionType.CREDIT) secondParty else null,
+                        category = selectedCategory.value
+                    )
+                    viewModel.onEvent(CreateTransactionEvents.OnCreateTransactionClicked(transaction))
+                    navController.popBackStack()
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -192,8 +218,8 @@ fun CreateTransaction() {
 
 @Composable
 private fun SpendSelector(
-    selectedTransactionType: String,
-    onTransactionTypeSelected: (String) -> Unit = {}
+    selectedTransactionType: TransactionType,
+    onTransactionTypeSelected: (TransactionType) -> Unit = {}
 ) {
 
     Row(
@@ -206,13 +232,13 @@ private fun SpendSelector(
                 .weight(1f)
                 .height(48.dp)
                 .align(Alignment.CenterVertically),
-            onClick = {  onTransactionTypeSelected("income") },
+            onClick = {  onTransactionTypeSelected(TransactionType.CREDIT) },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ),
             border = BorderStroke(
-                if (selectedTransactionType == "income") 2.dp else 0.dp,
+                if (selectedTransactionType == TransactionType.CREDIT) 2.dp else 0.dp,
                 MaterialTheme.colorScheme.secondary
             )
         ) {
@@ -233,13 +259,13 @@ private fun SpendSelector(
                 .weight(1f)
                 .height(48.dp)
                 .align(Alignment.CenterVertically),
-            onClick = { onTransactionTypeSelected("expense") },
+            onClick = { onTransactionTypeSelected(TransactionType.DEBIT) },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onError
             ),
             border = BorderStroke(
-                if (selectedTransactionType == "expense") 2.dp else 0.dp,
+                if (selectedTransactionType == TransactionType.DEBIT) 2.dp else 0.dp,
                 MaterialTheme.colorScheme.secondary
             )
         ) {
@@ -255,5 +281,5 @@ private fun SpendSelector(
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
 @Composable
 fun previewCreateTransaction() {
-    CreateTransaction()
+//    CreateTransaction(navController)
 }

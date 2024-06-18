@@ -68,13 +68,13 @@ fun Home(
     Scaffold(
         floatingActionButton = { FloatingActionButton(onClick = {
             navController.navigate(Screen.NewTransaction.route)
-        }) {
+        }, shape = MaterialTheme.shapes.large) {
             Icon(
                 imageVector = Icons.Outlined.Add,
                 contentDescription = "Add new transaction"
             )
         } }
-    ) {
+    ) { padding ->
         Column(modifier = Modifier
             .padding(16.dp)
         ) {

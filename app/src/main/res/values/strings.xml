@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Spendly</string>
     <string name="greeting_hello">Hello</string>
-    <string name="daily">Daily</string>
+    <string name="today">Today</string>
     <string name="weekly">Weekly</string>
     <string name="monthly">Monthly</string>
     <string name="quarter">Quarterly</string>

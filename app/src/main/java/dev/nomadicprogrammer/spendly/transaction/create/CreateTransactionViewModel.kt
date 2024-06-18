@@ -1,7 +1,5 @@
 package dev.nomadicprogrammer.spendly.transaction.create
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,14 +24,14 @@ class CreateTransactionViewModel @Inject constructor(
 
     fun onEvent(event: CreateTransactionEvents) {
         when (event) {
-            is CreateTransactionEvents.onCreateTransactionClicked -> {
+            is CreateTransactionEvents.OnCreateTransactionClicked -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     val rowsUpdated = saveTransactionsUseCase(event.transaction)
-                    _toastMessage.emit(if(true) "Transaction saved successfully" else "Failed to save transaction")
+                    _toastMessage.emit(if(rowsUpdated > 0) "Transaction saved successfully" else "Failed to save transaction")
                 }
             }
 
-            is CreateTransactionEvents.clearToastMessage -> {
+            is CreateTransactionEvents.ClearToastMessage -> {
                 viewModelScope.launch {
                     _toastMessage.emit(null)
                 }

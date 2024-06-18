@@ -95,7 +95,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun currentViewTransactions(currentViewBy : ViewBy) = when(currentViewBy){
-        ViewBy.DAILY -> _state.value.todayTransaction
+        ViewBy.Today -> _state.value.todayTransaction
         ViewBy.WEEKLY -> _state.value.thisWeekTransactions
         ViewBy.MONTHLY -> _state.value.thisMonthTransactions
         ViewBy.Quarter -> _state.value.thisQuarterTransactions

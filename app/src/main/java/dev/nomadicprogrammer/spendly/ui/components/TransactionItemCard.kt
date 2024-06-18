@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
@@ -83,11 +85,10 @@ fun TransactionItemCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-//                val transactionParticipant = when(transaction){
-//                    is TransactionalSms.Debit -> transaction.transferredTo
-//                    is TransactionalSms.Credit -> transaction.receivedFrom
-//
-//                }
+                val transactionParticipant = when(transaction){
+                    is Debit -> transaction.transferredTo
+                    is Credit -> transaction.receivedFrom
+                }
                 Text(
                     text = transaction.originalSms.senderId,
                     style = MaterialTheme.typography.bodySmall,
