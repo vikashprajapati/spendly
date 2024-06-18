@@ -47,6 +47,7 @@ import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,7 +190,7 @@ fun RecentTransactions(
             }
         }
         LazyColumn {
-            items(recentTransactions) { transaction ->
+            items(recentTransactions, key = { it.id ?: Random.nextInt() }) { transaction ->
                 TransactionItemCard(transaction, onTransactionSmsClick)
             }
         }

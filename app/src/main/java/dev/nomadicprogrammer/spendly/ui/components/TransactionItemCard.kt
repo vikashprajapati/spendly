@@ -21,8 +21,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
@@ -51,11 +53,13 @@ fun TransactionItemCard(
             .clickable { onTransactionClick(transaction) },
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val randomIndex = remember { Random.nextInt(iconList.size) }
+        val randomPastelColor = remember { randomPastelColor() }
         Icon(
-            imageVector = iconList[Random.nextInt(iconList.size)],
+            imageVector = iconList[randomIndex],
             modifier = Modifier
                 .size(60.dp)
-                .background(randomPastelColor(), MaterialTheme.shapes.large)
+                .background(randomPastelColor, MaterialTheme.shapes.large)
                 .padding(20.dp),
             contentDescription = "Shopping",
             tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -65,39 +69,33 @@ fun TransactionItemCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = transaction.bankName ?: transaction.originalSms.senderId,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                val secondParty = when(transaction){
+                    is Debit -> transaction.transferredTo
+                    is Credit -> transaction.receivedFrom
+                }
+
+                Column {
+                    Text(
+                        text = transaction.category ?: "Unknown",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = secondParty ?: transaction.bankName ?: transaction.originalSms.senderId,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
                 val transactionSymbol = if (transaction.type == TransactionType.DEBIT) "-" else "+"
                 Text(
                     text = "$transactionSymbol ${transaction.currencyAmount}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (transaction.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                val transactionParticipant = when(transaction){
-                    is Debit -> transaction.transferredTo
-                    is Credit -> transaction.receivedFrom
-                }
-                Text(
-                    text = transaction.originalSms.senderId,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-                Text(
-                    text = transaction.transactionDate ?: transaction.originalSms.date.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         }
