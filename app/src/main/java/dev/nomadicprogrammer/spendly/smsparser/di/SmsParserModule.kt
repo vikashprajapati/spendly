@@ -60,7 +60,6 @@ import javax.inject.Singleton
         )
     }
 
-    @Singleton
     @Provides
     fun providesSpendAnalyserUseCase(
         @ApplicationContext context: Context,

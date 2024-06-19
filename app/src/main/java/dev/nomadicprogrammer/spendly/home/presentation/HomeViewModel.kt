@@ -43,7 +43,15 @@ class HomeViewModel @Inject constructor(
 
     private fun launchClassifier(){
         transactionClassifierJob?.cancel()
-        transactionClassifierJob = viewModelScope.launch(Dispatchers.IO) { spendAnalyserUseCase() }
+        transactionClassifierJob = viewModelScope.launch(Dispatchers.IO) {
+            val progressJob = launch {
+                spendAnalyserUseCase.progress.collect{
+                    _state.value = _state.value.copy(progress = it)
+                }
+            }
+            spendAnalyserUseCase.invoke()
+            progressJob.cancel()
+        }
     }
 
     fun onEvent(event: HomeEvent) {

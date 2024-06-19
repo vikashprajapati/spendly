@@ -9,6 +9,8 @@ import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -24,6 +26,8 @@ class SpendAnalyserUseCase @Inject constructor(
     private val transactionClassifier: SmsUseCase<Transaction>,
 ) {
     private val TAG = SpendAnalyserUseCase::class.simpleName
+    private val _progress : MutableSharedFlow<Float> = MutableSharedFlow()
+    val progress : SharedFlow<Float> = _progress
 
     suspend operator fun invoke() {
         if (!smsReadPermissionAvailable(context)) {
@@ -45,8 +49,9 @@ class SpendAnalyserUseCase @Inject constructor(
             .toList(filteredSms)
     }
 
-    private fun trackProgress(it: Triple<Int, Int, Sms>) {
+    private suspend fun trackProgress(it: Triple<Int, Int, Sms>) {
         val progress = (it.first.toFloat() / it.second.toFloat()) * 100
+        _progress.emit(progress)
         transactionClassifier.onProgress(progress.toInt())
     }
 
