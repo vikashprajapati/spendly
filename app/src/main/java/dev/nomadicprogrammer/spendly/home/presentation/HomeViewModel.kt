@@ -115,6 +115,10 @@ class HomeViewModel @Inject constructor(
                     _state.value = _state.value.copy(dialogTransactionSms = transactionalSms)
                 }
             }
+
+            is HomeEvent.ReadSmsPermissionGranted -> {
+                launchClassifier()
+            }
         }
     }
 
@@ -148,4 +152,6 @@ sealed class HomeEvent{
     data class TransactionUpdate(val transaction : Transaction) : HomeEvent()
 
     data object TransactionDetailsDialogLoaded : HomeEvent()
+
+    data object ReadSmsPermissionGranted : HomeEvent()
 }

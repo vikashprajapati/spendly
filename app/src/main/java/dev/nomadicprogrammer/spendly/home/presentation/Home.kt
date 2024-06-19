@@ -61,6 +61,10 @@ fun Home(
         return
     }
 
+    LaunchedEffect(key1 = readSmsPermissionAvailable) {
+        viewModel.onEvent(HomeEvent.ReadSmsPermissionGranted)
+    }
+
     LaunchedEffect(null){
         viewModel.onEvent(HomeEvent.PageLoad)
     }
