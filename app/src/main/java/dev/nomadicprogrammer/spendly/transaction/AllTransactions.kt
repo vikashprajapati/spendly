@@ -54,7 +54,7 @@ fun AllTransactions(homeViewModel: HomeViewModel){
     if (uiState.dialogTransactionSms != null) {
         val context = LocalContext.current
         TransactionDetails(
-            uiState.dialogTransactionSms!!,
+            homeViewModel = homeViewModel,
             sheetState = sheetState,
             onDismiss = {
                 homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)

@@ -127,7 +127,7 @@ fun Home(
             val context = LocalContext.current
             if (uiState.dialogTransactionSms != null) {
                 TransactionDetails(
-                    uiState.dialogTransactionSms!!,
+                    homeViewModel = viewModel,
                     sheetState = sheetState,
                     onDismiss = {
                         viewModel.onEvent(HomeEvent.TransactionDialogDismissed)

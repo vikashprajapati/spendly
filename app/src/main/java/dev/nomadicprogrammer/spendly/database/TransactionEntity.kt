@@ -27,20 +27,20 @@ data class TransactionEntity(
                 bankName = transaction.bankName,
                 currency = transaction.currencyAmount.currency,
                 amount = transaction.currencyAmount.amount.toFloat(),
-                originalSmsId = transaction.originalSms?.id?.toLong(),
+                originalSmsId = transaction.smsId?.toLong(),
                 category = transaction.category
             )
         }
     }
 
-    fun toModel(originalSms : Sms?= null): Transaction {
+    fun toModel(smsId : String?= null): Transaction {
         return Transaction.create(
             id = transactionId.toString(),
             type = TransactionType.valueOf(type),
             transactionDate = transactionDate,
             bank = bankName,
             currencyAmount = CurrencyAmount(currency, amount.toDouble()),
-            sms = originalSms,
+            smsId = smsId,
             category = category,
             transferredTo = if (type == TransactionType.CREDIT.name) secondParty else null,
             receivedFrom = if(type == TransactionType.DEBIT.name) secondParty else null

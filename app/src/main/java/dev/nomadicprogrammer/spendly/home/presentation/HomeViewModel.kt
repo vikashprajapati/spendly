@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
+import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
 import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +25,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val spendAnalyserUseCase: SpendAnalyserUseCase,
     private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
-    private val updateTransactionsUseCase: UpdateTransactionsUseCase
+    private val updateTransactionsUseCase: UpdateTransactionsUseCase,
+    private val originalSmsFetchUseCase: OriginalSmsFetchUseCase
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
@@ -78,6 +82,7 @@ class HomeViewModel @Inject constructor(
             }
 
             is HomeEvent.TransactionSelected -> {
+                Log.d(TAG, "TransactionSelected: ${event.transactionalSms}")
                 _state.value = _state.value.copy(dialogTransactionSms = event.transactionalSms)
             }
 
@@ -89,6 +94,25 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     val rowsUpdated = updateTransactionsUseCase(event.transaction)
                     Log.d(TAG, "Rows updated: $rowsUpdated")
+                }
+            }
+
+            is HomeEvent.TransactionDetailsDialogLoaded -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    Log.d(TAG, "reading original sms for smsId: ${_state.value.dialogTransactionSms?.smsId}")
+                    val originalSms = _state.value.dialogTransactionSms?.smsId?.let {
+                        originalSmsFetchUseCase.invoke(it)
+                    }
+                    Log.d(TAG, "Original sms: $originalSms")
+                    val transactionalSms = when(_state.value.dialogTransactionSms!!){
+                        is Debit -> (_state.value.dialogTransactionSms as Debit).copy(
+                            originalSms = originalSms
+                        )
+                        is Credit -> (_state.value.dialogTransactionSms as Credit).copy(
+                            originalSms = originalSms
+                        )
+                    }
+                    _state.value = _state.value.copy(dialogTransactionSms = transactionalSms)
                 }
             }
         }
@@ -122,4 +146,6 @@ sealed class HomeEvent{
     data object TransactionDialogDismissed : HomeEvent()
 
     data class TransactionUpdate(val transaction : Transaction) : HomeEvent()
+
+    data object TransactionDetailsDialogLoaded : HomeEvent()
 }

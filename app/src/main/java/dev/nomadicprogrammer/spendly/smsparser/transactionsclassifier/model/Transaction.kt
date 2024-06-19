@@ -19,7 +19,8 @@ sealed class Transaction(
     open val bankName: String? = null,
     open val currencyAmount: CurrencyAmount,
     open val originalSms: Sms? = null,
-    open val category : String? = null
+    open val category : String? = null,
+    open val smsId : String? = null
 ) : Serializable{
     companion object {
         fun create(
@@ -31,18 +32,19 @@ sealed class Transaction(
             transactionDate: String?,
             transferredTo: String? = null,
             receivedFrom: String? = null,
-            category: String? = null
+            category: String? = null,
+            smsId: String? = null
         ): Transaction {
             return when(type){
                 TransactionType.DEBIT -> Debit(
                     id= id,
                     transactionDate = transactionDate, transferredTo = transferredTo, bankName = bank,
-                    currencyAmount = currencyAmount, originalSms = sms, category = category
+                    currencyAmount = currencyAmount, originalSms = sms, category = category, smsId = sms?.id ?: smsId
                 )
                 TransactionType.CREDIT -> Credit(
                     id = id,
                     transactionDate = transactionDate, receivedFrom = receivedFrom, bankName = bank,
-                    currencyAmount = currencyAmount, originalSms = sms, category = category
+                    currencyAmount = currencyAmount, originalSms = sms, category = category, smsId = sms?.id ?: smsId
                 )
             }
         }
@@ -56,8 +58,11 @@ data class Debit(
     override val bankName: String? = null,
     override val currencyAmount: CurrencyAmount,
     override val originalSms: Sms? = null,
-    override val category: String? = null
-) : Transaction(id, TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
+    override val category: String? = null,
+    override val smsId: String? = null
+) : Transaction(
+    id, TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId
+)
 
 data class Credit(
     override val id: String?,
@@ -66,5 +71,6 @@ data class Credit(
     override val bankName: String? = null,
     override val currencyAmount: CurrencyAmount,
     override val originalSms: Sms ?= null,
-    override val category: String? = null
-) : Transaction(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)
+    override val category: String? = null,
+    override val smsId: String? = null
+) : Transaction(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId)

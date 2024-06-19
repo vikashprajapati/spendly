@@ -31,14 +31,10 @@ class LocalTransactionRepository @Inject constructor(
     override suspend fun getAllTransactions(): Flow<List<Transaction>> = flow{
         transactionDao.getAllTransactions().collect{ transactionEntities->
             Log.d(TAG, "getAllTransactions: transactionEntities size: ${transactionEntities.size}")
-            /*val smsIds = transactionEntities.map { it.originalSmsId.toInt() }
-            val originalSmsList = smsInbox.getSmsByIds(smsIds)?: List(transactionEntities.size){DEFAULT_UNDEFINED_SMS}
-            Log.d(TAG, "getAllTransactions: originalSmsList: ${originalSmsList}")
-            Log.d(TAG, "getAllTransactions: originalSmsList: ${originalSmsList.size}")
-            val transactionModel =  transactionEntities.zip(originalSmsList){transactionEntity, originalSms ->
-                transactionEntity.toModel(originalSms?:DEFAULT_UNDEFINED_SMS)
-            }*/
-            val transactionModels = transactionEntities.map { transactionEntity -> transactionEntity.toModel()  }
+            Log.d(TAG, "getAllTransactions: transactionEntities: $transactionEntities")
+            val transactionModels = transactionEntities.map { transactionEntity -> transactionEntity.toModel(
+                smsId = transactionEntity.originalSmsId?.toString()
+            )  }
             Log.d(TAG, "getAllTransactions: transactionModel: $transactionModels")
             emit(transactionModels)
         }

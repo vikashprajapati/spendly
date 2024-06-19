@@ -61,7 +61,7 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
         )
 
         cursor?.use {
-            if (it.moveToFirst()) {
+            if (it.moveToNext()) {
                 val smsInboxId = it.getString(it.getColumnIndex(Telephony.Sms._ID))
                 val senderId = it.getString(it.getColumnIndex(Telephony.Sms.ADDRESS))
                 val body = it.getString(it.getColumnIndex(Telephony.Sms.BODY))
