@@ -8,26 +8,18 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.LAST_PROCESSED_SMS
 import dev.nomadicprogrammer.spendly.base.appSettings
-import dev.nomadicprogrammer.spendly.smsparser.di.AmountParserQualifier
-import dev.nomadicprogrammer.spendly.smsparser.di.BankNameParserQualifier
-import dev.nomadicprogrammer.spendly.smsparser.di.ReceiverDetailsParserQualifier
-import dev.nomadicprogrammer.spendly.smsparser.di.SenderDetailsParserQualifier
-import dev.nomadicprogrammer.spendly.smsparser.di.TransactionDateParserQualifier
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.exceptions.RegexFetchException
-import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Calendar
@@ -59,9 +51,9 @@ class TransactionalSmsUseCase @Inject constructor(
     override fun readSmsRange(smsReadPeriod: SmsReadPeriod): Range {
         val from = runBlocking {
             scope.async {
-                context.appSettings.data
-                    .first()[LAST_PROCESSED_SMS]
-                    ?: run {
+                val lastTimeRun = context.appSettings.data.firstOrNull()?.get(LAST_PROCESSED_SMS)
+                Log.d(TAG, "Last processed sms: $lastTimeRun")
+                lastTimeRun ?: run {
                         Log.d(TAG, "Last processed sms not found, reading sms for last ${smsReadPeriod.days} days")
                         Calendar.getInstance().run {
                             add(Calendar.DAY_OF_YEAR, -smsReadPeriod.days)
@@ -79,23 +71,24 @@ class TransactionalSmsUseCase @Inject constructor(
     }
 
     override fun filterMap(sms: Sms): Transaction? {
+        Log.d(TAG, "Filtering sms: ${DateUtils.Local.formattedDateWithTimeFromTimestamp(sms.date)}: $sms")
         return transactionSmsClassifier.classify(sms)
     }
 
     override fun onComplete(filteredSms: List<Transaction>) {
+        Log.d(TAG, "onComplete")
         scope.launch {
             if (filteredSms.isEmpty()) {
+                context.appSettings.edit { settings->
+                    settings[LAST_PROCESSED_SMS] = System.currentTimeMillis()
+                }
                 return@launch
             }
             Log.d(TAG, "Saving transactions: $filteredSms")
             context.appSettings.edit { settings ->
-                settings[LAST_PROCESSED_SMS] = try{
-                    filteredSms.last().originalSms.date
-                }catch (e: NoSuchElementException){
-                    Log.e(TAG, "No sms found to save last processed sms date", e)
-                    System.currentTimeMillis()
-                }
+                settings[LAST_PROCESSED_SMS] = filteredSms.last().originalSms?.date?: System.currentTimeMillis()
             }
+            Log.d(TAG, "last processed time updated: ${context.appSettings.data.firstOrNull()?.get(LAST_PROCESSED_SMS)}")
             Log.d(TAG, "Filtered Sms: $filteredSms")
             this@TransactionalSmsUseCase.filteredSms = filteredSms
             saveTransactionUseCase(filteredSms)

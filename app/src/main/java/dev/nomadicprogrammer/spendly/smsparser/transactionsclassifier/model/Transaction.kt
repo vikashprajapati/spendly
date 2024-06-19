@@ -18,14 +18,14 @@ sealed class Transaction(
     open val transactionDate: String?,
     open val bankName: String? = null,
     open val currencyAmount: CurrencyAmount,
-    open val originalSms: Sms,
+    open val originalSms: Sms? = null,
     open val category : String? = null
 ) : Serializable{
     companion object {
         fun create(
             id : String?,
             type: TransactionType,
-            sms: Sms,
+            sms: Sms? = null,
             currencyAmount: CurrencyAmount,
             bank: String?,
             transactionDate: String?,
@@ -55,7 +55,7 @@ data class Debit(
     val transferredTo: String?,
     override val bankName: String? = null,
     override val currencyAmount: CurrencyAmount,
-    override val originalSms: Sms,
+    override val originalSms: Sms? = null,
     override val category: String? = null
 ) : Transaction(id, TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category)
 
@@ -65,6 +65,6 @@ data class Credit(
     val receivedFrom: String?,
     override val bankName: String? = null,
     override val currencyAmount: CurrencyAmount,
-    override val originalSms: Sms,
+    override val originalSms: Sms ?= null,
     override val category: String? = null
 ) : Transaction(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category)

@@ -20,12 +20,13 @@ class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : S
     private val TAG = SmsInbox::class.simpleName
 
     private fun getRangeFilter(range: Range): String {
-        return "${Telephony.Sms.Inbox.DATE} >= ${range.start} AND ${Telephony.Sms.Inbox.DATE} <= ${range.end}"
+        return "${Telephony.Sms.Inbox.DATE} > ${range.start} AND ${Telephony.Sms.Inbox.DATE} <= ${range.end}"
     }
 
     @SuppressLint("Range")
     override fun <T> readSms(transactionalSmsClassifier: SmsUseCase<T>): Flow<Triple<Int, Int, Sms>> = flow{
         val range = transactionalSmsClassifier.readSmsRange(SmsReadPeriod.Yearly)
+        Log.d(TAG, "Reading sms range: $range")
         val sortOrder = transactionalSmsClassifier.inboxReadSortOrder()
         val inboxUri = Uri.parse("content://sms/inbox")
         val projection = arrayOf(Telephony.Sms.Inbox.ADDRESS, Telephony.Sms.Inbox.BODY, Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox._ID)

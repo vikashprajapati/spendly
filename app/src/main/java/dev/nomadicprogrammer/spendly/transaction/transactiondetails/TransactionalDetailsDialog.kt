@@ -89,8 +89,8 @@ fun TransactionDetails(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "From: ${transactionalSms.originalSms.senderId}", style = MaterialTheme.typography.titleSmall)
-                Text(text = DateUtils.Local.formattedDateFromTimestamp(transactionalSms.originalSms.date), style = MaterialTheme.typography.titleSmall)
+                Text(text = "From: ${transactionalSms.originalSms?.senderId}", style = MaterialTheme.typography.titleSmall)
+                Text(text = DateUtils.Local.formattedDateFromTimestamp(transactionalSms.originalSms?.date?:System.currentTimeMillis()), style = MaterialTheme.typography.titleSmall)
             }
 
             Spacer(modifier = Modifier.padding(8.dp))
@@ -105,7 +105,7 @@ fun TransactionDetails(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = transactionalSms.originalSms.msgBody,
+                    text = transactionalSms.originalSms?.msgBody ?:"Body not found",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )

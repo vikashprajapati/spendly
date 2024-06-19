@@ -15,7 +15,7 @@ data class TransactionEntity(
     val bankName: String? = null,
     val amount: Float,
     val currency: String,
-    val originalSmsId: Long, // Reference to the original SMS
+    val originalSmsId: Long? = null, // Reference to the original SMS
     val category: String? = null,
     val secondParty : String? = null
 ){
@@ -27,13 +27,13 @@ data class TransactionEntity(
                 bankName = transaction.bankName,
                 currency = transaction.currencyAmount.currency,
                 amount = transaction.currencyAmount.amount.toFloat(),
-                originalSmsId = transaction.originalSms.id.toLong(),
+                originalSmsId = transaction.originalSms?.id?.toLong(),
                 category = transaction.category
             )
         }
     }
 
-    fun toModel(originalSms : Sms): Transaction {
+    fun toModel(originalSms : Sms?= null): Transaction {
         return Transaction.create(
             id = transactionId.toString(),
             type = TransactionType.valueOf(type),

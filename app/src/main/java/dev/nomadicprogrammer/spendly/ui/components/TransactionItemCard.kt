@@ -85,7 +85,7 @@ fun TransactionItemCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = secondParty ?: transaction.bankName ?: transaction.originalSms.senderId,
+                        text = secondParty ?: transaction.bankName ?: transaction.originalSms?.senderId?: "Unknown",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
