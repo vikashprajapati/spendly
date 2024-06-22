@@ -62,41 +62,21 @@ class HomeViewModel @Inject constructor(
                 getAllTransactionJob = viewModelScope.launch(Dispatchers.IO) {
                     getAllTransactionsUseCase()
                         .collect{
-                            val sortedTransactions = it?.reversed() ?: emptyList()
                             Log.d(TAG, "All transactions: $it")
-                            _state.value = _state.value.copy(
-                                allTransactions = sortedTransactions,
-                                recentTransactions = sortedTransactions.take(5),
-                                todayTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(1)) },
-                                thisWeekTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(7)) },
-                                thisMonthTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(30)) }, // TODO: consider 30 or 31 or leap year,
-                                thisQuarterTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(90)) },
-                                thisHalfYearTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(180)) },
-                                thisYearTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(365)) },
-                                currentViewTransactions = currentViewTransactions(_state.value.currentViewBy)
-                            )
+                            updateState(it?: emptyList())
                         }
                 }
             }
 
             is HomeEvent.ViewBySelected -> {
                 viewModelScope.launch {
-                    _state.value = _state.value.copy(
-                        currentViewBy = event.viewBy,
-                        selectedTabIndex = event.index,
-                        currentViewTransactions = currentViewTransactions(event.viewBy)
-                    )
+                    _state.value = _state.value.copy(currentViewBy = event.viewBy, selectedTabIndex = event.index, currentViewTransactions = currentViewTransactions(event.viewBy))
                 }
             }
 
-            is HomeEvent.TransactionSelected -> {
-                Log.d(TAG, "TransactionSelected: ${event.transactionalSms}")
-                _state.value = _state.value.copy(dialogTransactionSms = event.transactionalSms)
-            }
+            is HomeEvent.TransactionSelected -> { _state.value = _state.value.copy(dialogTransactionSms = event.transactionalSms) }
 
-            is HomeEvent.TransactionDialogDismissed -> {
-                _state.value = _state.value.copy(dialogTransactionSms = null)
-            }
+            is HomeEvent.TransactionDialogDismissed -> { _state.value = _state.value.copy(dialogTransactionSms = null) }
 
             is HomeEvent.TransactionUpdate -> {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -113,12 +93,8 @@ class HomeViewModel @Inject constructor(
                     }
                     Log.d(TAG, "Original sms: $originalSms")
                     val transactionalSms = when(_state.value.dialogTransactionSms!!){
-                        is Debit -> (_state.value.dialogTransactionSms as Debit).copy(
-                            originalSms = originalSms
-                        )
-                        is Credit -> (_state.value.dialogTransactionSms as Credit).copy(
-                            originalSms = originalSms
-                        )
+                        is Debit -> (_state.value.dialogTransactionSms as Debit).copy(originalSms = originalSms)
+                        is Credit -> (_state.value.dialogTransactionSms as Credit).copy(originalSms = originalSms)
                     }
                     _state.value = _state.value.copy(dialogTransactionSms = transactionalSms)
                 }
@@ -128,6 +104,21 @@ class HomeViewModel @Inject constructor(
                 launchClassifier()
             }
         }
+    }
+
+    private fun updateState(allTransactions: List<Transaction>) {
+        val sortedTransactions = allTransactions.reversed()
+        _state.value = _state.value.copy(
+            allTransactions = sortedTransactions,
+            recentTransactions = sortedTransactions.take(5),
+            todayTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(1)) },
+            thisWeekTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(7)) },
+            thisMonthTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(30)) }, // TODO: consider 30 or 31 or leap year,
+            thisQuarterTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(90)) },
+            thisHalfYearTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(180)) },
+            thisYearTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(365)) },
+            currentViewTransactions = currentViewTransactions(_state.value.currentViewBy)
+        )
     }
 
     private fun currentViewTransactions(currentViewBy : ViewBy) = when(currentViewBy){
@@ -146,20 +137,4 @@ class HomeViewModel @Inject constructor(
         val transactionDate = DateUtils.Local.getLocalDate(date)
         transactionDate.isAfter(takeFrom) || transactionDate.isEqual(takeFrom)
     } ?: false
-}
-
-
-sealed class HomeEvent{
-    data object PageLoad : HomeEvent()
-    data class ViewBySelected(val viewBy: ViewBy,val index : Int) : HomeEvent()
-
-    data class TransactionSelected(val transactionalSms: Transaction) : HomeEvent()
-
-    data object TransactionDialogDismissed : HomeEvent()
-
-    data class TransactionUpdate(val transaction : Transaction) : HomeEvent()
-
-    data object TransactionDetailsDialogLoaded : HomeEvent()
-
-    data object ReadSmsPermissionGranted : HomeEvent()
 }
