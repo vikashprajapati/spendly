@@ -10,6 +10,7 @@
         - [ ] Home Page
         - [ ] Add Transaction Page
         - [ ] View All Transaction Page
+- [ ] DI component tree enhancement
 
 # Bug Fixes
 - [ ] Fix Loading issue
