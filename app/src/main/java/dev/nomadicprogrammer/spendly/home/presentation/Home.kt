@@ -5,12 +5,14 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -93,7 +95,7 @@ fun Home(
                 CircularLoading(uiState)
             }
 
-            Text(
+            /*Text(
                 text = stringResource(id = R.string.greeting_hello),
                 style = MaterialTheme.typography.headlineMedium
             )
@@ -105,7 +107,7 @@ fun Home(
                 fontWeight = FontWeight(800)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))*/
 
             val selectedTab = uiState.selectedTabIndex
             LazyRow(
@@ -194,7 +196,11 @@ fun RecentTransactions(
             )
 
             OutlinedButton(
+                modifier = Modifier
+                    .height(32.dp)
+                    .width(IntrinsicSize.Min),
                 onClick = onSeeAllClick,
+                shape = MaterialTheme.shapes.small,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             ) {
                 Row(

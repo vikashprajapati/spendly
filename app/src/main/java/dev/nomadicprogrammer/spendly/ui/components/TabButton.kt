@@ -32,11 +32,11 @@ fun TabButton(
         selected = isSelected,
         modifier = modifier
             .width(IntrinsicSize.Min)
-            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
             .border(
                 width = 1.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.shapes.medium
             ),
         onClick = onClick
     ){
