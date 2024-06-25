@@ -6,6 +6,7 @@ import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryProvider
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.notification.categories.TransactionNotification
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
@@ -33,7 +34,11 @@ class SmsListener : BroadcastReceiver(){
                 if (transaction != null) {
                     withContext(Dispatchers.IO){
                         val transactionID = saveTransactionUseCase(transaction)
-                        TransactionNotification(transactionID.toString()).show(context)
+                        val actionCategories = TransactionCategoryProvider.provideCategoriesForNotificationActions()
+                        TransactionNotification(
+                            transactionId = transactionID.toString(),
+                            actionCategories = actionCategories
+                        ).show(context)
                     }
                 }
             }

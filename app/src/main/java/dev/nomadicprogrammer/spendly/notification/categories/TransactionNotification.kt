@@ -10,14 +10,14 @@ import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.notification.NotificationChannelManager
 import dev.nomadicprogrammer.spendly.notification.actions.UpdateTransactionCategoryAction
 import java.util.Random
-import kotlin.properties.Delegates
 
 class TransactionNotification(
     val transactionId: String,
-    val title: String = "Transaction Detected"
+    val title: String = "Transaction Detected",
+    val actionCategories: List<String>
 ) : Notification() {
     override fun build(context: Context): android.app.Notification {
-        val actions = TransactionCategoryProvider.categories.map { createAction(context, it) }
+        val actions = actionCategories.map { createAction(context, it) }
         val mainIntent = PendingIntent.getActivity(
             context,
             Random().nextInt(),
