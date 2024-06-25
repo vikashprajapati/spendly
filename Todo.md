@@ -13,5 +13,5 @@
 - [ ] DI component tree enhancement
 
 # Bug Fixes
-- [ ] Fix Loading issue
+- [*] Fix Loading issue
 - [ ] Fix chart loading issue on app launch
