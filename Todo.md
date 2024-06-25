@@ -14,4 +14,4 @@
 
 # Bug Fixes
 - [*] Fix Loading issue
-- [ ] Fix chart loading issue on app launch
+- [*] Fix chart loading issue on app launch

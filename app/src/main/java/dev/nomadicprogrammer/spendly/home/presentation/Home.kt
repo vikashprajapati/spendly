@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +32,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -131,14 +134,22 @@ fun Home(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            val income = uiState.currentViewTransactions
-                .filter { it.type == TransactionType.CREDIT }
-                .sumOf { it.currencyAmount.amount }
-                .toFloat()
-            val expense = uiState.currentViewTransactions
-                .filter { it.type == TransactionType.DEBIT }
-                .sumOf { it.currencyAmount.amount }
-                .toFloat()
+            val income by remember(uiState.currentViewTransactions) {
+                derivedStateOf {
+                    uiState.currentViewTransactions
+                        .filter { it.type == TransactionType.CREDIT }
+                        .sumOf { it.currencyAmount.amount }
+                        .toFloat()
+                }
+            }
+            val expense by remember(uiState.currentViewTransactions) {
+                derivedStateOf {
+                    uiState.currentViewTransactions
+                        .filter { it.type == TransactionType.DEBIT }
+                        .sumOf { it.currencyAmount.amount }
+                        .toFloat()
+                }
+            }
             TransactionSummaryChart(income, expense, onChartClick = {})
 
             Spacer(modifier = Modifier.height(24.dp))

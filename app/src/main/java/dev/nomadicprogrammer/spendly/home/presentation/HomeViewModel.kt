@@ -117,10 +117,10 @@ class HomeViewModel @Inject constructor(
             thisQuarterTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(90)) },
             thisHalfYearTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(180)) },
             thisYearTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(365)) },
-            currentViewTransactions = currentViewTransactions(_state.value.currentViewBy),
             progress = 100f
         )
 
+        _state.value = _state.value.copy(currentViewTransactions = currentViewTransactions(_state.value.currentViewBy))
     }
 
     private fun currentViewTransactions(currentViewBy : ViewBy) = when(currentViewBy){
