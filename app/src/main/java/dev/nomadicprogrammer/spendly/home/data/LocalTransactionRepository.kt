@@ -4,11 +4,8 @@ import android.util.Log
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.database.TransactionEntity
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsDataSource
-import dev.nomadicprogrammer.spendly.smsparser.common.model.DEFAULT_UNDEFINED_SMS
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
@@ -41,6 +38,6 @@ class LocalTransactionRepository @Inject constructor(
     }
 
     override suspend fun updateTransaction(transaction: Transaction): Int {
-        return transactionDao.updateTransactionCategory(transaction.id!!, transaction.category!!)
+        return transactionDao.updateTransactionCategory(transaction.id!!, transaction.category.value)
     }
 }

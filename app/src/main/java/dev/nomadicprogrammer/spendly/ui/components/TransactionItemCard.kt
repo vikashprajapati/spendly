@@ -24,13 +24,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.IconCompat
+import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
+import java.util.Locale
 import kotlin.random.Random
 
 @Composable
@@ -39,13 +43,6 @@ fun TransactionItemCard(
     onTransactionClick : (Transaction) -> Unit = {}
 ){
     Log.d("TransactionItem", "Transaction: $transaction")
-    val iconList = listOf(
-        Icons.Outlined.ShoppingCart,
-        Icons.Outlined.Place,
-        Icons.Outlined.List,
-        Icons.Outlined.AccountBox,
-        Icons.Outlined.Call
-    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,14 +50,13 @@ fun TransactionItemCard(
             .clickable { onTransactionClick(transaction) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val randomIndex = remember { Random.nextInt(iconList.size) }
-        val randomPastelColor = remember { randomPastelColor() }
+        Log.d("TransactionItem", "Transaction category: ${transaction.category}")
         Icon(
-            imageVector = iconList[randomIndex],
+            painter = painterResource(id = transaction.category.iconId),
             modifier = Modifier
-                .size(60.dp)
-                .background(randomPastelColor, MaterialTheme.shapes.large)
-                .padding(20.dp),
+                .size(48.dp)
+                .background(transaction.category.color, MaterialTheme.shapes.medium)
+                .padding(12.dp),
             contentDescription = "Shopping",
             tint = MaterialTheme.colorScheme.onPrimaryContainer
         )
@@ -79,7 +75,7 @@ fun TransactionItemCard(
 
                 Column {
                     Text(
-                        text = transaction.category ?: "Unknown",
+                        text = transaction.category.value,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold
                     )

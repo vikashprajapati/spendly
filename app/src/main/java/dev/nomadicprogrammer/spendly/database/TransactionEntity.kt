@@ -2,8 +2,8 @@ package dev.nomadicprogrammer.spendly.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 
@@ -28,7 +28,7 @@ data class TransactionEntity(
                 currency = transaction.currencyAmount.currency,
                 amount = transaction.currencyAmount.amount.toFloat(),
                 originalSmsId = transaction.smsId?.toLong(),
-                category = transaction.category
+                category = transaction.category.value
             )
         }
     }
@@ -41,7 +41,7 @@ data class TransactionEntity(
             bank = bankName,
             currencyAmount = CurrencyAmount(currency, amount.toDouble()),
             smsId = smsId,
-            category = category,
+            category = category?.let { TransactionCategory.fromValue(it) } ?: TransactionCategory.OTHER,
             transferredTo = if (type == TransactionType.CREDIT.name) secondParty else null,
             receivedFrom = if(type == TransactionType.DEBIT.name) secondParty else null
         )

@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.Action
+import androidx.core.graphics.drawable.IconCompat
 import dev.nomadicprogrammer.spendly.MainActivity
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.notification.NotificationChannelManager
 import dev.nomadicprogrammer.spendly.notification.actions.UpdateTransactionCategoryAction
 import java.util.Random
@@ -14,7 +16,7 @@ import java.util.Random
 class TransactionNotification(
     val transactionId: String,
     val title: String = "Transaction Detected",
-    val actionCategories: List<String>
+    val actionCategories: List<TransactionCategory>
 ) : Notification() {
     override fun build(context: Context): android.app.Notification {
         val actions = actionCategories.map { createAction(context, it) }
@@ -35,10 +37,13 @@ class TransactionNotification(
             .build()
     }
 
-    private fun createAction(context: Context, category : String): Action {
-        val actionIntent = UpdateTransactionCategoryAction.createIntent(context, transactionId, category, notificationId)
+    private fun createAction(context: Context, category : TransactionCategory): Action {
+        val actionIntent = UpdateTransactionCategoryAction.createIntent(context, transactionId, category.name, notificationId)
         val pendingIntent = PendingIntent.getBroadcast(context, Random().nextInt(), actionIntent, PendingIntent.FLAG_IMMUTABLE)
-        return Action.Builder(null, category, pendingIntent).build()
+        return Action.Builder(
+            /* icon = */ IconCompat.createWithResource(context, category.iconId),
+            /* title = */ category.name,
+            /* intent = */ pendingIntent).build()
     }
 
 }

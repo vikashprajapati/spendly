@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -41,10 +43,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.DEFAULT_UNDEFINED_SMS
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
@@ -66,13 +70,22 @@ fun CreateTransaction(navController: NavController) {
         viewModel.onEvent(CreateTransactionEvents.ClearToastMessage)
     }
 
-    Scaffold() {
+    Scaffold() { paddingValues ->
+        val screenPaddingTop = paddingValues.calculateTopPadding() + 16.dp
+        val screenPaddingBottom = paddingValues.calculateBottomPadding() + 16.dp
+        val screenPaddingStart = paddingValues.calculateStartPadding(LayoutDirection.Rtl) + 16.dp
+        val screenPaddingEnd = paddingValues.calculateEndPadding(LayoutDirection.Rtl) + 16.dp
         Column(
             modifier = Modifier
+                .padding(
+                    top = screenPaddingTop,
+                    bottom = screenPaddingBottom,
+                    start = screenPaddingStart,
+                    end = screenPaddingEnd
+                )
                 .background(
                     color = MaterialTheme.colorScheme.background
                 )
-                .padding(it)
         ) {
             Text(
                 text = "Create Transaction",
@@ -158,7 +171,7 @@ fun CreateTransaction(navController: NavController) {
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
-            val selectedCategory = remember { mutableStateOf("") }
+            val selectedCategory = remember { mutableStateOf<TransactionCategory?>(null) }
             TransactionCategoriesGrid(
                 selectedCategory = selectedCategory.value,
                 verticalItemSpacing = 4.dp,
@@ -197,7 +210,7 @@ fun CreateTransaction(navController: NavController) {
                         transactionDate = DateUtils.Local.formattedDateFromTimestamp(datePickerState.selectedDateMillis?:System.currentTimeMillis()),
                         transferredTo = if (selectedTransactionType == TransactionType.DEBIT) secondParty else null,
                         receivedFrom = if (selectedTransactionType == TransactionType.CREDIT) secondParty else null,
-                        category = selectedCategory.value
+                        category = selectedCategory.value?: TransactionCategory.OTHER
                     )
                     viewModel.onEvent(CreateTransactionEvents.OnCreateTransactionClicked(transaction))
                     navController.popBackStack()

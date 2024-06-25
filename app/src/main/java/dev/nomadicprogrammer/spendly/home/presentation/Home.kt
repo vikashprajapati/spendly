@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.navigation.Screen
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
@@ -153,6 +155,7 @@ fun Home(
                         viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
                     },
                     onUpdateClick = {
+                        Log.d("Home", "Transaction updated: $it")
                         viewModel.onEvent(HomeEvent.TransactionUpdate(it))
                         Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
                     }
@@ -192,7 +195,7 @@ fun RecentTransactions(
 
             OutlinedButton(
                 onClick = onSeeAllClick,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -229,7 +232,7 @@ fun RecentTransactions(
             "12-12-2021",
             "Amit",
             "Sbi",
-            "Food"
+            TransactionCategory.TRAVEL
         ),
 
         Transaction.create(
@@ -241,7 +244,7 @@ fun RecentTransactions(
             "12-12-2021",
             "Amit",
             "Sbi",
-            "Food"
+            TransactionCategory.TRANSFER
         )
     )
     Column(modifier = Modifier.padding(16.dp)) {

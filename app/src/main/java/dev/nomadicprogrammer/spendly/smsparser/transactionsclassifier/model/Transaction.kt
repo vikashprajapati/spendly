@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
 
 import androidx.room.util.copy
+import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import java.io.Serializable
@@ -19,7 +20,7 @@ sealed class Transaction(
     open val bankName: String? = null,
     open val currencyAmount: CurrencyAmount,
     open val originalSms: Sms? = null,
-    open val category : String? = null,
+    open val category : TransactionCategory = TransactionCategory.OTHER,
     open val smsId : String? = null
 ) : Serializable{
     companion object {
@@ -32,7 +33,7 @@ sealed class Transaction(
             transactionDate: String?,
             transferredTo: String? = null,
             receivedFrom: String? = null,
-            category: String? = null,
+            category: TransactionCategory = TransactionCategory.OTHER,
             smsId: String? = null
         ): Transaction {
             return when(type){
@@ -58,7 +59,7 @@ data class Debit(
     override val bankName: String? = null,
     override val currencyAmount: CurrencyAmount,
     override val originalSms: Sms? = null,
-    override val category: String? = null,
+    override val category: TransactionCategory = TransactionCategory.OTHER,
     override val smsId: String? = null
 ) : Transaction(
     id, TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId
@@ -71,6 +72,6 @@ data class Credit(
     override val bankName: String? = null,
     override val currencyAmount: CurrencyAmount,
     override val originalSms: Sms ?= null,
-    override val category: String? = null,
+    override val category: TransactionCategory = TransactionCategory.OTHER,
     override val smsId: String? = null
 ) : Transaction(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId)
