@@ -3,6 +3,7 @@ package dev.nomadicprogrammer.spendly.home.presentation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,9 +17,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -29,10 +29,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +49,9 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Tran
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.transaction.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.CircularLoading
+import dev.nomadicprogrammer.spendly.ui.components.FabActionItem
+import dev.nomadicprogrammer.spendly.ui.components.FabMainItem
+import dev.nomadicprogrammer.spendly.ui.components.MultipleFloatingActionButton
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
@@ -74,18 +80,13 @@ fun Home(
     val uiState by viewModel.state.collectAsState()
 
     Scaffold(
-        floatingActionButton = { FloatingActionButton(onClick = {
-            navController.navigate(Screen.NewTransaction.route)
-        }, shape = MaterialTheme.shapes.large) {
-            Icon(
-                imageVector = Icons.Outlined.Add,
-                contentDescription = "Add new transaction"
-            )
-        } }
+        floatingActionButton = {
+            HomeMainFab(navController)
+        }
     ) { padding ->
         Column(
             modifier = Modifier
-            .padding(16.dp)
+                .padding(16.dp)
         ) {
             if (uiState.progress >= 0 && uiState.progress < 100) {
                 CircularLoading(uiState.progress)
@@ -170,6 +171,55 @@ fun Home(
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun HomeMainFab(navController: NavController) {
+    var isFabOpen by remember { mutableStateOf(false) }
+    val mainFab by remember {
+        derivedStateOf {
+            if (isFabOpen) {
+                FabMainItem(Icons.Outlined.Close, "Close")
+            } else {
+                FabMainItem(Icons.Outlined.Add, "Add Transaction")
+            }
+        }
+    }
+
+    val fabActionItems = listOf(
+        FabActionItem(
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.income),
+                    contentDescription = "Income"
+                )
+            },
+            contentDescription = "Income",
+            onClick = {
+                navController.navigate(Screen.NewTransaction.route)
+            }
+        ),
+        FabActionItem(
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.expense),
+                    contentDescription = "Expense"
+                )
+            },
+            contentDescription = "Expense",
+            onClick = {
+                navController.navigate(Screen.NewTransaction.route)
+            }
+        )
+    )
+
+    MultipleFloatingActionButton(
+        mainFab = mainFab,
+        isFabOpen = isFabOpen,
+        fabActionItems = fabActionItems
+    ) {
+        isFabOpen = !isFabOpen
     }
 }
 

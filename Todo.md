@@ -4,6 +4,7 @@
         - [ ] Showing a Line chart to show day by day data for week/month
         - [ ] Show breakdown of expenses/income  alongside pie chart
 - [*] Icons & Color for different Categories
+- [*] Multiple action floatin button for adding transaction
 
 # Improvement
 - [ ] Take UI reference from different app and improve the UI
