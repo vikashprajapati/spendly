@@ -3,11 +3,13 @@ package dev.nomadicprogrammer.spendly.base
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.ui.theme.brighten
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
 
 enum class TransactionCategory(
     val value: String,
     val color : Color = randomPastelColor(),
+    val iconTint : Color = color.brighten(),
     val iconId: Int = 0
 ) {
     FOOD(value = "Food", iconId = R.drawable.baseline_fastfood_24),

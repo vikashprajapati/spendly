@@ -11,12 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBox
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.List
-import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,20 +20,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.IconCompat
-import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.ui.theme.darken
-import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
-import java.util.Locale
-import kotlin.random.Random
+import dev.nomadicprogrammer.spendly.ui.theme.brighten
 
 @Composable
 fun TransactionItemCard(
@@ -53,9 +41,6 @@ fun TransactionItemCard(
             .clickable { onTransactionClick(transaction) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val iconTint by remember { mutableStateOf(transaction.category.color.darken()) }
-        Log.d("TransactionItem", "Icon tint: $iconTint")
-        Log.d("TransactionItem", "Icon bg: ${transaction.category.color}")
         Icon(
             painter = painterResource(id = transaction.category.iconId),
             modifier = Modifier
@@ -63,7 +48,7 @@ fun TransactionItemCard(
                 .background(transaction.category.color, MaterialTheme.shapes.medium)
                 .padding(12.dp),
             contentDescription = "Shopping",
-            tint = iconTint
+            tint = transaction.category.iconTint
         )
         Column(
             modifier = Modifier.padding(start = 16.dp)

@@ -75,7 +75,7 @@ fun randomPastelColor(): Color {
     return Color(red, green, blue)
 }
 
-fun Color.darken(factor: Float = 0.6f): Color {
+fun Color.brighten(factor: Float = 0.6f): Color {
     val cofactor = 1 + factor
     val r = max((this.red * 255 * cofactor).toInt(), 0)
     val g = max((this.green * 255 * cofactor).toInt(), 0)
