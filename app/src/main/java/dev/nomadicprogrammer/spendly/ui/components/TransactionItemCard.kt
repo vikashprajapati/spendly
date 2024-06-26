@@ -37,7 +37,7 @@ fun TransactionItemCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 12.dp)
             .clickable { onTransactionClick(transaction) },
         verticalAlignment = Alignment.CenterVertically
     ) {

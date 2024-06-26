@@ -9,7 +9,7 @@ import java.util.Locale
 data class CurrencyAmount(val currency: String = DEFAULT_CURRENCY, val amount: Double){
 
     override fun toString(): String {
-        return "$currency $amount"
+        return "$currency$amount"
     }
 
     companion object CurrencyAmountParser{

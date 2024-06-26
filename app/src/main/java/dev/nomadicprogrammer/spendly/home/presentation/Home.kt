@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -191,31 +192,22 @@ fun RecentTransactions(
         ) {
             Text(
                 text = stringResource(id = R.string.recent_transactions),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             OutlinedButton(
                 modifier = Modifier
-                    .height(32.dp)
-                    .width(IntrinsicSize.Min),
+                    .height(32.dp),
+                contentPadding = PaddingValues(8.dp),
                 onClick = onSeeAllClick,
-                shape = MaterialTheme.shapes.small,
+                shape = MaterialTheme.shapes.large,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.see_all),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Icon(
-                        imageVector = Icons.Outlined.KeyboardArrowRight,
-                        modifier = Modifier.size(16.dp),
-                        contentDescription = "See all transactions"
-                    )
-                }
+                Text(
+                    text = stringResource(id = R.string.see_all),
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
         LazyColumn {
