@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.ui.theme
 import androidx.compose.ui.graphics.Color
+import kotlin.math.max
 import kotlin.random.Random
 
 val md_theme_light_primary = Color(0xff92c891)
@@ -72,5 +73,13 @@ fun randomPastelColor(): Color {
     val green = Random.nextInt(200, 256)
     val blue = Random.nextInt(200, 256)
     return Color(red, green, blue)
+}
+
+fun Color.darken(factor: Float = 0.6f): Color {
+    val cofactor = 1 + factor
+    val r = max((this.red * 255 * cofactor).toInt(), 0)
+    val g = max((this.green * 255 * cofactor).toInt(), 0)
+    val b = max((this.blue * 255 * cofactor).toInt(), 0)
+    return Color(r, g, b, 255)
 }
 

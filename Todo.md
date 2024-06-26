@@ -10,6 +10,8 @@
         - [ ] Home Page
         - [ ] Add Transaction Page
         - [ ] View All Transaction Page
+- [*] Category icon tint should be bolder variant of the category surface color
+- [ ] See all CTA horizontal padding to be reduced.
 - [ ] DI component tree enhancement
 
 # Bug Fixes

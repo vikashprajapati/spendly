@@ -21,9 +21,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +36,7 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Cred
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.ui.theme.darken
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
 import java.util.Locale
 import kotlin.random.Random
@@ -42,7 +46,6 @@ fun TransactionItemCard(
     transaction: Transaction,
     onTransactionClick : (Transaction) -> Unit = {}
 ){
-    Log.d("TransactionItem", "Transaction: $transaction")
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +53,9 @@ fun TransactionItemCard(
             .clickable { onTransactionClick(transaction) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Log.d("TransactionItem", "Transaction category: ${transaction.category}")
+        val iconTint by remember { mutableStateOf(transaction.category.color.darken()) }
+        Log.d("TransactionItem", "Icon tint: $iconTint")
+        Log.d("TransactionItem", "Icon bg: ${transaction.category.color}")
         Icon(
             painter = painterResource(id = transaction.category.iconId),
             modifier = Modifier
@@ -58,7 +63,7 @@ fun TransactionItemCard(
                 .background(transaction.category.color, MaterialTheme.shapes.medium)
                 .padding(12.dp),
             contentDescription = "Shopping",
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
+            tint = iconTint
         )
         Column(
             modifier = Modifier.padding(start = 16.dp)
