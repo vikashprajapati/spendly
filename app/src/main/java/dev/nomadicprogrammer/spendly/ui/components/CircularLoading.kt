@@ -15,13 +15,13 @@ import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.home.presentation.HomeScreenState
 
 @Composable
-fun CircularLoading(uiState: HomeScreenState) {
+fun CircularLoading(progress: Float) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(progress = { uiState.progress / 100f })
+            CircularProgressIndicator(progress = { progress / 100f })
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Analyzing transactions...", style = MaterialTheme.typography.bodyMedium)
         }
