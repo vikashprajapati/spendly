@@ -41,7 +41,7 @@ enum class TransactionCategory(
     companion object {
         fun fromValue(value: String): TransactionCategory {
             Log.d("TransactionCategory", "Value: $value")
-            return entries.first { it.value == value }
+            return entries.firstOrNull { it.value == value }?: OTHER
         }
     }
 }

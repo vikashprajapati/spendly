@@ -1,10 +1,10 @@
 package dev.nomadicprogrammer.spendly.transaction.create
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -149,73 +149,24 @@ fun CreateTransactionScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val selectedCategory = remember { mutableStateOf<TransactionCategory?>(null) }
-                var categoryMenuExpanded by remember { mutableStateOf(false) }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            shape = MaterialTheme.shapes.medium
-                        )
-                ){
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = selectedCategory.value?.value ?: "Select Category",
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .weight(1f)
-                        )
-                        IconButton(onClick = {
-                            categoryMenuExpanded = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Outlined.KeyboardArrowDown,
-                                contentDescription = "Expand Category Menu"
-                            )
-                        }
-                    }
+                val selectedCategory = remember { mutableStateOf<String>("Category") }
+                DropdownSelector(
+                    selected = selectedCategory.value,
+                    selectionOptions = TransactionCategory.entries.map { it.value }
+                    ){
+                    selectedCategory.value = it
                 }
-
-                DropdownMenu(
-                    expanded = categoryMenuExpanded,
-                    onDismissRequest = { categoryMenuExpanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    TransactionCategory.entries.forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(text = category.value) },
-                            onClick = {
-                                selectedCategory.value = category
-                                categoryMenuExpanded = false
-                            })
-                    }
-                }
-
-
-
-
-
-
 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 var transactionMedium by remember { mutableStateOf<String>("Cash") }
-                OutlinedTextField(
-                    value = transactionMedium,
-                    onValueChange = {
-                        transactionMedium = it
-                    },
-                    readOnly = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = { Icons.Outlined.KeyboardArrowDown },
-                    shape = MaterialTheme.shapes.medium,
-                )
+                DropdownSelector(
+                    selected = transactionMedium,
+                    selectionOptions = listOf("Cash", "Bank", "UPI", "Card")
+                ){
+                    transactionMedium = it
+                }
 
 
                 val datePickerState = rememberDatePickerState(
@@ -242,7 +193,6 @@ fun CreateTransactionScreen(
                         val transaction = Transaction.create(
                             id = Random.nextInt().toString(),
                             type = transactionType,
-                            sms = DEFAULT_UNDEFINED_SMS,
                             currencyAmount = CurrencyAmount(amount = amount.toDouble()),
                             bank = null,
                             transactionDate = DateUtils.Local.formattedDateFromTimestamp(
@@ -250,7 +200,7 @@ fun CreateTransactionScreen(
                             ),
                             transferredTo = if (transactionType == TransactionType.DEBIT) secondParty else null,
                             receivedFrom = if (transactionType == TransactionType.CREDIT) secondParty else null,
-                            category = selectedCategory.value ?: TransactionCategory.OTHER
+                            category = TransactionCategory.fromValue(selectedCategory.value)
                         )
                         onEvent(CreateTransactionEvents.OnCreateTransactionClicked(transaction))
                         navController.popBackStack()
@@ -266,6 +216,62 @@ fun CreateTransactionScreen(
                         modifier = Modifier
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DropdownSelector(
+    selected: String= "Select",
+    selectionOptions : List<String>,
+    onCategorySelected : (String) -> Unit
+){
+    var menuExpanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium
+            )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selected,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(1f)
+            )
+            IconButton(onClick = {
+                menuExpanded = true
+            }) {
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowDown,
+                    contentDescription = "Expand Menu"
+                )
+            }
+        }
+    }
+
+    Box{
+        DropdownMenu(
+            expanded = menuExpanded,
+            onDismissRequest = { menuExpanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+        ) {
+            selectionOptions.forEach { category ->
+                DropdownMenuItem(
+                    text = { Text(text = category) },
+                    onClick = {
+                        onCategorySelected(category)
+                        menuExpanded = false
+                    })
             }
         }
     }
