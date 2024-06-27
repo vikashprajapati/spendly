@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.Navigator
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.navigation.Screen
@@ -189,28 +190,14 @@ private fun HomeMainFab(navController: NavController) {
 
     val fabActionItems = listOf(
         FabActionItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.income),
-                    contentDescription = "Income"
-                )
-            },
+            icon = { Image(painter = painterResource(id = R.drawable.income), contentDescription = "Income") },
             contentDescription = "Income",
-            onClick = {
-                navController.navigate(Screen.NewTransaction.route)
-            }
+            onClick = { navController.navigate(Screen.NewTransaction.withArgs(Screen.NewTransaction.Args.TRANSACTION_TYPE to "Income")) }
         ),
         FabActionItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.expense),
-                    contentDescription = "Expense"
-                )
-            },
+            icon = { Image(painter = painterResource(id = R.drawable.expense), contentDescription = "Expense") },
             contentDescription = "Expense",
-            onClick = {
-                navController.navigate(Screen.NewTransaction.route)
-            }
+            onClick = { navController.navigate(Screen.NewTransaction.withArgs(Screen.NewTransaction.Args.TRANSACTION_TYPE to "Expense")) }
         )
     )
 

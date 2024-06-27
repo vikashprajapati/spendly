@@ -58,7 +58,10 @@ import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTransaction(navController: NavController) {
+fun CreateTransaction(
+    navController: NavController,
+    transactionType: TransactionType
+) {
     val viewModel : CreateTransactionViewModel = hiltViewModel()
     val state = viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -88,7 +91,7 @@ fun CreateTransaction(navController: NavController) {
                 )
         ) {
             Text(
-                text = "Create Transaction",
+                text = if (transactionType == TransactionType.DEBIT) "Expense" else "Income",
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -134,16 +137,10 @@ fun CreateTransaction(navController: NavController) {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            var selectedTransactionType by rememberSaveable { mutableStateOf(state.value.transactionType) }
-            SpendSelector(selectedTransactionType){type ->
-                selectedTransactionType = type
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
             var secondParty by rememberSaveable { mutableStateOf("") }
 
             Row {
-                val secondPartyLabel = if (selectedTransactionType == TransactionType.DEBIT) "Transferred To" else "Received From"
+                val secondPartyLabel = if (transactionType == TransactionType.DEBIT) "Transferred To" else "Received From"
                 TextField(
                     value = secondParty,
                     onValueChange = { secondParty = it },
@@ -203,13 +200,13 @@ fun CreateTransaction(navController: NavController) {
                 onClick = {
                     val transaction = Transaction.create(
                         id = Random.nextInt().toString(),
-                        type = selectedTransactionType,
+                        type = transactionType,
                         sms = DEFAULT_UNDEFINED_SMS,
                         currencyAmount = CurrencyAmount(amount = amount.toDouble()),
                         bank = null,
                         transactionDate = DateUtils.Local.formattedDateFromTimestamp(datePickerState.selectedDateMillis?:System.currentTimeMillis()),
-                        transferredTo = if (selectedTransactionType == TransactionType.DEBIT) secondParty else null,
-                        receivedFrom = if (selectedTransactionType == TransactionType.CREDIT) secondParty else null,
+                        transferredTo = if (transactionType == TransactionType.DEBIT) secondParty else null,
+                        receivedFrom = if (transactionType == TransactionType.CREDIT) secondParty else null,
                         category = selectedCategory.value?: TransactionCategory.OTHER
                     )
                     viewModel.onEvent(CreateTransactionEvents.OnCreateTransactionClicked(transaction))

@@ -20,6 +20,7 @@ import dev.nomadicprogrammer.spendly.checkAndRequestPermission
 import dev.nomadicprogrammer.spendly.transaction.AllTransactions
 import dev.nomadicprogrammer.spendly.home.presentation.Home
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.transaction.create.CreateTransaction
 
 @Composable
@@ -41,8 +42,11 @@ fun NavGraphBuilder.seeAllTransactions(homeViewModel: HomeViewModel){
 }
 
 fun NavGraphBuilder.newTransaction(navController: NavController){
-    composable(Screen.NewTransaction.route){
-        CreateTransaction(navController)
+    composable(Screen.NewTransaction.route){ backstackEntry ->
+        val transactionToCreateType = backstackEntry.arguments?.getString(Screen.NewTransaction.Args.TRANSACTION_TYPE)?.run {
+            if (this == "Expense") TransactionType.DEBIT else TransactionType.CREDIT
+        }
+        CreateTransaction(navController, transactionToCreateType ?: TransactionType.DEBIT)
     }
 }
 
