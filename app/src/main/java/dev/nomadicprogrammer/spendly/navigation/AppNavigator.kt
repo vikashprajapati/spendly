@@ -17,10 +17,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.checkAndRequestPermission
-import dev.nomadicprogrammer.spendly.transaction.AllTransactions
 import dev.nomadicprogrammer.spendly.home.presentation.Home
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.transaction.AllTransactions
 import dev.nomadicprogrammer.spendly.transaction.create.CreateTransaction
 
 @Composable
@@ -28,7 +28,7 @@ fun AppNavigator(){
     val navigationController = rememberNavController()
     val homeViewModel : HomeViewModel = hiltViewModel<HomeViewModel>()
 
-    NavHost(navController = navigationController, startDestination = Screen.Home.route){
+    NavHost(navController = navigationController, startDestination = Home.route){
         homeNavGraph(navigationController, homeViewModel)
         seeAllTransactions(homeViewModel)
         newTransaction(navigationController)
@@ -36,14 +36,14 @@ fun AppNavigator(){
 }
 
 fun NavGraphBuilder.seeAllTransactions(homeViewModel: HomeViewModel){
-    composable(Screen.SeeAllTransaction.route){
+    composable(SeeAllTransaction.route){
         AllTransactions(homeViewModel)
     }
 }
 
 fun NavGraphBuilder.newTransaction(navController: NavController){
-    composable(Screen.NewTransaction.route){ backstackEntry ->
-        val transactionToCreateType = backstackEntry.arguments?.getString(Screen.NewTransaction.Args.TRANSACTION_TYPE)?.run {
+    composable(NewTransaction.route){ backstackEntry ->
+        val transactionToCreateType = backstackEntry.arguments?.getString(NewTransaction.Args.TRANSACTION_TYPE)?.run {
             if (this == "Expense") TransactionType.DEBIT else TransactionType.CREDIT
         }
         CreateTransaction(navController, transactionToCreateType ?: TransactionType.DEBIT)
@@ -51,7 +51,7 @@ fun NavGraphBuilder.newTransaction(navController: NavController){
 }
 
 fun NavGraphBuilder.homeNavGraph(navController: NavController, homeViewModel: HomeViewModel){
-    composable(Screen.Home.route){
+    composable(Home.route){
         var isPermissionAvailable by remember { mutableStateOf(false) }
 
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {

@@ -40,10 +40,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.Navigator
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.base.TransactionCategory
-import dev.nomadicprogrammer.spendly.navigation.Screen
+import dev.nomadicprogrammer.spendly.navigation.NewTransaction
+import dev.nomadicprogrammer.spendly.navigation.SeeAllTransaction
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
@@ -168,7 +168,7 @@ fun Home(
                     viewModel.onEvent(HomeEvent.TransactionSelected(it))
                 },
                 onSeeAllClick = {
-                    navController.navigate(Screen.SeeAllTransaction.route)
+                    navController.navigate(SeeAllTransaction.route)
                 }
             )
         }
@@ -192,12 +192,12 @@ private fun HomeMainFab(navController: NavController) {
         FabActionItem(
             icon = { Image(painter = painterResource(id = R.drawable.income), contentDescription = "Income") },
             contentDescription = "Income",
-            onClick = { navController.navigate(Screen.NewTransaction.withArgs(Screen.NewTransaction.Args.TRANSACTION_TYPE to "Income")) }
+            onClick = { navController.navigate(NewTransaction.withArgs(NewTransaction.Args.TRANSACTION_TYPE to "Income")) }
         ),
         FabActionItem(
             icon = { Image(painter = painterResource(id = R.drawable.expense), contentDescription = "Expense") },
             contentDescription = "Expense",
-            onClick = { navController.navigate(Screen.NewTransaction.withArgs(Screen.NewTransaction.Args.TRANSACTION_TYPE to "Expense")) }
+            onClick = { navController.navigate(NewTransaction.withArgs(NewTransaction.Args.TRANSACTION_TYPE to "Expense")) }
         )
     )
 
