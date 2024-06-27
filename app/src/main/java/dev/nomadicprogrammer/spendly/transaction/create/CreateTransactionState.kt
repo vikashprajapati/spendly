@@ -4,7 +4,7 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Tran
 
 data class CreateTransactionState(
     val transactionDate: String = "",
-    val transactionAmount: String = "",
+    val transactionAmount: String = "0",
     val transactionCategory: String = "",
     val transactionType: TransactionType = TransactionType.DEBIT,
     val secondParty: String = ""
