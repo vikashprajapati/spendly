@@ -5,6 +5,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerColors
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -61,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import dev.nomadicprogrammer.spendly.base.CashInflowCategory
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
@@ -108,8 +112,9 @@ fun CreateTransactionScreen(
 
     Scaffold(
         topBar = {
-            ScreenHeader(navController, transactionType, amount) {
+            ScreenHeader(navController, state, transactionType, amount) {
                 amount = it
+                onEvent(CreateTransactionEvents.OnTransactionAmountChanged(it))
             }
         }
     ) { paddingValues ->
@@ -117,6 +122,9 @@ fun CreateTransactionScreen(
         val screenPaddingBottom = paddingValues.calculateBottomPadding()
         val screenPaddingStart = paddingValues.calculateStartPadding(LayoutDirection.Rtl)
         val screenPaddingEnd = paddingValues.calculateEndPadding(LayoutDirection.Rtl)
+
+        val surfaceBgColor =  if (transactionType == TransactionType.DEBIT) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primary
+        val contentColor = Color.White
 
         Column(
             modifier = Modifier
@@ -134,33 +142,61 @@ fun CreateTransactionScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 var secondParty by rememberSaveable { mutableStateOf("") }
-                val secondPartyLabel =
-                    if (transactionType == TransactionType.DEBIT) "Transferred To" else "Received From"
+                val secondPartyLabel = if (transactionType == TransactionType.DEBIT) "Transferred To" else "Received From"
+                val fieldColors = TextFieldDefaults.colors(
+                    cursorColor = surfaceBgColor,
+                    focusedIndicatorColor = surfaceBgColor,
+                    focusedContainerColor = Color.Transparent,
+                    focusedLabelColor = surfaceBgColor,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
+                val shouldShowError = state.value.error?.second == "second party"
                 OutlinedTextField(
                     value = secondParty,
-                    onValueChange = { secondParty = it },
+                    onValueChange = {
+                        secondParty = it
+                        onEvent(CreateTransactionEvents.OnSecondPartyChanged(it))
+                    },
                     modifier = Modifier
                         .fillMaxWidth(),
                     label = { Text(secondPartyLabel) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     singleLine = true,
                     shape = MaterialTheme.shapes.medium,
+                    colors = fieldColors,
+                    isError = shouldShowError,
+                    supportingText = {
+                        if (shouldShowError){
+                            state.value.error?.first?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val selectedCategory = remember { mutableStateOf<String>("Category") }
+                val selectedCategory = remember { mutableStateOf("Category") }
+                val categoryList = if (transactionType == TransactionType.DEBIT) {
+                    TransactionCategory.entries.map { it.value }
+                } else {
+                    CashInflowCategory.entries.map { it.value }
+                }
                 DropdownSelector(
                     selected = selectedCategory.value,
-                    selectionOptions = TransactionCategory.entries.map { it.value }
-                    ){
+                    selectionOptions = categoryList
+                ){
                     selectedCategory.value = it
                 }
 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                var transactionMedium by remember { mutableStateOf<String>("Cash") }
+                var transactionMedium by remember { mutableStateOf("Cash") }
                 DropdownSelector(
                     selected = transactionMedium,
                     selectionOptions = listOf("Cash", "Bank", "UPI", "Card")
@@ -184,17 +220,19 @@ fun CreateTransactionScreen(
                     state = datePickerState,
                     showModeToggle = false,
                     title = null,
-                    headline = null
+                    headline = null,
                 )
 
                 Button(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    enabled = state.value.enableCreateTransactionButton,
                     onClick = {
                         val transaction = Transaction.create(
                             id = Random.nextInt().toString(),
                             type = transactionType,
                             currencyAmount = CurrencyAmount(amount = amount.toDouble()),
-                            bank = null,
+                            bank = transactionMedium,
                             transactionDate = DateUtils.Local.formattedDateFromTimestamp(
                                 datePickerState.selectedDateMillis ?: System.currentTimeMillis()
                             ),
@@ -206,14 +244,15 @@ fun CreateTransactionScreen(
                         navController.popBackStack()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = surfaceBgColor,
+                        contentColor = contentColor
                     ),
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Text(
                         text = "Create Transaction",
                         modifier = Modifier
+                            .padding(vertical = 8.dp)
                     )
                 }
             }
@@ -231,6 +270,7 @@ private fun DropdownSelector(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .focusable()
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
@@ -238,7 +278,12 @@ private fun DropdownSelector(
             )
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable {
+                    menuExpanded = true
+                }
         ) {
             Text(
                 text = selected,
@@ -280,6 +325,7 @@ private fun DropdownSelector(
 @Composable
 private fun ScreenHeader(
     navController: NavController,
+    state: State<CreateTransactionState>,
     transactionType: TransactionType,
     amount: String,
     onAmountChange : (String) -> Unit
@@ -327,13 +373,17 @@ private fun ScreenHeader(
                     text = "How much?",
                     style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center,
-                    color = contentColor.brighten(0.9f),
+                    color = contentColor,
                     modifier = Modifier.padding(start = 16.dp)
                 )
+
+                val shouldShowError = state.value.error?.second == "amount"
+
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { onAmountChange(it) },
                     textStyle = MaterialTheme.typography.displayMedium,
+                    placeholder = { Text("0.00", style = MaterialTheme.typography.displayMedium, color = contentColor) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     prefix = { Text(
@@ -341,6 +391,18 @@ private fun ScreenHeader(
                         color = contentColor
                     ) }, // TODO: use local currency saved
                     shape = MaterialTheme.shapes.medium,
+                    isError = shouldShowError,
+                    supportingText = {
+                        if (shouldShowError){
+                            state.value.error?.first?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
@@ -349,6 +411,7 @@ private fun ScreenHeader(
                         unfocusedLabelColor = contentColor,
                         unfocusedTextColor = contentColor,
                         focusedTextColor = contentColor,
+                        cursorColor = contentColor
                     ),
                 )
             }

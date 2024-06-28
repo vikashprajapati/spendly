@@ -20,12 +20,7 @@ enum class TransactionCategory(
     HEALTH("Health", iconId = R.drawable.baseline_health_and_safety_24),
     BILLS("Bills", iconId = R.drawable.baseline_description_24),
     OTHER("Other", iconId = R.drawable.baseline_attach_money_24),
-    INCOME("Income", iconId = R.drawable.baseline_attach_money_24),
     TRANSFER("Transfer", iconId = R.drawable.baseline_send_to_mobile_24),
-    SALARY("Salary", iconId = R.drawable.baseline_attach_money_24),
-    REWARDS("Rewards", iconId = R.drawable.baseline_card_giftcard_24),
-    REFUND("Refund", iconId = R.drawable.baseline_autorenew_24),
-    GIFTS("Gifts", iconId = R.drawable.baseline_card_giftcard_24),
     RENT("Rent", iconId = R.drawable.baseline_home_work_24),
     FUEL("Fuel", iconId = R.drawable.baseline_water_drop_24),
     ELECTRICITY("Electricity", iconId = R.drawable.baseline_electric_meter_24),
@@ -44,4 +39,17 @@ enum class TransactionCategory(
             return entries.firstOrNull { it.value == value }?: OTHER
         }
     }
+}
+
+enum class CashInflowCategory(
+    val value: String,
+    val color : Color = randomPastelColor(),
+    val iconTint : Color = color.brighten(),
+    val iconId: Int = 0
+){
+    INCOME("Income", iconId = R.drawable.baseline_attach_money_24),
+    SALARY("Salary", iconId = R.drawable.baseline_attach_money_24),
+    REWARDS("Rewards", iconId = R.drawable.baseline_card_giftcard_24),
+    REFUND("Refund", iconId = R.drawable.baseline_autorenew_24),
+    GIFTS("Gifts", iconId = R.drawable.baseline_card_giftcard_24),
 }

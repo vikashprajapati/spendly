@@ -15,6 +15,14 @@ import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
 import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.transaction.data.AmountValidator
+import dev.nomadicprogrammer.spendly.transaction.data.CategoryValidator
+import dev.nomadicprogrammer.spendly.transaction.data.DateValidator
+import dev.nomadicprogrammer.spendly.transaction.data.SecondPartyValidator
+import dev.nomadicprogrammer.spendly.transaction.data.TransactionMetadataValidator
+import dev.nomadicprogrammer.spendly.transaction.data.ValidateCreateTransactionStateUseCase
+import dev.nomadicprogrammer.spendly.transaction.data.Validator
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -52,5 +60,32 @@ object AppModule {
     @Provides
     fun updateTransactionUseCase(transactionRepository: TransactionRepository) : UpdateTransactionsUseCase{
         return UpdateTransactionsUseCase(transactionRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideValidateCreateTransactionStateUseCase(validator: Validator) : ValidateCreateTransactionStateUseCase {
+        return ValidateCreateTransactionStateUseCase(validator)
+    }
+
+
+    @Singleton
+    @Provides
+    fun providesNewTransactionDetailsValidator() : Validator {
+        return AmountValidator().apply {
+            setNext(
+                CategoryValidator(categories = listOf("Food", "Grocery", "Fuel", "Rent", "EMI", "Others")).apply {
+                    setNext(DateValidator().apply {
+                        setNext(
+                            TransactionMetadataValidator(
+                                listOf("Cash", "Bank", "UPI", "Card")
+                            ).apply {
+                                setNext(SecondPartyValidator())
+                            }
+                        )
+                    })
+                }
+            )
+        }
     }
 }
