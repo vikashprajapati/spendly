@@ -1,7 +1,6 @@
 package dev.nomadicprogrammer.spendly.transaction.create
 
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerColors
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -68,14 +66,11 @@ import dev.nomadicprogrammer.spendly.base.CashInflowCategory
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.common.model.DEFAULT_UNDEFINED_SMS
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.ui.theme.brighten
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTransaction(
     navController: NavController,
@@ -437,7 +432,7 @@ private fun ScreenHeader(
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF, showSystemUi = true)
 @Composable
-fun previewCreateTransaction() {
+fun PreviewCreateTransaction() {
     val state = remember { mutableStateOf(CreateTransactionState()) }
     CreateTransactionScreen(transactionType = TransactionType.DEBIT, state = state, navController = rememberNavController() ) {
 
