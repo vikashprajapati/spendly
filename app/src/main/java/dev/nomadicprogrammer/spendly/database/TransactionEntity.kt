@@ -41,7 +41,7 @@ data class TransactionEntity(
             bank = bankName,
             currencyAmount = CurrencyAmount(currency, amount.toDouble()),
             smsId = smsId,
-            category = category?.let { TransactionCategory.fromValue(it) } ?: TransactionCategory.OTHER,
+            category = category?.let { TransactionCategory.fromValue(it) } ?: TransactionCategory.Other,
             transferredTo = if (type == TransactionType.CREDIT.name) secondParty else null,
             receivedFrom = if(type == TransactionType.DEBIT.name) secondParty else null
         )

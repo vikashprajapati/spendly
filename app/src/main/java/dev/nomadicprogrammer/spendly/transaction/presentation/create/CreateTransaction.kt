@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import dev.nomadicprogrammer.spendly.base.CashInflowCategory
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
@@ -177,9 +176,9 @@ fun CreateTransactionScreen(
 
                 val selectedCategory = remember { mutableStateOf("Category") }
                 val categoryList = if (transactionType == TransactionType.DEBIT) {
-                    TransactionCategory.entries.map { it.value }
+                    TransactionCategory.Expenses.entries.map { it.value }
                 } else {
-                    CashInflowCategory.entries.map { it.value }
+                    TransactionCategory.CashInflowCategory.entries.map { it.value }
                 }
                 DropdownSelector(
                     selected = selectedCategory.value,

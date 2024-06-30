@@ -25,7 +25,7 @@ import dev.nomadicprogrammer.spendly.base.TransactionCategory
 
 @Composable
 fun TransactionCategoriesGrid(
-    tagCategories: List<TransactionCategory> = TransactionCategory.entries,
+    tagCategories: List<TransactionCategory> = TransactionCategory.allCategories,
     selectedCategory : TransactionCategory?,
     verticalItemSpacing : Dp = 8.dp,
     horizontalArrangement : Arrangement.Horizontal = Arrangement.spacedBy(8.dp),
@@ -78,7 +78,7 @@ fun TransactionCategoriesGrid(
 @Preview
 @Composable
 fun TransactionCategoriesGridPreview() {
-    TransactionCategoriesGrid(selectedCategory = TransactionCategory.ENTERTAINMENT) {
+    TransactionCategoriesGrid(selectedCategory = TransactionCategory.Expenses.ENTERTAINMENT) {
 
     }
 }

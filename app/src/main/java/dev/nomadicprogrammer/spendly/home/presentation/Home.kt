@@ -271,7 +271,7 @@ fun RecentTransactions(
             "12-12-2021",
             "Amit",
             "Sbi",
-            TransactionCategory.TRAVEL
+            TransactionCategory.Expenses.BUS
         ),
 
         Transaction.create(
@@ -283,7 +283,7 @@ fun RecentTransactions(
             "12-12-2021",
             "Amit",
             "Sbi",
-            TransactionCategory.TRANSFER
+            TransactionCategory.CashInflowCategory.SALARY
         )
     )
     Column(modifier = Modifier.padding(16.dp)) {

@@ -38,11 +38,11 @@ class TransactionNotification(
     }
 
     private fun createAction(context: Context, category : TransactionCategory): Action {
-        val actionIntent = UpdateTransactionCategoryAction.createIntent(context, transactionId, category.name, notificationId)
+        val actionIntent = UpdateTransactionCategoryAction.createIntent(context, transactionId, category.value, notificationId)
         val pendingIntent = PendingIntent.getBroadcast(context, Random().nextInt(), actionIntent, PendingIntent.FLAG_IMMUTABLE)
         return Action.Builder(
             /* icon = */ IconCompat.createWithResource(context, category.iconId),
-            /* title = */ category.name,
+            /* title = */ category.value,
             /* intent = */ pendingIntent).build()
     }
 

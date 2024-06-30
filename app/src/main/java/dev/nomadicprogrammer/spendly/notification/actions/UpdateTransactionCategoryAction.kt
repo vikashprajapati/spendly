@@ -65,7 +65,7 @@ class UpdateTransactionCategoryAction @Inject constructor(
 
     private fun getIntentParams(intent: Intent?): Triple<String, String, Int>? {
         val transactionId = intent?.getStringExtra(INTENT_PARAM_TRANSACTION_ID) ?: return null
-        val category = intent.getStringExtra(INTENT_PARAM_TRANSACTION_CATEGORY) ?: TransactionCategory.OTHER.name
+        val category = intent.getStringExtra(INTENT_PARAM_TRANSACTION_CATEGORY) ?: TransactionCategory.Other.value
         val notificationID = intent.getIntExtra(INTENT_PARAM_NOTIFICATION_ID, -1)
         Log.d(TAG, "TransactionId: $transactionId, Category: $category")
         return Triple(transactionId, category, notificationID)
