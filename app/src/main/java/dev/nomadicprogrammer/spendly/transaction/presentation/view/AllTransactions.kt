@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction
+package dev.nomadicprogrammer.spendly.transaction.presentation.view
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -20,15 +20,13 @@ import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.R
 import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
-import dev.nomadicprogrammer.spendly.transaction.transactiondetails.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
-import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTransactions(homeViewModel: HomeViewModel){
     val uiState by homeViewModel.state.collectAsState()
-    val customFilter = stringResource(id = ViewBy.entries.toTypedArray()[uiState.selectedTabIndex].resId)
+    val customFilter = stringResource(id = uiState.currentViewBy.resId)
     
     Column(
         modifier = Modifier.padding(16.dp)

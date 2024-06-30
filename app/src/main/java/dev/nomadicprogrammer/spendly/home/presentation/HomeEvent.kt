@@ -1,7 +1,6 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
-import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 
 sealed class HomeEvent{
     data object PageLoad : HomeEvent()

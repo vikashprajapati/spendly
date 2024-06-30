@@ -1,6 +1,6 @@
 package dev.nomadicprogrammer.spendly.transaction.data
 
-import dev.nomadicprogrammer.spendly.transaction.create.CreateTransactionState
+import dev.nomadicprogrammer.spendly.transaction.presentation.create.CreateTransactionState
 import javax.inject.Inject
 
 class ValidateCreateTransactionStateUseCase @Inject constructor(

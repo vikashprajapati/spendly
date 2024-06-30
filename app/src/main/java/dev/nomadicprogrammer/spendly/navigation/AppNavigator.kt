@@ -20,8 +20,8 @@ import dev.nomadicprogrammer.spendly.checkAndRequestPermission
 import dev.nomadicprogrammer.spendly.home.presentation.Home
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.transaction.AllTransactions
-import dev.nomadicprogrammer.spendly.transaction.create.CreateTransaction
+import dev.nomadicprogrammer.spendly.transaction.presentation.view.AllTransactions
+import dev.nomadicprogrammer.spendly.transaction.presentation.create.CreateTransaction
 
 @Composable
 fun AppNavigator(){

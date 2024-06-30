@@ -40,26 +40,6 @@ import javax.inject.Singleton
         )
     }
 
-    @Singleton
-    @Provides
-    fun providesTransactionSmsClassifier(
-        @AmountParserQualifier amountParser: Parser,
-        @BankNameParserQualifier bankNameParser: Parser,
-        @TransactionDateParserQualifier dateParser: Parser,
-        @ReceiverDetailsParserQualifier receiverDetailsParser: Parser,
-        @SenderDetailsParserQualifier senderDetailsParser: Parser,
-        regexProvider: RegexProvider
-    ) : TransactionSmsClassifier{
-        return TransactionSmsClassifier(
-            regexProvider = regexProvider,
-            amountParser = amountParser,
-            bankNameParser = bankNameParser,
-            dateParser = dateParser,
-            receiverDetailsParser = receiverDetailsParser,
-            senderDetailsParser = senderDetailsParser
-        )
-    }
-
     @Provides
     fun providesSpendAnalyserUseCase(
         @ApplicationContext context: Context,

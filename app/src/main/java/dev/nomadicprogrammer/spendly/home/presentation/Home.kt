@@ -51,7 +51,7 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.transaction.transactiondetails.TransactionDetails
+import dev.nomadicprogrammer.spendly.transaction.presentation.view.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.CircularLoading
 import dev.nomadicprogrammer.spendly.ui.components.FabActionItem
 import dev.nomadicprogrammer.spendly.ui.components.FabMainItem
@@ -59,7 +59,6 @@ import dev.nomadicprogrammer.spendly.ui.components.MultipleFloatingActionButton
 import dev.nomadicprogrammer.spendly.ui.components.TabButton
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 import dev.nomadicprogrammer.spendly.ui.components.TransactionSummaryChart
-import dev.nomadicprogrammer.spendly.ui.utils.ViewBy
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 

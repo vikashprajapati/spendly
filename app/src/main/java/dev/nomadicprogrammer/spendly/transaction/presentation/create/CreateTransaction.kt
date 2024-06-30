@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.create
+package dev.nomadicprogrammer.spendly.transaction.presentation.create
 
 import android.app.Activity
 import android.widget.Toast

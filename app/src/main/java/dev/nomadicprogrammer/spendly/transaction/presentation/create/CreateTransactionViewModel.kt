@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.create
+package dev.nomadicprogrammer.spendly.transaction.presentation.create
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -29,7 +29,9 @@ class CreateTransactionViewModel @Inject constructor(
     private val dateValidator: Validator,
     private val validateCreateTransactionStateUseCase: ValidateCreateTransactionStateUseCase
 ) : ViewModel() {
-    private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(CreateTransactionState())
+    private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(
+        CreateTransactionState()
+    )
     val state : StateFlow<CreateTransactionState> = _state // why we are using state flow here?, backing field?
 
     private val _toastMessage : MutableSharedFlow<String?> = MutableSharedFlow()
@@ -50,7 +52,7 @@ class CreateTransactionViewModel @Inject constructor(
                 }
             }
 
-            is CreateTransactionEvents.OnTransactionAmountChanged-> {
+            is CreateTransactionEvents.OnTransactionAmountChanged -> {
                 Log.d("CreateTransactionViewModel", "Amount changed: ${event.amount}")
                 _state.value = _state.value.copy(transactionAmount = event.amount)
                 validateState(amountValidator)

@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.ui.utils
+package dev.nomadicprogrammer.spendly.home.presentation
 
 import dev.nomadicprogrammer.spendly.R
 
