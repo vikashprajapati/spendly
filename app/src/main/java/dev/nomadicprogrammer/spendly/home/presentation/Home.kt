@@ -156,8 +156,8 @@ fun Home(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            val sheetState = rememberModalBottomSheetState()
             if (uiState.dialogTransactionalSmsSms != null) {
+                val sheetState = rememberModalBottomSheetState()
                 TransactionDetails(
                     homeViewModel = viewModel,
                     sheetState = sheetState,
@@ -168,9 +168,14 @@ fun Home(
                         Log.d("Home", "Transaction updated: $it")
                         val newStateHolder = uiState.dialogTransactionalSmsSms?.copy(transactionalSms = it)
                         viewModel.onEvent(HomeEvent.TransactionUpdate(newStateHolder!!))
-                        Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
                     }
                 )
+            }
+
+            val toastMessage = viewModel.toastMessage.collectAsState(null)
+            if (!toastMessage.value.isNullOrEmpty()) {
+                Toast.makeText(context, toastMessage.value, Toast.LENGTH_SHORT).show()
+                viewModel.onEvent(HomeEvent.ClearToastMessage)
             }
 
             RecentTransactions(

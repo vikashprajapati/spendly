@@ -15,4 +15,6 @@ sealed class HomeEvent{
     data object TransactionDetailsDialogLoaded : HomeEvent()
 
     data object ReadSmsPermissionGranted : HomeEvent()
+
+    data object ClearToastMessage : HomeEvent()
 }

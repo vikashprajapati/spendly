@@ -6,23 +6,24 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResources
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
 import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
-import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -30,12 +31,16 @@ class HomeViewModel @Inject constructor(
     private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
     private val updateTransactionsUseCase: UpdateTransactionsUseCase,
     private val originalSmsFetchUseCase: OriginalSmsFetchUseCase,
-    val transactionCategoryResource: List<TransactionCategoryResource>
+    val transactionCategoryResource: List<TransactionCategoryResource>,
+    val transactionCategoryResources: TransactionCategoryResources
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
     private val _state = MutableStateFlow(HomeScreenState())
     val state : StateFlow<HomeScreenState> = _state
+
+    private val _toastMessage = MutableSharedFlow<String?>()
+    val toastMessage : SharedFlow<String?> = _toastMessage
 
     private var transactionClassifierJob : Job?= null
     private var getAllTransactionJob : Job?= null
@@ -67,7 +72,7 @@ class HomeViewModel @Inject constructor(
                     getAllTransactionsUseCase()
                         .collect{
                             Log.d(TAG, "All transactions: $it")
-                            updateState(it?: emptyList())
+                            updateState(it?.reversed()?: emptyList())
                         }
                 }
             }
@@ -86,6 +91,20 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     val rowsUpdated = updateTransactionsUseCase(event.transactionStateHolder.transactionalSms)
                     Log.d(TAG, "Rows updated: $rowsUpdated")
+                    if(rowsUpdated > 0){
+                        val allTransactions = _state.value.allTransactionalSms.toMutableList()
+                        val newTransactionStateHolder = TransactionStateHolder(event.transactionStateHolder.transactionalSms, transactionCategoryResources.getResource(event.transactionStateHolder.transactionalSms.category))
+                        allTransactions[allTransactions.indexOfFirst { it.transactionalSms.id == event.transactionStateHolder.transactionalSms.id }] = newTransactionStateHolder
+                        _state.value = _state.value.copy(dialogTransactionalSmsSms = null)
+                        updateState(allTransactions.toList())
+                        _toastMessage.emit("Transaction updated")
+                    }
+                }
+            }
+
+            is HomeEvent.ClearToastMessage -> {
+                viewModelScope.launch {
+                    _toastMessage.emit(null)
                 }
             }
 
@@ -110,8 +129,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun updateState(allTransactionalSms: List<TransactionStateHolder>) {
-        val sortedTransactions = allTransactionalSms.reversed()
+    private fun updateState(sortedTransactions: List<TransactionStateHolder>) {
         _state.value = _state.value.copy(
             allTransactionalSms = sortedTransactions,
             recentTransactionalSms = sortedTransactions.take(5),

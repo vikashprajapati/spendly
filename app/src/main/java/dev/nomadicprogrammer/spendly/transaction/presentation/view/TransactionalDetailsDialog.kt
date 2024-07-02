@@ -130,7 +130,6 @@ fun TransactionDetails(
                 onClick = {
                     val updatedTransaction = if(transactionalSms is Debit) transactionalSms.copy(category = selectedCategory.value.transactionCategory) else (transactionalSms as Credit).copy(category = selectedCategory.value.transactionCategory)
                     onUpdateClick(updatedTransaction)
-                    onDismiss()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
