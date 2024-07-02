@@ -8,8 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
-import dev.nomadicprogrammer.spendly.base.TransactionCategoryResources
-import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.database.AppDatabase
 import dev.nomadicprogrammer.spendly.database.TransactionCategoryConverter
 import dev.nomadicprogrammer.spendly.database.TransactionDao
@@ -62,7 +61,7 @@ object AppModule {
     @Singleton
     @Provides
     fun getAllTransactionUseCase(@ApplicationContext context: Context, transactionRepository: TransactionRepository) : GetAllTransactionsUseCase{
-        return GetAllTransactionsUseCase(transactionRepository, TransactionCategoryResources(context))
+        return GetAllTransactionsUseCase(transactionRepository, TransactionCategoryResourceProvider(context))
     }
 
     @Singleton
@@ -108,19 +107,19 @@ object AppModule {
     @Named("notificationActionCategories")
     fun provideCategoriesForNotificationActions(
         categories: Categories,
-        transactionCategoryResources: TransactionCategoryResources
+        transactionCategoryResourceProvider: TransactionCategoryResourceProvider
     ): List<Pair<String, TransactionCategoryResource>> {
         return (categories.cashOutflow + categories.cashInflow)
             .shuffled()
             .take(3)
-            .map { Pair(it.name, transactionCategoryResources.getResource(it)) }
+            .map { Pair(it.name, transactionCategoryResourceProvider.getResource(it)) }
     // TODO: Enhance to use a more sophisticated algorithm
     }
 
     @Provides
     @Singleton
-    fun provideTransactionCategoryResources(@ApplicationContext context: Context) : TransactionCategoryResources {
-        return TransactionCategoryResources(context)
+    fun provideTransactionCategoryResources(@ApplicationContext context: Context) : TransactionCategoryResourceProvider {
+        return TransactionCategoryResourceProvider(context)
     }
 
     @Provides
@@ -139,9 +138,9 @@ object AppModule {
     @Provides
     fun provideAllCategoryResources(
         categories: Categories,
-        transactionCategoryResources: TransactionCategoryResources
+        transactionCategoryResourceProvider: TransactionCategoryResourceProvider
     ): List<TransactionCategoryResource> {
         return (categories.cashOutflow + categories.cashInflow)
-            .map { transactionCategoryResources.getResource(it) }
+            .map { transactionCategoryResourceProvider.getResource(it) }
     }
 }

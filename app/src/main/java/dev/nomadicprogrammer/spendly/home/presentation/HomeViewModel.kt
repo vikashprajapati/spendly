@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
-import dev.nomadicprogrammer.spendly.base.TransactionCategoryResources
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
@@ -32,7 +32,7 @@ class HomeViewModel @Inject constructor(
     private val updateTransactionsUseCase: UpdateTransactionsUseCase,
     private val originalSmsFetchUseCase: OriginalSmsFetchUseCase,
     val transactionCategoryResource: List<TransactionCategoryResource>,
-    val transactionCategoryResources: TransactionCategoryResources
+    private val transactionCategoryResourceProvider: TransactionCategoryResourceProvider
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
@@ -93,7 +93,7 @@ class HomeViewModel @Inject constructor(
                     Log.d(TAG, "Rows updated: $rowsUpdated")
                     if(rowsUpdated > 0){
                         val allTransactions = _state.value.allTransactionalSms.toMutableList()
-                        val newTransactionStateHolder = TransactionStateHolder(event.transactionStateHolder.transactionalSms, transactionCategoryResources.getResource(event.transactionStateHolder.transactionalSms.category))
+                        val newTransactionStateHolder = TransactionStateHolder(event.transactionStateHolder.transactionalSms, transactionCategoryResourceProvider.getResource(event.transactionStateHolder.transactionalSms.category))
                         allTransactions[allTransactions.indexOfFirst { it.transactionalSms.id == event.transactionStateHolder.transactionalSms.id }] = newTransactionStateHolder
                         _state.value = _state.value.copy(dialogTransactionalSmsSms = null)
                         updateState(allTransactions.toList())

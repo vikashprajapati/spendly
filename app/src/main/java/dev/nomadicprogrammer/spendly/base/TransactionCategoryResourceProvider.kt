@@ -1,15 +1,13 @@
 package dev.nomadicprogrammer.spendly.base
 
 import android.content.Context
-import android.content.res.Resources.NotFoundException
 import androidx.compose.ui.graphics.Color
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.theme.brighten
 import dev.nomadicprogrammer.spendly.ui.theme.randomPastelColor
 
-class TransactionCategoryResources(@ApplicationContext private val context: Context) {
+class TransactionCategoryResourceProvider(@ApplicationContext private val context: Context) {
     fun getResource(transactionCategory: TransactionCategory): TransactionCategoryResource {
         val name = transactionCategory.name
         return TransactionCategoryResource(transactionCategory, getIcon(name), getColor(name))
