@@ -11,15 +11,17 @@ class GetAllTransactionsUseCase @Inject constructor(
     private val transactionEntityRepository: TransactionRepository,
     private val transactionCategoryResources: TransactionCategoryResources
 ) {
-    suspend operator fun invoke():Flow<List<TransactionStateHolder>?> {
-        val transactionalSmsList = transactionEntityRepository.getAllTransactions()
-        val  transactionStateHolders = transactionalSmsList.first()?.map { transactionalSms ->
-            TransactionStateHolder(
-                transactionalSms = transactionalSms,
-                transactionCategoryResource = transactionCategoryResources.getResource(transactionalSms.category)
-            )
+    suspend operator fun invoke():Flow<List<TransactionStateHolder>?>  = flow{
+        transactionEntityRepository.getAllTransactions().collect{
+            val  transactionStateHolders = it?.map { transactionalSms ->
+                TransactionStateHolder(
+                    transactionalSms = transactionalSms,
+                    transactionCategoryResource = transactionCategoryResources.getResource(transactionalSms.category)
+                )
+            }
+
+            emit(transactionStateHolders)
         }
 
-        return flow { emit(transactionStateHolders) }
     }
 }
