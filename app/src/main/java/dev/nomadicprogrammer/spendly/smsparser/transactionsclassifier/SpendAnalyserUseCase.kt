@@ -1,13 +1,12 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier
 
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.nomadicprogrammer.spendly.smsparser.common.Util.smsReadPermissionAvailable
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsInbox
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,7 +22,7 @@ import javax.inject.Inject
 
 class SpendAnalyserUseCase @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val transactionClassifier: SmsUseCase<Transaction>,
+    private val transactionalSmsClassifier: SmsUseCase<TransactionalSms>,
 ) {
     private val TAG = SpendAnalyserUseCase::class.simpleName
     private val _progress : MutableSharedFlow<Float> = MutableSharedFlow()
@@ -34,16 +33,16 @@ class SpendAnalyserUseCase @Inject constructor(
             return
         }
 
-        val filteredSms: MutableList<Transaction> = mutableListOf()
+        val filteredSms: MutableList<TransactionalSms> = mutableListOf()
 
         SmsInbox(context)
-            .readSms(transactionClassifier)
-            .onStart { transactionClassifier.getRegex() }
+            .readSms(transactionalSmsClassifier)
+            .onStart { transactionalSmsClassifier.getRegex() }
             .flowOn(Dispatchers.IO)
             .onEach { trackProgress(it) }
             .map { it.third }
             .filter { sms -> isNonPersonalSms(sms) }
-            .mapNotNull { sms -> transactionClassifier.filterMap(sms) }
+            .mapNotNull { sms -> transactionalSmsClassifier.filterMap(sms) }
             .onCompletion { error -> onComplete(error, filteredSms) }
             .flowOn(Dispatchers.Default)
             .toList(filteredSms)
@@ -52,23 +51,23 @@ class SpendAnalyserUseCase @Inject constructor(
     private suspend fun trackProgress(it: Triple<Int, Int, Sms>) {
         val progress = (it.first.toFloat() / it.second.toFloat()) * 100
         _progress.emit(progress)
-        transactionClassifier.onProgress(progress.toInt())
+        transactionalSmsClassifier.onProgress(progress.toInt())
     }
 
     private fun onComplete(
         error: Throwable?,
-        filteredSms: MutableList<Transaction>
+        filteredSms: MutableList<TransactionalSms>
     ) {
         if (error == null) {
-            transactionClassifier.onComplete(filteredSms)
+            transactionalSmsClassifier.onComplete(filteredSms)
         } else {
-            transactionClassifier.onError(error)
+            transactionalSmsClassifier.onError(error)
         }
     }
 
     private fun isNonPersonalSms(sms: Sms): Boolean {
-        val isNonPersonalSms = transactionClassifier.getRegex().isPositiveSender(sms.senderId) &&
-                    !transactionClassifier.getRegex().isNegativeSender(sms.senderId)
+        val isNonPersonalSms = transactionalSmsClassifier.getRegex().isPositiveSender(sms.senderId) &&
+                    !transactionalSmsClassifier.getRegex().isNegativeSender(sms.senderId)
 
         return isNonPersonalSms
     }

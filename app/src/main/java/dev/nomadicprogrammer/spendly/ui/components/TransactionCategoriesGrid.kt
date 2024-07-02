@@ -21,15 +21,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.nomadicprogrammer.spendly.base.TransactionCategory
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 
 @Composable
 fun TransactionCategoriesGrid(
-    tagCategories: List<TransactionCategory> = TransactionCategory.allCategories,
-    selectedCategory : TransactionCategory?,
+    tagCategories: List<TransactionCategoryResource>,
+    selectedCategory : TransactionCategoryResource?,
     verticalItemSpacing : Dp = 8.dp,
     horizontalArrangement : Arrangement.Horizontal = Arrangement.spacedBy(8.dp),
-    onCategorySelected : (TransactionCategory) -> Unit
+    onCategorySelected : (TransactionCategoryResource) -> Unit
 ) {
     LazyVerticalStaggeredGrid(
         modifier = Modifier
@@ -59,13 +59,13 @@ fun TransactionCategoriesGrid(
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                 ) {
                      Icon(
-                         painter = painterResource(id = tagCategories[index].iconId),
+                         painter = painterResource(id = tagCategories[index].icon.toInt()),
                          contentDescription = null,
                          tint = MaterialTheme.colorScheme.onSecondaryContainer
                      )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = tagCategories[index].value,
+                        text = tagCategories[index].transactionCategory.name,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -78,7 +78,12 @@ fun TransactionCategoriesGrid(
 @Preview
 @Composable
 fun TransactionCategoriesGridPreview() {
-    TransactionCategoriesGrid(selectedCategory = TransactionCategory.Expenses.ENTERTAINMENT) {
 
-    }
+//    TransactionCategoriesGrid(
+//        selectedCategory = TransactionCategory.Other,
+//        tagCategories = listOf(
+//        )
+//    ) {
+//
+//    }
 }

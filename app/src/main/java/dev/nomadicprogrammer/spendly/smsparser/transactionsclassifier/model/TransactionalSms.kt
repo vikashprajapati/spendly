@@ -1,8 +1,8 @@
 package dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model
 
-import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import java.io.Serializable
 
 const val DEFAULT_CURRENCY = "₹"
@@ -12,7 +12,7 @@ enum class TransactionType{
     CREDIT
 }
 
-sealed class Transaction(
+sealed class TransactionalSms(
     open val id : String?= null,
     val type: TransactionType,
     open val transactionDate: String?,
@@ -34,7 +34,7 @@ sealed class Transaction(
             receivedFrom: String? = null,
             category: TransactionCategory = TransactionCategory.Other,
             smsId: String? = null
-        ): Transaction {
+        ): TransactionalSms {
             return when(type){
                 TransactionType.DEBIT -> Debit(
                     id= id,
@@ -60,7 +60,7 @@ data class Debit(
     override val originalSms: Sms? = null,
     override val category: TransactionCategory = TransactionCategory.Other,
     override val smsId: String? = null
-) : Transaction(
+) : TransactionalSms(
     id, TransactionType.DEBIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId
 )
 
@@ -73,4 +73,4 @@ data class Credit(
     override val originalSms: Sms ?= null,
     override val category: TransactionCategory = TransactionCategory.Other,
     override val smsId: String? = null
-) : Transaction(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId)
+) : TransactionalSms(id, TransactionType.CREDIT, transactionDate, bankName, currencyAmount, originalSms, category, smsId)

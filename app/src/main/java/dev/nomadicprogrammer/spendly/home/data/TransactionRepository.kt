@@ -1,14 +1,14 @@
 package dev.nomadicprogrammer.spendly.home.data
 
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
-    suspend fun saveTransaction(transactionalSms: Transaction) : Long
+    suspend fun saveTransaction(transactionalSms: TransactionalSms) : Long
 
-    suspend fun saveTransactions(transactionalSms: List<Transaction>)
+    suspend fun saveTransactions(transactionalSms: List<TransactionalSms>)
 
-    suspend fun getAllTransactions(): Flow<List<Transaction>?>
+    suspend fun getAllTransactions(): Flow<List<TransactionalSms>?>
 
-    suspend fun updateTransaction(transaction: Transaction) : Int
+    suspend fun updateTransaction(transactionalSms: TransactionalSms) : Int
 }

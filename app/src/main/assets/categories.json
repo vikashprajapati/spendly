@@ -1,0 +1,30 @@
+{
+  "CashOutflow": [
+    {"name": "food"},
+    {"name": "grocery"},
+    {"name": "shopping"},
+    {"name": "entertainment"},
+    {"name": "travel"},
+    {"name": "health"},
+    {"name": "bills"},
+    {"name": "transfer"},
+    {"name": "rent"},
+    {"name": "fuel"},
+    {"name": "electricity"},
+    {"name": "water"},
+    {"name": "phone"},
+    {"name": "internet"},
+    {"name": "credit_card"},
+    {"name": "car"},
+    {"name": "bus"},
+    {"name": "movie"},
+    {"name": "restaurant"}
+  ],
+  "CashInflow": [
+    {"name": "income"},
+    {"name": "salary"},
+    {"name": "rewards"},
+    {"name": "refund"},
+    {"name": "gifts"}
+  ]
+}

@@ -44,13 +44,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
-import dev.nomadicprogrammer.spendly.base.TransactionCategory
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
+import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.navigation.NewTransaction
 import dev.nomadicprogrammer.spendly.navigation.SeeAllTransaction
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.transaction.presentation.view.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.CircularLoading
 import dev.nomadicprogrammer.spendly.ui.components.FabActionItem
@@ -134,19 +136,19 @@ fun Home(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            val income by remember(uiState.currentViewTransactions) {
+            val income by remember(uiState.currentViewTransactionalSms) {
                 derivedStateOf {
-                    uiState.currentViewTransactions
-                        .filter { it.type == TransactionType.CREDIT }
-                        .sumOf { it.currencyAmount.amount }
+                    uiState.currentViewTransactionalSms
+                        .filter { it.transactionalSms.type == TransactionType.CREDIT }
+                        .sumOf { it.transactionalSms.currencyAmount.amount }
                         .toFloat()
                 }
             }
-            val expense by remember(uiState.currentViewTransactions) {
+            val expense by remember(uiState.currentViewTransactionalSms) {
                 derivedStateOf {
-                    uiState.currentViewTransactions
-                        .filter { it.type == TransactionType.DEBIT }
-                        .sumOf { it.currencyAmount.amount }
+                    uiState.currentViewTransactionalSms
+                        .filter { it.transactionalSms.type == TransactionType.DEBIT }
+                        .sumOf { it.transactionalSms.currencyAmount.amount }
                         .toFloat()
                 }
             }
@@ -155,8 +157,7 @@ fun Home(
             Spacer(modifier = Modifier.height(24.dp))
 
             val sheetState = rememberModalBottomSheetState()
-            val context = LocalContext.current
-            if (uiState.dialogTransactionSms != null) {
+            if (uiState.dialogTransactionalSmsSms != null) {
                 TransactionDetails(
                     homeViewModel = viewModel,
                     sheetState = sheetState,
@@ -165,14 +166,15 @@ fun Home(
                     },
                     onUpdateClick = {
                         Log.d("Home", "Transaction updated: $it")
-                        viewModel.onEvent(HomeEvent.TransactionUpdate(it))
+                        val newStateHolder = uiState.dialogTransactionalSmsSms?.copy(transactionalSms = it)
+                        viewModel.onEvent(HomeEvent.TransactionUpdate(newStateHolder!!))
                         Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
 
             RecentTransactions(
-                uiState.recentTransactions,
+                uiState.recentTransactionalSms,
                 onTransactionSmsClick = {
                     viewModel.onEvent(HomeEvent.TransactionSelected(it))
                 },
@@ -221,8 +223,8 @@ private fun HomeMainFab(navController: NavController) {
 
 @Composable
 fun RecentTransactions(
-    recentTransactions: List<Transaction>,
-    onTransactionSmsClick : (Transaction) -> Unit,
+    recentTransactionalSms: List<TransactionStateHolder>,
+    onTransactionSmsClick : (TransactionStateHolder) -> Unit,
     onSeeAllClick : () -> Unit
 ) {
     Column {
@@ -252,7 +254,7 @@ fun RecentTransactions(
             }
         }
         LazyColumn {
-            items(recentTransactions, key = { it.id ?: Random.nextInt() }) { transaction ->
+            items(recentTransactionalSms, key = { it.transactionalSms.id ?: Random.nextInt() }) { transaction ->
                 TransactionItemCard(transaction, onTransactionSmsClick)
             }
         }
@@ -261,8 +263,8 @@ fun RecentTransactions(
 
 @Preview(showBackground = true, showSystemUi = false)
 @Composable fun RecentPreview(){
-    val transactions= listOf(
-        Transaction.create(
+    val transactionalSms= listOf(
+        TransactionalSms.create(
             id = "dfd",
             TransactionType.DEBIT,
             Sms("id", "", "", System.currentTimeMillis()),
@@ -271,10 +273,10 @@ fun RecentTransactions(
             "12-12-2021",
             "Amit",
             "Sbi",
-            TransactionCategory.Expenses.BUS
+            TransactionCategory.CashOutflow("Grocery")
         ),
 
-        Transaction.create(
+        TransactionalSms.create(
             "idfd",
             TransactionType.CREDIT,
             Sms("id", "", "", System.currentTimeMillis()),
@@ -283,12 +285,15 @@ fun RecentTransactions(
             "12-12-2021",
             "Amit",
             "Sbi",
-            TransactionCategory.CashInflowCategory.SALARY
+            TransactionCategory.Other
         )
     )
+    val stateHolder = transactionalSms.map {
+        TransactionStateHolder(it, TransactionCategoryResource(TransactionCategory.Other, R.drawable.bus_icon, MaterialTheme.colorScheme.primary))
+    }
     Column(modifier = Modifier.padding(16.dp)) {
         RecentTransactions(
-            recentTransactions = transactions,
+            recentTransactionalSms = stateHolder,
             onTransactionSmsClick = {},
             onSeeAllClick = {}
         )

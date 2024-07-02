@@ -14,7 +14,7 @@ import dev.nomadicprogrammer.spendly.smsparser.parsers.DateParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.ReceiverDetailsParser
 import dev.nomadicprogrammer.spendly.smsparser.parsers.SenderDetailsParser
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -40,7 +40,7 @@ abstract class ParserModule {
     abstract fun senderDetailsParser(senderDetailsParser: SenderDetailsParser) : Parser
 
     @Binds
-    abstract fun smsInbox(smsInbox: SmsInbox): SmsDataSource<Transaction>
+    abstract fun smsInbox(smsInbox: SmsInbox): SmsDataSource<TransactionalSms>
 
     @Binds
     abstract fun localRegexProvider(localRegexProvider: LocalRegexProvider) : RegexProvider

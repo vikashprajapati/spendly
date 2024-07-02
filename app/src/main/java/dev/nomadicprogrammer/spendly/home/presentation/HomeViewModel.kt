@@ -5,13 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
+import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
 import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +22,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val spendAnalyserUseCase: SpendAnalyserUseCase,
     private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
     private val updateTransactionsUseCase: UpdateTransactionsUseCase,
-    private val originalSmsFetchUseCase: OriginalSmsFetchUseCase
+    private val originalSmsFetchUseCase: OriginalSmsFetchUseCase,
+    val transactionCategoryResource: List<TransactionCategoryResource>
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
 
@@ -69,33 +74,33 @@ class HomeViewModel @Inject constructor(
 
             is HomeEvent.ViewBySelected -> {
                 viewModelScope.launch {
-                    _state.value = _state.value.copy(currentViewBy = event.viewBy, selectedTabIndex = event.index, currentViewTransactions = currentViewTransactions(event.viewBy))
+                    _state.value = _state.value.copy(currentViewBy = event.viewBy, selectedTabIndex = event.index, currentViewTransactionalSms = currentViewTransactions(event.viewBy))
                 }
             }
 
-            is HomeEvent.TransactionSelected -> { _state.value = _state.value.copy(dialogTransactionSms = event.transactionalSms) }
+            is HomeEvent.TransactionSelected -> { _state.value = _state.value.copy(dialogTransactionalSmsSms = event.transactionStateHolder) }
 
-            is HomeEvent.TransactionDialogDismissed -> { _state.value = _state.value.copy(dialogTransactionSms = null) }
+            is HomeEvent.TransactionDialogDismissed -> { _state.value = _state.value.copy(dialogTransactionalSmsSms = null) }
 
             is HomeEvent.TransactionUpdate -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val rowsUpdated = updateTransactionsUseCase(event.transaction)
+                    val rowsUpdated = updateTransactionsUseCase(event.transactionStateHolder.transactionalSms)
                     Log.d(TAG, "Rows updated: $rowsUpdated")
                 }
             }
 
             is HomeEvent.TransactionDetailsDialogLoaded -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    Log.d(TAG, "reading original sms for smsId: ${_state.value.dialogTransactionSms?.smsId}")
-                    val originalSms = _state.value.dialogTransactionSms?.smsId?.let {
+                    Log.d(TAG, "reading original sms for smsId: ${_state.value.dialogTransactionalSmsSms?.transactionalSms?.smsId}")
+                    val originalSms = _state.value.dialogTransactionalSmsSms?.transactionalSms?.smsId?.let {
                         originalSmsFetchUseCase.invoke(it)
                     }
                     Log.d(TAG, "Original sms: $originalSms")
-                    val transactionalSms = when(_state.value.dialogTransactionSms!!){
-                        is Debit -> (_state.value.dialogTransactionSms as Debit).copy(originalSms = originalSms)
-                        is Credit -> (_state.value.dialogTransactionSms as Credit).copy(originalSms = originalSms)
+                    val transactionalSmsNew = when(val transactionalSms = _state.value.dialogTransactionalSmsSms?.transactionalSms!!){
+                        is Debit -> transactionalSms.copy(originalSms = originalSms)
+                        is Credit -> transactionalSms.copy(originalSms = originalSms)
                     }
-                    _state.value = _state.value.copy(dialogTransactionSms = transactionalSms)
+                    _state.value = _state.value.copy(dialogTransactionalSmsSms = _state.value.dialogTransactionalSmsSms?.copy(transactionalSms = transactionalSmsNew))
                 }
             }
 
@@ -105,34 +110,34 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun updateState(allTransactions: List<Transaction>) {
-        val sortedTransactions = allTransactions.reversed()
+    private fun updateState(allTransactionalSms: List<TransactionStateHolder>) {
+        val sortedTransactions = allTransactionalSms.reversed()
         _state.value = _state.value.copy(
-            allTransactions = sortedTransactions,
-            recentTransactions = sortedTransactions.take(5),
-            todayTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(1)) },
-            thisWeekTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(7)) },
-            thisMonthTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(30)) }, // TODO: consider 30 or 31 or leap year,
-            thisQuarterTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(90)) },
-            thisHalfYearTransaction = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(180)) },
-            thisYearTransactions = sortedTransactions.filter { filterTransactionsByDate(it, DateUtils.Local.getPreviousDate(365)) },
+            allTransactionalSms = sortedTransactions,
+            recentTransactionalSms = sortedTransactions.take(5),
+            todayTransactionalSms = sortedTransactions.filter { filterTransactionsByDate(it.transactionalSms, DateUtils.Local.getPreviousDate(1)) },
+            thisWeekTransactionalSms = sortedTransactions.filter { filterTransactionsByDate(it.transactionalSms, DateUtils.Local.getPreviousDate(7)) },
+            thisMonthTransactionalSms = sortedTransactions.filter { filterTransactionsByDate(it.transactionalSms, DateUtils.Local.getPreviousDate(30)) }, // TODO: consider 30 or 31 or leap year,
+            thisQuarterTransactionalSms = sortedTransactions.filter { filterTransactionsByDate(it.transactionalSms, DateUtils.Local.getPreviousDate(90)) },
+            thisHalfYearTransactionalSms = sortedTransactions.filter { filterTransactionsByDate(it.transactionalSms, DateUtils.Local.getPreviousDate(180)) },
+            thisYearTransactionalSms = sortedTransactions.filter { filterTransactionsByDate(it.transactionalSms, DateUtils.Local.getPreviousDate(365)) },
             progress = 100f
         )
 
-        _state.value = _state.value.copy(currentViewTransactions = currentViewTransactions(_state.value.currentViewBy))
+        _state.value = _state.value.copy(currentViewTransactionalSms = currentViewTransactions(_state.value.currentViewBy))
     }
 
     private fun currentViewTransactions(currentViewBy : ViewBy) = when(currentViewBy){
-        ViewBy.Today -> _state.value.todayTransaction
-        ViewBy.WEEKLY -> _state.value.thisWeekTransactions
-        ViewBy.MONTHLY -> _state.value.thisMonthTransactions
-        ViewBy.Quarter -> _state.value.thisQuarterTransactions
-        ViewBy.MidYear -> _state.value.thisHalfYearTransaction
-        ViewBy.Yearly -> _state.value.thisYearTransactions
+        ViewBy.Today -> _state.value.todayTransactionalSms
+        ViewBy.WEEKLY -> _state.value.thisWeekTransactionalSms
+        ViewBy.MONTHLY -> _state.value.thisMonthTransactionalSms
+        ViewBy.Quarter -> _state.value.thisQuarterTransactionalSms
+        ViewBy.MidYear -> _state.value.thisHalfYearTransactionalSms
+        ViewBy.Yearly -> _state.value.thisYearTransactionalSms
     }
 
     private fun filterTransactionsByDate(
-        it: Transaction,
+        it: TransactionalSms,
         takeFrom: LocalDate?
     ) = it.transactionDate?.let { date ->
         val transactionDate = DateUtils.Local.getLocalDate(date)

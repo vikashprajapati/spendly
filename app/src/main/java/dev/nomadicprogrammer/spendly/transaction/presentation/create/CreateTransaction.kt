@@ -63,9 +63,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.nomadicprogrammer.spendly.base.DateUtils
-import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -176,9 +176,9 @@ fun CreateTransactionScreen(
 
                 val selectedCategory = remember { mutableStateOf("Category") }
                 val categoryList = if (transactionType == TransactionType.DEBIT) {
-                    TransactionCategory.Expenses.entries.map { it.value }
+                    state.value.categories.filterIsInstance<TransactionCategory.CashOutflow>().map { it.name }
                 } else {
-                    TransactionCategory.CashInflowCategory.entries.map { it.value }
+                    state.value.categories.filterIsInstance<TransactionCategory.CashInflow>().map { it.name }
                 }
                 DropdownSelector(
                     selected = selectedCategory.value,
@@ -222,7 +222,7 @@ fun CreateTransactionScreen(
                         .fillMaxWidth(),
                     enabled = state.value.enableCreateTransactionButton,
                     onClick = {
-                        val transaction = Transaction.create(
+                        val transactionalSms = TransactionalSms.create(
                             id = Random.nextInt().toString(),
                             type = transactionType,
                             currencyAmount = CurrencyAmount(amount = amount.toDouble()),
@@ -232,9 +232,9 @@ fun CreateTransactionScreen(
                             ),
                             transferredTo = if (transactionType == TransactionType.DEBIT) secondParty else null,
                             receivedFrom = if (transactionType == TransactionType.CREDIT) secondParty else null,
-                            category = TransactionCategory.fromValue(selectedCategory.value)
+                            category = if (transactionType == TransactionType.DEBIT) TransactionCategory.CashOutflow(selectedCategory.value) else TransactionCategory.CashInflow(selectedCategory.value)
                         )
-                        onEvent(CreateTransactionEvents.OnCreateTransactionClicked(transaction))
+                        onEvent(CreateTransactionEvents.OnCreateTransactionClicked(transactionalSms))
                         navController.popBackStack()
                     },
                     colors = ButtonDefaults.buttonColors(

@@ -21,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.nomadicprogrammer.spendly.base.DateUtils
@@ -29,8 +28,8 @@ import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.TransactionCategoriesGrid
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,10 +38,11 @@ fun TransactionDetails(
     homeViewModel: HomeViewModel,
     sheetState : SheetState,
     onDismiss : () -> Unit,
-    onUpdateClick: (transaction : Transaction) -> Unit
+    onUpdateClick: (transactionalSms : TransactionalSms) -> Unit
 ) {
     val state = homeViewModel.state.collectAsState()
-    val transactionalSms = state.value.dialogTransactionSms!!
+    val transactionalSms = state.value.dialogTransactionalSmsSms!!.transactionalSms
+    val transactionCategoryResource = state.value.dialogTransactionalSmsSms!!.transactionCategoryResource
 
     SideEffect {
         homeViewModel.onEvent(HomeEvent.TransactionDetailsDialogLoaded)
@@ -115,19 +115,20 @@ fun TransactionDetails(
             Spacer(modifier = Modifier.padding(8.dp))
 
             Text(text = "Tag Category", style = MaterialTheme.typography.titleSmall)
-            val selectedCategory = remember { mutableStateOf(transactionalSms.category) }
+            val selectedCategory = remember { mutableStateOf(transactionCategoryResource) }
+            val categories = homeViewModel.transactionCategoryResource
             TransactionCategoriesGrid(
-                selectedCategory = selectedCategory.value
+                selectedCategory = selectedCategory.value,
+                tagCategories = categories
             ){
                 selectedCategory.value = it
             }
 
             Spacer(modifier = Modifier.padding(8.dp))
 
-            val context = LocalContext.current
             Button(
                 onClick = {
-                    val updatedTransaction = if(transactionalSms is Debit) transactionalSms.copy(category = selectedCategory.value) else (transactionalSms as Credit).copy(category = selectedCategory.value)
+                    val updatedTransaction = if(transactionalSms is Debit) transactionalSms.copy(category = selectedCategory.value.transactionCategory) else (transactionalSms as Credit).copy(category = selectedCategory.value.transactionCategory)
                     onUpdateClick(updatedTransaction)
                     onDismiss()
                 },

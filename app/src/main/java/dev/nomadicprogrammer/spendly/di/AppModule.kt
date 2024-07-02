@@ -2,19 +2,24 @@ package dev.nomadicprogrammer.spendly.di
 
 import android.content.Context
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResources
+import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.database.AppDatabase
+import dev.nomadicprogrammer.spendly.database.TransactionCategoryConverter
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
-import dev.nomadicprogrammer.spendly.home.data.LocalTransactionRepository
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
 import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.BundledCategories
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.transaction.data.AmountValidator
 import dev.nomadicprogrammer.spendly.transaction.data.CategoryValidator
 import dev.nomadicprogrammer.spendly.transaction.data.DateValidator
@@ -22,7 +27,7 @@ import dev.nomadicprogrammer.spendly.transaction.data.SecondPartyValidator
 import dev.nomadicprogrammer.spendly.transaction.data.TransactionMetadataValidator
 import dev.nomadicprogrammer.spendly.transaction.data.ValidateCreateTransactionStateUseCase
 import dev.nomadicprogrammer.spendly.transaction.data.Validator
-import javax.inject.Qualifier
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -36,12 +41,16 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providesAppDatabase(@ApplicationContext context : Context): AppDatabase {
+    fun providesAppDatabase(
+        @ApplicationContext context : Context,
+        transactionCategoryConverter: TransactionCategoryConverter
+    ): AppDatabase {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
-        ).build()
+        ).addTypeConverter(transactionCategoryConverter)
+            .build()
     }
 
     @Singleton
@@ -52,8 +61,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun getAllTransactionUseCase(transactionRepository: TransactionRepository) : GetAllTransactionsUseCase{
-        return GetAllTransactionsUseCase(transactionRepository)
+    fun getAllTransactionUseCase(@ApplicationContext context: Context, transactionRepository: TransactionRepository) : GetAllTransactionsUseCase{
+        return GetAllTransactionsUseCase(transactionRepository, TransactionCategoryResources(context))
     }
 
     @Singleton
@@ -87,5 +96,52 @@ object AppModule {
                 }
             )
         }
+    }
+
+    @Singleton
+    @Provides
+    fun providesCategories(@ApplicationContext context: Context) : Categories{
+        return BundledCategories(context, "categories.json").parse()
+    }
+
+    @Provides
+    @Named("notificationActionCategories")
+    fun provideCategoriesForNotificationActions(
+        categories: Categories,
+        transactionCategoryResources: TransactionCategoryResources
+    ): List<Pair<String, TransactionCategoryResource>> {
+        return (categories.cashOutflow + categories.cashInflow)
+            .shuffled()
+            .take(3)
+            .map { Pair(it.name, transactionCategoryResources.getResource(it)) }
+    // TODO: Enhance to use a more sophisticated algorithm
+    }
+
+    @Provides
+    @Singleton
+    fun provideTransactionCategoryResources(@ApplicationContext context: Context) : TransactionCategoryResources {
+        return TransactionCategoryResources(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCashOutflowCategories(categories: Categories): List<TransactionCategory.CashOutflow> {
+        return categories.cashOutflow
+    }
+
+    @Provides
+    @Singleton
+    fun provideCashInflowCategories(categories: Categories): List<TransactionCategory.CashInflow> {
+        return categories.cashInflow
+    }
+
+    @Singleton
+    @Provides
+    fun provideAllCategoryResources(
+        categories: Categories,
+        transactionCategoryResources: TransactionCategoryResources
+    ): List<TransactionCategoryResource> {
+        return (categories.cashOutflow + categories.cashInflow)
+            .map { transactionCategoryResources.getResource(it) }
     }
 }

@@ -4,11 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
-import dev.nomadicprogrammer.spendly.transaction.data.CategoryValidator
-import dev.nomadicprogrammer.spendly.transaction.data.DateValidator
-import dev.nomadicprogrammer.spendly.transaction.data.SecondPartyValidator
-import dev.nomadicprogrammer.spendly.transaction.data.TransactionMetadataValidator
 import dev.nomadicprogrammer.spendly.transaction.data.ValidateCreateTransactionStateUseCase
 import dev.nomadicprogrammer.spendly.transaction.data.Validator
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +24,8 @@ class CreateTransactionViewModel @Inject constructor(
     private val secondPartyValidator: Validator,
     private val transactionMetadataValidator: Validator,
     private val dateValidator: Validator,
-    private val validateCreateTransactionStateUseCase: ValidateCreateTransactionStateUseCase
+    private val validateCreateTransactionStateUseCase: ValidateCreateTransactionStateUseCase,
+    private val transactionCategoryResource: List<TransactionCategoryResource>
 ) : ViewModel() {
     private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(
         CreateTransactionState()
@@ -41,7 +39,7 @@ class CreateTransactionViewModel @Inject constructor(
         when (event) {
             is CreateTransactionEvents.OnCreateTransactionClicked -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val rowsUpdated = saveTransactionsUseCase(event.transaction)
+                    val rowsUpdated = saveTransactionsUseCase(event.transactionalSms)
                     _toastMessage.emit(if(rowsUpdated > 0) "Transaction saved successfully" else "Failed to save transaction")
                 }
             }

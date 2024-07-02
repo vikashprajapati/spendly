@@ -13,7 +13,7 @@ import dev.nomadicprogrammer.spendly.smsparser.di.ReceiverDetailsParserQualifier
 import dev.nomadicprogrammer.spendly.smsparser.di.SenderDetailsParserQualifier
 import dev.nomadicprogrammer.spendly.smsparser.di.TransactionDateParserQualifier
 import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import javax.inject.Inject
 import kotlin.random.Random
@@ -31,7 +31,7 @@ class TransactionSmsClassifier @Inject constructor(
     private val creditTransactionIdentifierRegex by lazy { regexProvider.getCreditTransactionIdentifierRegex() ?: throw RegexFetchException("Regex not found") }
 
 
-    fun classify(sms: Sms): Transaction? {
+    fun classify(sms: Sms): TransactionalSms? {
         val transactionType = when {
             isDebitTransaction(sms) -> TransactionType.DEBIT
             isCreditTransaction(sms) -> TransactionType.CREDIT
@@ -48,7 +48,7 @@ class TransactionSmsClassifier @Inject constructor(
         }
         val transactionDate = dateParser.parse(sms.msgBody)?.let { DateUtils.Local.getFormattedDate(it) }
 
-        return Transaction.create(
+        return TransactionalSms.create(
             id = Random.nextInt().toString(),
             type = transactionType,
             sms = sms,

@@ -6,8 +6,8 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dev.nomadicprogrammer.spendly.base.TransactionCategory
 import dev.nomadicprogrammer.spendly.database.TransactionDao
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,7 +65,7 @@ class UpdateTransactionCategoryAction @Inject constructor(
 
     private fun getIntentParams(intent: Intent?): Triple<String, String, Int>? {
         val transactionId = intent?.getStringExtra(INTENT_PARAM_TRANSACTION_ID) ?: return null
-        val category = intent.getStringExtra(INTENT_PARAM_TRANSACTION_CATEGORY) ?: TransactionCategory.Other.value
+        val category = intent.getStringExtra(INTENT_PARAM_TRANSACTION_CATEGORY) ?: TransactionCategory.Other.name
         val notificationID = intent.getIntExtra(INTENT_PARAM_NOTIFICATION_ID, -1)
         Log.d(TAG, "TransactionId: $transactionId, Category: $category")
         return Triple(transactionId, category, notificationID)

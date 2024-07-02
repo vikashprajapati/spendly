@@ -9,11 +9,10 @@ import dagger.hilt.components.SingletonComponent
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.parsers.Parser
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.TransactionSmsClassifier
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.TransactionalSmsUseCase
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
@@ -30,7 +29,7 @@ import javax.inject.Singleton
         transactionSmsClassifier: TransactionSmsClassifier,
         regexProvider: RegexProvider,
         saveTransactionsUseCase: SaveTransactionsUseCase
-    ) : SmsUseCase<Transaction>{
+    ) : SmsUseCase<TransactionalSms>{
         return TransactionalSmsUseCase(
             context = context,
             transactionSmsClassifier = transactionSmsClassifier,
@@ -43,8 +42,8 @@ import javax.inject.Singleton
     @Provides
     fun providesSpendAnalyserUseCase(
         @ApplicationContext context: Context,
-        transactionClassifier: SmsUseCase<Transaction>
+        transactionalSmsClassifier: SmsUseCase<TransactionalSms>
     ) : SpendAnalyserUseCase {
-        return SpendAnalyserUseCase(context, transactionClassifier)
+        return SpendAnalyserUseCase(context, transactionalSmsClassifier)
     }
 }

@@ -1,20 +1,20 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 
 data class HomeScreenState(
-    val allTransactions : List<Transaction> = mutableListOf(),
-    val recentTransactions : List<Transaction> = mutableListOf(),
-    val todayTransaction: List<Transaction> = mutableListOf(),
-    val thisWeekTransactions: List<Transaction> = mutableListOf(),
-    val thisMonthTransactions: List<Transaction> = mutableListOf(),
-    val thisQuarterTransactions: List<Transaction> = mutableListOf(),
-    val thisHalfYearTransaction: List<Transaction> = mutableListOf(),
-    val thisYearTransactions: List<Transaction> = mutableListOf(),
+    val allTransactionalSms : List<TransactionStateHolder> = mutableListOf(),
+    val recentTransactionalSms : List<TransactionStateHolder> = mutableListOf(),
+    val todayTransactionalSms: List<TransactionStateHolder> = mutableListOf(),
+    val thisWeekTransactionalSms: List<TransactionStateHolder> = mutableListOf(),
+    val thisMonthTransactionalSms: List<TransactionStateHolder> = mutableListOf(),
+    val thisQuarterTransactionalSms: List<TransactionStateHolder> = mutableListOf(),
+    val thisHalfYearTransactionalSms: List<TransactionStateHolder> = mutableListOf(),
+    val thisYearTransactionalSms: List<TransactionStateHolder> = mutableListOf(),
     val currentViewBy : ViewBy = ViewBy.Today,
-    val currentViewTransactions : List<Transaction> = mutableListOf(),
+    val currentViewTransactionalSms : List<TransactionStateHolder> = mutableListOf(),
     val selectedTabIndex : Int = 0,
-    val dialogTransactionSms : Transaction? = null,
+    val dialogTransactionalSmsSms : TransactionStateHolder? = null,
     val progress: Float = 0f
 ){
 }

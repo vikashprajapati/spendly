@@ -38,7 +38,7 @@ fun AllTransactions(homeViewModel: HomeViewModel){
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
-        val transactionsToShow = uiState.currentViewTransactions
+        val transactionsToShow = uiState.currentViewTransactionalSms
         LazyColumn() {
             items(transactionsToShow) { transaction ->
                 TransactionItemCard(transaction){
@@ -49,7 +49,7 @@ fun AllTransactions(homeViewModel: HomeViewModel){
     }
 
     val sheetState = rememberModalBottomSheetState()
-    if (uiState.dialogTransactionSms != null) {
+    if (uiState.dialogTransactionalSmsSms != null) {
         val context = LocalContext.current
         TransactionDetails(
             homeViewModel = homeViewModel,
@@ -58,7 +58,7 @@ fun AllTransactions(homeViewModel: HomeViewModel){
                 homeViewModel.onEvent(HomeEvent.TransactionDialogDismissed)
             },
             onUpdateClick = {
-                homeViewModel.onEvent(HomeEvent.TransactionUpdate(it))
+                homeViewModel.onEvent(HomeEvent.TransactionUpdate(uiState.dialogTransactionalSmsSms!!.copy(transactionalSms = it)))
                 Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show()
                 // TODO: show a snackbar using proper state management
             }

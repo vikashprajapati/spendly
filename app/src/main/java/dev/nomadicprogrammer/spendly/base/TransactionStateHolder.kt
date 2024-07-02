@@ -1,0 +1,5 @@
+package dev.nomadicprogrammer.spendly.base
+
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
+
+data class TransactionStateHolder(val transactionalSms: TransactionalSms, val transactionCategoryResource: TransactionCategoryResource)

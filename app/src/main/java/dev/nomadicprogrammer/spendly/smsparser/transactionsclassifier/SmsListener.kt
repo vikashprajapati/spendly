@@ -6,15 +6,17 @@ import android.content.Intent
 import android.provider.Telephony
 import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
-import dev.nomadicprogrammer.spendly.base.TransactionCategoryProvider
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.notification.categories.TransactionNotification
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.random.Random
 
 @AndroidEntryPoint
@@ -22,6 +24,10 @@ class SmsListener : BroadcastReceiver(){
     private val TAG = SmsListener::class.java.simpleName
     @Inject
     lateinit var transactionSmsClassifier: TransactionSmsClassifier
+
+    @Inject
+    @Named("notificationActionCategories")
+    lateinit var actionCategories : List<Pair<String, TransactionCategoryResource>>
 
     @Inject
     lateinit var saveTransactionUseCase: SaveTransactionsUseCase
@@ -34,7 +40,7 @@ class SmsListener : BroadcastReceiver(){
                 if (transaction != null) {
                     withContext(Dispatchers.IO){
                         val transactionID = saveTransactionUseCase(transaction)
-                        val actionCategories = TransactionCategoryProvider.provideCategoriesForNotificationActions()
+                        val actionCategories = actionCategories
                         TransactionNotification(
                             transactionId = transactionID.toString(),
                             actionCategories = actionCategories

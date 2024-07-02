@@ -16,7 +16,7 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.common.model.SmsRegex
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.LocalRegexProvider
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.RegexProvider
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.firstOrNull
@@ -34,11 +34,11 @@ class TransactionalSmsUseCase @Inject constructor(
     private val transactionSmsClassifier: TransactionSmsClassifier,
     private val saveTransactionUseCase : SaveTransactionsUseCase,
     private val scope : CoroutineScope
-) : SmsUseCase<Transaction> {
+) : SmsUseCase<TransactionalSms> {
     private val TAG = TransactionalSmsUseCase::class.simpleName
 
     private val personalSmsExclusionRegex by lazy { regexProvider.getRegex() ?: throw RegexFetchException("Regex not found") }
-    private var filteredSms: List<Transaction> = emptyList()
+    private var filteredSms: List<TransactionalSms> = emptyList()
 
     override fun getRegex(): SmsRegex {
         return personalSmsExclusionRegex
@@ -70,12 +70,12 @@ class TransactionalSmsUseCase @Inject constructor(
         Log.d(TAG, "Progress: $progress")
     }
 
-    override fun filterMap(sms: Sms): Transaction? {
+    override fun filterMap(sms: Sms): TransactionalSms? {
         Log.d(TAG, "Filtering sms: ${DateUtils.Local.formattedDateWithTimeFromTimestamp(sms.date)}: $sms")
         return transactionSmsClassifier.classify(sms)
     }
 
-    override fun onComplete(filteredSms: List<Transaction>) {
+    override fun onComplete(filteredSms: List<TransactionalSms>) {
         Log.d(TAG, "onComplete")
         scope.launch {
             if (filteredSms.isEmpty()) {
@@ -95,7 +95,7 @@ class TransactionalSmsUseCase @Inject constructor(
         }
     }
 
-    override fun getFilteredResult(): List<Transaction> {
+    override fun getFilteredResult(): List<TransactionalSms> {
         return filteredSms
     }
 

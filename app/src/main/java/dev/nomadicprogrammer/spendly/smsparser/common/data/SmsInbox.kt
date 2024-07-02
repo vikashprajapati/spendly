@@ -10,13 +10,13 @@ import dev.nomadicprogrammer.spendly.smsparser.common.base.SmsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Range
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SmsReadPeriod
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 
-class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : SmsDataSource<Transaction> {
+class SmsInbox @Inject constructor(@ApplicationContext val context: Context) : SmsDataSource<TransactionalSms> {
     private val TAG = SmsInbox::class.simpleName
 
     private fun getRangeFilter(range: Range): String {

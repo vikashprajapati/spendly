@@ -1,6 +1,5 @@
 package dev.nomadicprogrammer.spendly.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,40 +14,38 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.ui.theme.brighten
 
 @Composable
 fun TransactionItemCard(
-    transaction: Transaction,
-    onTransactionClick : (Transaction) -> Unit = {}
+    transactionStateHolder: TransactionStateHolder,
+    onTransactionClick : (TransactionStateHolder) -> Unit = {}
 ){
+    val transactionalSms = transactionStateHolder.transactionalSms
+    val transactionCategoryResource = transactionStateHolder.transactionCategoryResource
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)
-            .clickable { onTransactionClick(transaction) },
+            .clickable { onTransactionClick(transactionStateHolder) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(id = transaction.category.iconId),
+            painter = painterResource(id = transactionCategoryResource.icon),
             modifier = Modifier
                 .size(48.dp)
-                .background(transaction.category.color, MaterialTheme.shapes.medium)
+                .background(transactionCategoryResource.color, MaterialTheme.shapes.medium)
                 .padding(12.dp),
             contentDescription = "Shopping",
-            tint = transaction.category.iconTint
+            tint = transactionCategoryResource.iconTint
         )
         Column(
             modifier = Modifier.padding(start = 16.dp)
@@ -58,30 +55,30 @@ fun TransactionItemCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val secondParty = when(transaction){
-                    is Debit -> transaction.transferredTo
-                    is Credit -> transaction.receivedFrom
+                val secondParty = when(transactionalSms){
+                    is Debit -> transactionalSms.transferredTo
+                    is Credit -> transactionalSms.receivedFrom
                 }
 
                 Column {
                     Text(
-                        text = transaction.category.value,
+                        text = transactionStateHolder.transactionalSms.category.name,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = secondParty ?: transaction.bankName ?: transaction.originalSms?.senderId?: "Unknown",
+                        text = secondParty ?: transactionalSms.bankName ?: transactionalSms.originalSms?.senderId?: "Unknown",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                val transactionSymbol = if (transaction.type == TransactionType.DEBIT) "-" else "+"
+                val transactionSymbol = if (transactionalSms.type == TransactionType.DEBIT) "-" else "+"
                 Text(
-                    text = "$transactionSymbol ${transaction.currencyAmount}",
+                    text = "$transactionSymbol ${transactionalSms.currencyAmount}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (transaction.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    color = if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
             }
         }

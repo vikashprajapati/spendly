@@ -4,28 +4,28 @@ import android.util.Log
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.database.TransactionEntity
 import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsDataSource
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Transaction
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class LocalTransactionRepository @Inject constructor(
     private val transactionDao: TransactionDao,
-    private val smsInbox: SmsDataSource<Transaction>
+    private val smsInbox: SmsDataSource<TransactionalSms>
 ) : TransactionRepository {
     private val TAG = LocalTransactionRepository::class.java.simpleName
 
-    override suspend fun saveTransaction(transactionalSms: Transaction) : Long {
+    override suspend fun saveTransaction(transactionalSms: TransactionalSms) : Long {
         val transactionEntity = TransactionEntity.toEntity(transactionalSms)
         return transactionDao.insertTransaction(transactionEntity)
     }
 
-    override suspend fun saveTransactions(transactionalSms: List<Transaction>) {
+    override suspend fun saveTransactions(transactionalSms: List<TransactionalSms>) {
         val transactionEntities = transactionalSms.map { TransactionEntity.toEntity(it) }
         transactionDao.insertTransactions(transactionEntities)
     }
 
-    override suspend fun getAllTransactions(): Flow<List<Transaction>> = flow{
+    override suspend fun getAllTransactions(): Flow<List<TransactionalSms>> = flow{
         transactionDao.getAllTransactions().collect{ transactionEntities->
             Log.d(TAG, "getAllTransactions: transactionEntities size: ${transactionEntities.size}")
             Log.d(TAG, "getAllTransactions: transactionEntities: $transactionEntities")
@@ -37,7 +37,7 @@ class LocalTransactionRepository @Inject constructor(
         }
     }
 
-    override suspend fun updateTransaction(transaction: Transaction): Int {
-        return transactionDao.updateTransactionCategory(transaction.id!!, transaction.category.value)
+    override suspend fun updateTransaction(transactionalSms: TransactionalSms): Int {
+        return transactionDao.updateTransactionCategory(transactionalSms.id!!, transactionalSms.category.name)
     }
 }
