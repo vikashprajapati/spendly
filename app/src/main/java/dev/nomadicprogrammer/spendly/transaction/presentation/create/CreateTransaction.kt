@@ -76,6 +76,7 @@ fun CreateTransaction(
     transactionType: TransactionType,
     viewModel : CreateTransactionViewModel = hiltViewModel()
 ) {
+    viewModel.onEvent(CreateTransactionEvents.OnTransactionPageLoad(transactionType))
     val state = viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -175,14 +176,9 @@ fun CreateTransactionScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val selectedCategory = remember { mutableStateOf("Category") }
-                val categoryList = if (transactionType == TransactionType.DEBIT) {
-                    state.value.categories.filterIsInstance<TransactionCategory.CashOutflow>().map { it.name }
-                } else {
-                    state.value.categories.filterIsInstance<TransactionCategory.CashInflow>().map { it.name }
-                }
                 DropdownSelector(
                     selected = selectedCategory.value,
-                    selectionOptions = categoryList
+                    selectionOptions = state.value.categories.map { it.transactionCategory.name }
                 ){
                     selectedCategory.value = it
                 }

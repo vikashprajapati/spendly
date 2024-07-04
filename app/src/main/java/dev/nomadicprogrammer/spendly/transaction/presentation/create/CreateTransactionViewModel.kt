@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.transaction.data.ValidateCreateTransactionStateUseCase
 import dev.nomadicprogrammer.spendly.transaction.data.Validator
 import kotlinx.coroutines.Dispatchers
@@ -25,18 +27,26 @@ class CreateTransactionViewModel @Inject constructor(
     private val transactionMetadataValidator: Validator,
     private val dateValidator: Validator,
     private val validateCreateTransactionStateUseCase: ValidateCreateTransactionStateUseCase,
-    private val transactionCategoryResource: List<TransactionCategoryResource>
+    private val transactionCategoryResourceProvider: TransactionCategoryResourceProvider,
+    private val categories: Categories
 ) : ViewModel() {
-    private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(
-        CreateTransactionState()
-    )
-    val state : StateFlow<CreateTransactionState> = _state // why we are using state flow here?, backing field?
+    private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(CreateTransactionState())
+    val state : StateFlow<CreateTransactionState> = _state
 
     private val _toastMessage : MutableSharedFlow<String?> = MutableSharedFlow()
     val toastMessage : SharedFlow<String?> = _toastMessage
 
     fun onEvent(event: CreateTransactionEvents) {
         when (event) {
+            is CreateTransactionEvents.OnTransactionPageLoad -> {
+                viewModelScope.launch {
+                    val categoriesToLoad = if(event.transactionType == TransactionType.CREDIT) categories.cashInflow else categories.cashOutflow
+                    Log.d("CreateTransactionViewModel", "Categories to load: $categoriesToLoad")
+                    val categoriesWithResources = categoriesToLoad.map { transactionCategoryResourceProvider.getResource(it) }
+                    _state.value = _state.value.copy(categories = categoriesWithResources)
+                }
+            }
+
             is CreateTransactionEvents.OnCreateTransactionClicked -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     val rowsUpdated = saveTransactionsUseCase(event.transactionalSms)

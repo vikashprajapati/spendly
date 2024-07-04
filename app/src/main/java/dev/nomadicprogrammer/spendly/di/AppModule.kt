@@ -122,25 +122,12 @@ object AppModule {
         return TransactionCategoryResourceProvider(context)
     }
 
-    @Provides
-    @Singleton
-    fun provideCashOutflowCategories(categories: Categories): List<TransactionCategory.CashOutflow> {
-        return categories.cashOutflow
-    }
-
-    @Provides
-    @Singleton
-    fun provideCashInflowCategories(categories: Categories): List<TransactionCategory.CashInflow> {
-        return categories.cashInflow
-    }
-
     @Singleton
     @Provides
     fun provideAllCategoryResources(
         categories: Categories,
         transactionCategoryResourceProvider: TransactionCategoryResourceProvider
     ): List<TransactionCategoryResource> {
-        return (categories.cashOutflow + categories.cashInflow)
-            .map { transactionCategoryResourceProvider.getResource(it) }
+        return (categories.cashOutflow + categories.cashInflow).map { transactionCategoryResourceProvider.getResource(it) }
     }
 }
