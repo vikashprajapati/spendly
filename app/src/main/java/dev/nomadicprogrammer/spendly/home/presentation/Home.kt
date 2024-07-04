@@ -1,7 +1,6 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -24,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,12 +46,12 @@ import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.navigation.NewTransaction
 import dev.nomadicprogrammer.spendly.navigation.SeeAllTransaction
+import dev.nomadicprogrammer.spendly.navigation.TransactionDetail
 import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
-import dev.nomadicprogrammer.spendly.transaction.presentation.view.TransactionDetails
 import dev.nomadicprogrammer.spendly.ui.components.CircularLoading
 import dev.nomadicprogrammer.spendly.ui.components.FabActionItem
 import dev.nomadicprogrammer.spendly.ui.components.FabMainItem
@@ -156,22 +154,6 @@ fun Home(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (uiState.dialogTransactionalSmsSms != null) {
-                val sheetState = rememberModalBottomSheetState()
-                TransactionDetails(
-                    homeViewModel = viewModel,
-                    sheetState = sheetState,
-                    onDismiss = {
-                        viewModel.onEvent(HomeEvent.TransactionDialogDismissed)
-                    },
-                    onUpdateClick = {
-                        Log.d("Home", "Transaction updated: $it")
-                        val newStateHolder = uiState.dialogTransactionalSmsSms?.copy(transactionalSms = it)
-                        viewModel.onEvent(HomeEvent.TransactionUpdate(newStateHolder!!))
-                    }
-                )
-            }
-
             val toastMessage = viewModel.toastMessage.collectAsState(null)
             if (!toastMessage.value.isNullOrEmpty()) {
                 Toast.makeText(context, toastMessage.value, Toast.LENGTH_SHORT).show()
@@ -181,7 +163,9 @@ fun Home(
             RecentTransactions(
                 uiState.recentTransactionalSms,
                 onTransactionSmsClick = {
-                    viewModel.onEvent(HomeEvent.TransactionSelected(it))
+                    it.transactionalSms.id?.let { id ->
+                        navController.navigate(TransactionDetail.withArgs(TransactionDetail.Args.TRANSACTION_ID to id))
+                    }
                 },
                 onSeeAllClick = {
                     navController.navigate(SeeAllTransaction.route)

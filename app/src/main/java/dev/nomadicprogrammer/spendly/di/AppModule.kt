@@ -15,10 +15,9 @@ import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
-import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.transaction.domain.UpdateTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.BundledCategories
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
-import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.transaction.data.AmountValidator
 import dev.nomadicprogrammer.spendly.transaction.data.CategoryValidator
 import dev.nomadicprogrammer.spendly.transaction.data.DateValidator
@@ -66,7 +65,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun updateTransactionUseCase(transactionRepository: TransactionRepository) : UpdateTransactionsUseCase{
+    fun updateTransactionUseCase(transactionRepository: TransactionRepository) : UpdateTransactionsUseCase {
         return UpdateTransactionsUseCase(transactionRepository)
     }
 

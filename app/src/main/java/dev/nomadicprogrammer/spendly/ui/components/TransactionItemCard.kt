@@ -32,7 +32,6 @@ import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debi
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItemCard(
     transactionStateHolder: TransactionStateHolder,

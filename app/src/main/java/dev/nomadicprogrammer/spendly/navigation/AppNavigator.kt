@@ -22,6 +22,7 @@ import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.transaction.presentation.view.AllTransactions
 import dev.nomadicprogrammer.spendly.transaction.presentation.create.CreateTransaction
+import dev.nomadicprogrammer.spendly.transaction.presentation.view.TransactionDetails
 
 @Composable
 fun AppNavigator(){
@@ -30,14 +31,24 @@ fun AppNavigator(){
 
     NavHost(navController = navigationController, startDestination = Home.route){
         homeNavGraph(navigationController, homeViewModel)
-        seeAllTransactions(homeViewModel)
+        seeAllTransactions(navigationController, homeViewModel)
         newTransaction(navigationController)
+        transactionDetails(navigationController, homeViewModel)
     }
 }
 
-fun NavGraphBuilder.seeAllTransactions(homeViewModel: HomeViewModel){
+fun NavGraphBuilder.transactionDetails(navController: NavController, homeViewModel: HomeViewModel){
+    composable(TransactionDetail.route){
+        val transactionId = it.arguments?.getString(TransactionDetail.Args.TRANSACTION_ID)
+        if (transactionId != null) {
+            TransactionDetails(homeViewModel, navController, transactionId)
+        }
+    }
+}
+
+fun NavGraphBuilder.seeAllTransactions(navController: NavController, homeViewModel: HomeViewModel){
     composable(SeeAllTransaction.route){
-        AllTransactions(homeViewModel)
+        AllTransactions(navController, homeViewModel)
     }
 }
 

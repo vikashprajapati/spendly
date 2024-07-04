@@ -10,7 +10,7 @@ import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
-import dev.nomadicprogrammer.spendly.home.data.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.transaction.domain.UpdateTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
@@ -110,16 +110,13 @@ class HomeViewModel @Inject constructor(
 
             is HomeEvent.TransactionDetailsDialogLoaded -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    Log.d(TAG, "reading original sms for smsId: ${_state.value.dialogTransactionalSmsSms?.transactionalSms?.smsId}")
-                    val originalSms = _state.value.dialogTransactionalSmsSms?.transactionalSms?.smsId?.let {
-                        originalSmsFetchUseCase.invoke(it)
-                    }
+                    Log.d(TAG, "reading original sms for smsId: ${event.transactionalSms.smsId}")
+                    val originalSms =event.transactionalSms.smsId?.let { originalSmsFetchUseCase.invoke(it) }
                     Log.d(TAG, "Original sms: $originalSms")
-                    val transactionalSmsNew = when(val transactionalSms = _state.value.dialogTransactionalSmsSms?.transactionalSms!!){
+                    val transactionalSmsNew = when(val transactionalSms = event.transactionalSms){
                         is Debit -> transactionalSms.copy(originalSms = originalSms)
                         is Credit -> transactionalSms.copy(originalSms = originalSms)
                     }
-                    _state.value = _state.value.copy(dialogTransactionalSmsSms = _state.value.dialogTransactionalSmsSms?.copy(transactionalSms = transactionalSmsNew))
                 }
             }
 

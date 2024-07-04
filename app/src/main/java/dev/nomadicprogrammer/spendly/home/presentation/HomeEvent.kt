@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.home.presentation
 
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 
 sealed class HomeEvent{
     data object PageLoad : HomeEvent()
@@ -12,7 +13,7 @@ sealed class HomeEvent{
 
     data class TransactionUpdate(val transactionStateHolder : TransactionStateHolder) : HomeEvent()
 
-    data object TransactionDetailsDialogLoaded : HomeEvent()
+    data class TransactionDetailsDialogLoaded(val transactionalSms: TransactionalSms) : HomeEvent()
 
     data object ReadSmsPermissionGranted : HomeEvent()
 
