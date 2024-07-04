@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,20 +11,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
+import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
+import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItemCard(
     transactionStateHolder: TransactionStateHolder,
@@ -85,31 +94,27 @@ fun TransactionItemCard(
     }
 }
 
-/*
 @Preview(
     showBackground = true,
     uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL,
     showSystemUi = false
 )
 @Composable fun TransactionItemCardPreview() {
-    TransactionItemCard(
-        transaction = TransactionalSms.Debit(
-            originalSms = Sms(
-                id = UUID.randomUUID().toString(),
-                senderId = "Amazon",
-                date = System.currentTimeMillis(),
-                msgBody = "You've spent 1000 INR on Amazon"
-            ),
-            currencyAmount = CurrencyAmount(
-                amount = 1000.0,
-                currency = "INR"
-            ),
-            bankName = "ICICI Bank",
-            transactionDate = "2021-09-01",
-            transferredTo = ""
-        )
+    val provider = TransactionCategoryResourceProvider(LocalContext.current)
+    val transactionStateHolder = TransactionStateHolder(
+        TransactionalSms.create(
+            id = "",
+            type = TransactionType.CREDIT,
+            currencyAmount = CurrencyAmount(amount = 40.9),
+            category = TransactionCategory.CashInflow("Salary"),
+            bank = "Icici",
+            transactionDate = "2021-09-01"
+        ),
+        transactionCategoryResource = provider.getResource(TransactionCategory.CashInflow("Salary"))
     )
-
+    TransactionItemCard(
+        transactionStateHolder = transactionStateHolder
+    )
 }
 
 @Preview(
@@ -118,22 +123,19 @@ fun TransactionItemCard(
     showSystemUi = false
 )
 @Composable fun CreditTransactionItemCardPreview() {
-    TransactionItemCard(
-        transaction = TransactionalSms.Credit(
-            originalSms = Sms(
-                id = UUID.randomUUID().toString(),
-                senderId = "Amazon",
-                date = System.currentTimeMillis(),
-                msgBody = "You've spent 1000 INR on Amazon"
-            ),
-            currencyAmount = CurrencyAmount(
-                amount = 1000.0,
-                currency = "INR"
-            ),
-            bankName = "ICICI Bank",
-            transactionDate = "2021-09-01",
-            receivedFrom = ""
-        )
+    val provider = TransactionCategoryResourceProvider(LocalContext.current)
+    val transactionStateHolder = TransactionStateHolder(
+        TransactionalSms.create(
+            id = "",
+            type = TransactionType.DEBIT,
+            currencyAmount = CurrencyAmount(amount = 40.9),
+            category = TransactionCategory.CashOutflow("Grocery"),
+            bank = "Icici",
+            transactionDate = "2021-09-01"
+        ),
+        transactionCategoryResource = provider.getResource(TransactionCategory.CashOutflow("Grocery"))
     )
-
-}*/
+    TransactionItemCard(
+        transactionStateHolder = transactionStateHolder
+    )
+}
