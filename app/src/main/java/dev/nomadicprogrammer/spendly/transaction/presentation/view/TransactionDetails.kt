@@ -4,83 +4,135 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.nomadicprogrammer.spendly.base.DUMMY_TRANSACTIONS
 import dev.nomadicprogrammer.spendly.base.DateUtils
 import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.ui.components.TransactionCategoriesGrid
+import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
+import dev.nomadicprogrammer.spendly.ui.components.ScreenHeader
+import dev.nomadicprogrammer.spendly.ui.components.ScreenHeaderDefault
+import dev.nomadicprogrammer.spendly.ui.components.ScreenHeaderState
+import dev.nomadicprogrammer.spendly.ui.components.StatusBarColor
 
 @Composable
-fun TransactionDetails(
-    homeViewModel: HomeViewModel,
-    navController: NavController,
-    transactionId : String
-) {
-    val state = homeViewModel.state.collectAsState()
-    val transactionalSms = state.value.allTransactionalSms.first { it.transactionalSms.id == transactionId }.transactionalSms
-    val transactionCategoryResource = homeViewModel.transactionCategoryResource.first { it.transactionCategory.name == transactionalSms.category.name }
+fun TransactionDetails(navController: NavController, homeViewModel: HomeViewModel) {
+    val transactionStateHolder = homeViewModel.state.collectAsState().value.selectedTransactionalSms!!
 
-    SideEffect {
-        homeViewModel.onEvent(HomeEvent.TransactionDetailsDialogLoaded(transactionalSms))
+    LaunchedEffect(key1 = true) {
+        homeViewModel.onEvent(HomeEvent.TransactionDetailsPageLoaded(transactionStateHolder))
     }
 
-    Column(
-        modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Transaction Details",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
-            )
+    TransactionDetailsContent(
+        transactionalSms = transactionStateHolder.transactionalSms,
+        onBackClick = {
+            homeViewModel.onEvent(HomeEvent.TransactionSelected(transactionStateHolder = transactionStateHolder))
+            navController.popBackStack()
+        },
+        onDeleteClick = {},
+        onEditClick = {}
+    )
+}
 
-            Text(
-                text = transactionalSms.type.name,
-                color = if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier
-                    .background(
-                        color = if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error.copy(
-                            alpha = 0.1f
-                        ) else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        shape = MaterialTheme.shapes.small
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+@Composable
+private fun TransactionDetailsContent(
+    transactionalSms: TransactionalSms,
+    onBackClick : () -> Unit,
+    onDeleteClick : () -> Unit,
+    onEditClick : () -> Unit
+) {
+    val headerYOffset = 50.dp
+    Scaffold(
+        topBar = { TransactionDetailsHeader(transactionalSms, onBackClick, onDeleteClick, headerYOffset) }
+    ) {
+        val allSidePadding = 16.dp
+        val pd = remember {
+            PaddingValues(
+                start = it.calculateStartPadding(LayoutDirection.Ltr) + allSidePadding,
+                end = it.calculateEndPadding(LayoutDirection.Ltr) + allSidePadding,
+                top = it.calculateTopPadding() + headerYOffset + allSidePadding + 16.dp,
+                bottom = it.calculateBottomPadding() + allSidePadding + 16.dp
             )
         }
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(paddingValues = pd),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            OriginalSmsContent(transactionalSms)
 
-        Spacer(modifier = Modifier.padding(4.dp))
+            Button(
+                onClick = { onEditClick() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(
+                    text = "Edit",
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OriginalSmsContent(
+    transactionalSms: TransactionalSms
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "From: ${transactionalSms.originalSms?.senderId}", style = MaterialTheme.typography.titleSmall)
-            Text(text = DateUtils.Local.formattedDateFromTimestamp(transactionalSms.originalSms?.date?:System.currentTimeMillis()), style = MaterialTheme.typography.titleSmall)
+            Text(
+                text = "From: ${transactionalSms.originalSms?.senderId}",
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = DateUtils.Local.formattedDateFromTimestamp(
+                    transactionalSms.originalSms?.date ?: System.currentTimeMillis()
+                ), style = MaterialTheme.typography.titleSmall
+            )
         }
 
         Spacer(modifier = Modifier.padding(8.dp))
@@ -95,40 +147,125 @@ fun TransactionDetails(
                 .padding(16.dp)
         ) {
             Text(
-                text = transactionalSms.originalSms?.msgBody ?:"Body not found",
+                text = transactionalSms.originalSms?.msgBody ?: "Body not found",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
+    }
+}
 
-        Spacer(modifier = Modifier.padding(8.dp))
+@Composable
+private fun TransactionDetailsHeader(
+    transactionalSms: TransactionalSms,
+    onBackClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    offset: Dp
+) {
+    val headerSurfaceColor =
+        if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val contentColor =
+        if (transactionalSms.type == TransactionType.DEBIT) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary
 
-        Text(text = "Tag Category", style = MaterialTheme.typography.titleSmall)
-        val selectedCategory = remember { mutableStateOf(transactionCategoryResource) }
-        val categories = homeViewModel.transactionCategoryResource
-        TransactionCategoriesGrid(
-            selectedCategory = selectedCategory.value,
-            tagCategories = categories
-        ){
-            selectedCategory.value = it
-        }
+    StatusBarColor(surfaceBgColor = headerSurfaceColor)
 
-        Spacer(modifier = Modifier.padding(8.dp))
-
-        Button(
-            onClick = {
-                val updatedTransaction = if(transactionalSms is Debit) transactionalSms.copy(category = selectedCategory.value.transactionCategory) else (transactionalSms as Credit).copy(category = selectedCategory.value.transactionCategory)
-//                onUpdateClick(updatedTransaction)
+    Column(
+        modifier = Modifier
+            .background(
+                headerSurfaceColor,
+                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val screenHeaderState = ScreenHeaderState(
+            title = {
+                Text(
+                    text = "Transaction Details",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = contentColor
+                )
             },
+            leftHeaderButton = { ScreenHeaderDefault.BackHeaderButton(tint = contentColor, onClick = { onBackClick()}) },
+            rightHeaderButton = {
+                IconButton(onClick = { onDeleteClick() }) {
+                    Icon(imageVector = Icons.Outlined.Delete, contentDescription = "Delete", tint = contentColor)
+                }
+            }
+        )
+
+        ScreenHeader(
+            modifier = Modifier.fillMaxWidth(),
+            screenHeaderState = screenHeaderState
+        )
+
+        Spacer(modifier = Modifier.padding(24.dp))
+
+        Text(
+            text = transactionalSms.currencyAmount.toString(),
+            style = MaterialTheme.typography.displaySmall,
+            color = contentColor,
+            fontWeight = FontWeight.ExtraBold,
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        Text(
+            text = transactionalSms.transactionDate.toString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
+        )
+        ElevatedCard(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally),
+                .padding(horizontal = 24.dp)
+                .offset(y = offset),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
         ) {
-            Text(
-                text = "Update",
+            Row(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium),
-            )
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.shapes.medium
+                    )
+                    .padding(24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val typeName =
+                    if (transactionalSms.type == TransactionType.DEBIT) "Expense" else "Income"
+                DetailItem("Type", typeName)
+
+                DetailItem("Category", transactionalSms.category.name)
+
+                DetailItem("Mode", "Cash")
+            }
         }
     }
+}
+
+@Composable
+private fun DetailItem(title : String, value: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.padding(4.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewTransactionDetails(){
+    val transaction = DUMMY_TRANSACTIONS.first()
+    TransactionDetailsContent(transactionalSms = transaction, {}, {}, {})
 }

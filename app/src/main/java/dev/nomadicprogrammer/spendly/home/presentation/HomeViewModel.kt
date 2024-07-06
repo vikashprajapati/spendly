@@ -83,9 +83,9 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            is HomeEvent.TransactionSelected -> { _state.value = _state.value.copy(dialogTransactionalSmsSms = event.transactionStateHolder) }
+            is HomeEvent.TransactionSelected -> { _state.value = _state.value.copy(selectedTransactionalSms = event.transactionStateHolder) }
 
-            is HomeEvent.TransactionDialogDismissed -> { _state.value = _state.value.copy(dialogTransactionalSmsSms = null) }
+            is HomeEvent.TransactionDialogDismissed -> { _state.value = _state.value.copy(selectedTransactionalSms = null) }
 
             is HomeEvent.TransactionUpdate -> {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -95,7 +95,7 @@ class HomeViewModel @Inject constructor(
                         val allTransactions = _state.value.allTransactionalSms.toMutableList()
                         val newTransactionStateHolder = TransactionStateHolder(event.transactionStateHolder.transactionalSms, transactionCategoryResourceProvider.getResource(event.transactionStateHolder.transactionalSms.category))
                         allTransactions[allTransactions.indexOfFirst { it.transactionalSms.id == event.transactionStateHolder.transactionalSms.id }] = newTransactionStateHolder
-                        _state.value = _state.value.copy(dialogTransactionalSmsSms = null)
+                        _state.value = _state.value.copy(selectedTransactionalSms = null)
                         updateState(allTransactions.toList())
                         _toastMessage.emit("Transaction updated")
                     }
@@ -108,15 +108,17 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            is HomeEvent.TransactionDetailsDialogLoaded -> {
+            is HomeEvent.TransactionDetailsPageLoaded -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    Log.d(TAG, "reading original sms for smsId: ${event.transactionalSms.smsId}")
-                    val originalSms =event.transactionalSms.smsId?.let { originalSmsFetchUseCase.invoke(it) }
+                    val transactionalSms= event.transactionStateHolder.transactionalSms
+                    Log.d(TAG, "reading original sms for smsId: ${transactionalSms.smsId}")
+                    val originalSms =transactionalSms.smsId?.let { originalSmsFetchUseCase.invoke(it) }
                     Log.d(TAG, "Original sms: $originalSms")
-                    val transactionalSmsNew = when(val transactionalSms = event.transactionalSms){
+                    val transactionalSmsNew = when(transactionalSms){
                         is Debit -> transactionalSms.copy(originalSms = originalSms)
                         is Credit -> transactionalSms.copy(originalSms = originalSms)
                     }
+                    _state.value = _state.value.copy(selectedTransactionalSms = event.transactionStateHolder.copy(transactionalSms = transactionalSmsNew))
                 }
             }
 

@@ -14,7 +14,7 @@ data class HomeScreenState(
     val currentViewBy : ViewBy = ViewBy.Today,
     val currentViewTransactionalSms : List<TransactionStateHolder> = mutableListOf(),
     val selectedTabIndex : Int = 0,
-    val dialogTransactionalSmsSms : TransactionStateHolder? = null,
+    val selectedTransactionalSms : TransactionStateHolder? = null,
     val progress: Float = 0f
 ){
 }

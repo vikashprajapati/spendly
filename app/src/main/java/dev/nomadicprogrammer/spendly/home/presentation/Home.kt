@@ -42,16 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.base.DUMMY_TRANSACTIONS
 import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.navigation.NewTransaction
 import dev.nomadicprogrammer.spendly.navigation.SeeAllTransaction
 import dev.nomadicprogrammer.spendly.navigation.TransactionDetail
-import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
-import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.CircularLoading
 import dev.nomadicprogrammer.spendly.ui.components.FabActionItem
 import dev.nomadicprogrammer.spendly.ui.components.FabMainItem
@@ -163,9 +161,8 @@ fun Home(
             RecentTransactions(
                 uiState.recentTransactionalSms,
                 onTransactionSmsClick = {
-                    it.transactionalSms.id?.let { id ->
-                        navController.navigate(TransactionDetail.withArgs(TransactionDetail.Args.TRANSACTION_ID to id))
-                    }
+                    viewModel.onEvent(HomeEvent.TransactionSelected(it))
+                    navController.navigate(TransactionDetail.route)
                 },
                 onSeeAllClick = {
                     navController.navigate(SeeAllTransaction.route)
@@ -252,31 +249,7 @@ fun RecentTransactions(
 
 @Preview(showBackground = true, showSystemUi = false)
 @Composable fun RecentPreview(){
-    val transactionalSms= listOf(
-        TransactionalSms.create(
-            id = "dfd",
-            TransactionType.DEBIT,
-            Sms("id", "", "", System.currentTimeMillis()),
-            CurrencyAmount("INR", 100.0),
-            "Amazon",
-            "12-12-2021",
-            "Amit",
-            "Sbi",
-            TransactionCategory.CashOutflow("Grocery")
-        ),
-
-        TransactionalSms.create(
-            "idfd",
-            TransactionType.CREDIT,
-            Sms("id", "", "", System.currentTimeMillis()),
-            CurrencyAmount("INR", 200.0),
-            "Amazon",
-            "12-12-2021",
-            "Amit",
-            "Sbi",
-            TransactionCategory.Other
-        )
-    )
+    val transactionalSms= DUMMY_TRANSACTIONS
     val stateHolder = transactionalSms.map {
         TransactionStateHolder(it, TransactionCategoryResource(TransactionCategory.Other, R.drawable.bus_icon, MaterialTheme.colorScheme.primary))
     }

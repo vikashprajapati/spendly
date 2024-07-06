@@ -39,10 +39,7 @@ fun AppNavigator(){
 
 fun NavGraphBuilder.transactionDetails(navController: NavController, homeViewModel: HomeViewModel){
     composable(TransactionDetail.route){
-        val transactionId = it.arguments?.getString(TransactionDetail.Args.TRANSACTION_ID)
-        if (transactionId != null) {
-            TransactionDetails(homeViewModel, navController, transactionId)
-        }
+        TransactionDetails(navController, homeViewModel)
     }
 }
 

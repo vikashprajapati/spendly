@@ -13,7 +13,7 @@ sealed class HomeEvent{
 
     data class TransactionUpdate(val transactionStateHolder : TransactionStateHolder) : HomeEvent()
 
-    data class TransactionDetailsDialogLoaded(val transactionalSms: TransactionalSms) : HomeEvent()
+    data class TransactionDetailsPageLoaded(val transactionStateHolder: TransactionStateHolder) : HomeEvent()
 
     data object ReadSmsPermissionGranted : HomeEvent()
 

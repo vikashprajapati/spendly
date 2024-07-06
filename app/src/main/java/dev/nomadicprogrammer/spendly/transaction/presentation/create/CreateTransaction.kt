@@ -67,6 +67,7 @@ import dev.nomadicprogrammer.spendly.smsparser.common.model.CurrencyAmount
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
+import dev.nomadicprogrammer.spendly.ui.components.StatusBarColor
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -323,13 +324,7 @@ private fun ScreenHeader(
     val surfaceBgColor =  if (transactionType == TransactionType.DEBIT) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primary
     val contentColor = Color.White
 
-    val coroutineScope = rememberCoroutineScope()
-    val context =LocalContext.current
-    LaunchedEffect(key1 = true){
-        coroutineScope.launch {
-            (context as Activity).window.statusBarColor = surfaceBgColor.toArgb()
-        }
-    }
+    StatusBarColor(surfaceBgColor)
 
     Surface(color = surfaceBgColor, contentColor = contentColor) {
         Column {

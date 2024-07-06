@@ -3,15 +3,13 @@ package dev.nomadicprogrammer.spendly.home.data
 import android.util.Log
 import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.database.TransactionEntity
-import dev.nomadicprogrammer.spendly.smsparser.common.data.SmsDataSource
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class LocalTransactionRepository @Inject constructor(
-    private val transactionDao: TransactionDao,
-    private val smsInbox: SmsDataSource<TransactionalSms>
+    private val transactionDao: TransactionDao
 ) : TransactionRepository {
     private val TAG = LocalTransactionRepository::class.java.simpleName
 
