@@ -85,7 +85,7 @@ class HomeViewModel @Inject constructor(
 
             is HomeEvent.TransactionSelected -> { _state.value = _state.value.copy(selectedTransactionalSms = event.transactionStateHolder) }
 
-            is HomeEvent.TransactionDialogDismissed -> { _state.value = _state.value.copy(selectedTransactionalSms = null) }
+            is HomeEvent.TransactionViewPageDismissed -> { _state.value = _state.value.copy(selectedTransactionalSms = null) }
 
             is HomeEvent.TransactionUpdate -> {
                 viewModelScope.launch(Dispatchers.IO) {

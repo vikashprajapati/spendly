@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.R
+import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.navigation.TransactionDetail
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
@@ -40,6 +41,7 @@ fun AllTransactions(navController: NavController, homeViewModel: HomeViewModel){
         LazyColumn() {
             items(transactionsToShow) { transaction ->
                 TransactionItemCard(transaction){
+                    homeViewModel.onEvent(HomeEvent.TransactionSelected(it))
                     navController.navigate(TransactionDetail.route)
                 }
             }
