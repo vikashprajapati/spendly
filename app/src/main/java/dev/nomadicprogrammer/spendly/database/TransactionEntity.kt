@@ -22,6 +22,7 @@ data class TransactionEntity(
     companion object{
         fun toEntity(transactionalSms: TransactionalSms): TransactionEntity {
             return TransactionEntity(
+                transactionId = transactionalSms.id?.toInt()?:0,
                 type = transactionalSms.type.name,
                 transactionDate = transactionalSms.transactionDate,
                 bankName = transactionalSms.bankName,

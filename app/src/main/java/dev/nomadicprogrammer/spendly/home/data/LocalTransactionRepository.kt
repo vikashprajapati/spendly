@@ -38,4 +38,8 @@ class LocalTransactionRepository @Inject constructor(
     override suspend fun updateTransaction(transactionalSms: TransactionalSms): Int {
         return transactionDao.updateTransactionCategory(transactionalSms.id!!, transactionalSms.category.name)
     }
+
+    override suspend fun deleteTransaction(transactionalSms: TransactionalSms): Int {
+        return transactionDao.deleteTransaction(TransactionEntity.toEntity(transactionalSms))
+    }
 }

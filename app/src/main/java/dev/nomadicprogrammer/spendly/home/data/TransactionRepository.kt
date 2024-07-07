@@ -11,4 +11,6 @@ interface TransactionRepository {
     suspend fun getAllTransactions(): Flow<List<TransactionalSms>?>
 
     suspend fun updateTransaction(transactionalSms: TransactionalSms) : Int
+
+    suspend fun deleteTransaction(transactionalSms: TransactionalSms) : Int
 }

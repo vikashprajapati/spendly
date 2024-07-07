@@ -14,8 +14,7 @@ sealed class Screen(open val route : String) {
 
 data object Home : Screen("home")
 
-data object TransactionDetail : Screen("transactionDetails}"){
-}
+data object TransactionDetail : Screen("transactionDetails}")
 
 data object SeeAllTransaction: Screen("see_all_transaction")
 

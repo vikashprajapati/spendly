@@ -1,5 +1,6 @@
 package dev.nomadicprogrammer.spendly.transaction.presentation.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,11 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import dev.nomadicprogrammer.spendly.base.DUMMY_TRANSACTIONS
 import dev.nomadicprogrammer.spendly.base.DateUtils
-import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
-import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
+import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 import dev.nomadicprogrammer.spendly.ui.components.ScreenHeader
@@ -48,30 +51,42 @@ import dev.nomadicprogrammer.spendly.ui.components.ScreenHeaderState
 import dev.nomadicprogrammer.spendly.ui.components.StatusBarColor
 
 @Composable
-fun TransactionDetails(navController: NavController, homeViewModel: HomeViewModel) {
-    val transactionStateHolder = homeViewModel.state.collectAsState().value.selectedTransactionalSms!!
+fun TransactionDetails(navController: NavController, transactionStateHolder: TransactionStateHolder, onBackPressed : () -> Unit){
+    val viewModel = hiltViewModel<TransactionDetailsViewModel>()
+    val state = viewModel.state.collectAsState()
 
-    LaunchedEffect(key1 = true) {
-        homeViewModel.onEvent(HomeEvent.TransactionDetailsPageLoaded(transactionStateHolder))
+    LaunchedEffect(key1 = Unit) {
+        viewModel.onEvent(TransactionDetailsPageLoad(transactionStateHolder.transactionalSms.smsId))
+    }
+
+    if (state.value.transactionDeleted){
+        onBackPressed()
+    }
+
+    val toastMessage = viewModel.toastMessage.collectAsState(null)
+    if (toastMessage.value != null){
+        Toast.makeText(navController.context, toastMessage.value, Toast.LENGTH_SHORT).show()
+        viewModel.onEvent(ClearToast)
     }
 
     TransactionDetailsContent(
-        transactionalSms = transactionStateHolder.transactionalSms,
-        onBackClick = {
-            homeViewModel.onEvent(HomeEvent.TransactionViewPageDismissed)
-            navController.popBackStack()
+        state,
+        transactionStateHolder.transactionalSms,
+        onBackClick = { onBackPressed() },
+        onDeleteClick = {
+            viewModel.onEvent(OnDeleteClicked(transactionStateHolder.transactionalSms))
         },
-        onDeleteClick = {},
         onEditClick = {}
     )
 }
 
 @Composable
 private fun TransactionDetailsContent(
+    state: State<TransactionDetailsState>,
     transactionalSms: TransactionalSms,
-    onBackClick : () -> Unit,
-    onDeleteClick : () -> Unit,
-    onEditClick : () -> Unit
+    onBackClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit
 ) {
     val headerYOffset = 50.dp
     Scaffold(
@@ -92,7 +107,10 @@ private fun TransactionDetailsContent(
                 .padding(paddingValues = pd),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            OriginalSmsContent(transactionalSms)
+            val originalSms = state.value.originalSms
+            if (originalSms != null){
+                OriginalSmsContent(originalSms)
+            }
 
             Button(
                 onClick = { onEditClick() },
@@ -112,9 +130,7 @@ private fun TransactionDetailsContent(
 }
 
 @Composable
-private fun OriginalSmsContent(
-    transactionalSms: TransactionalSms
-) {
+private fun OriginalSmsContent(originalSms: Sms) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,12 +140,12 @@ private fun OriginalSmsContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "From: ${transactionalSms.originalSms?.senderId}",
+                text = "From: ${originalSms.senderId}",
                 style = MaterialTheme.typography.titleSmall
             )
             Text(
                 text = DateUtils.Local.formattedDateFromTimestamp(
-                    transactionalSms.originalSms?.date ?: System.currentTimeMillis()
+                    originalSms.date
                 ), style = MaterialTheme.typography.titleSmall
             )
         }
@@ -146,7 +162,7 @@ private fun OriginalSmsContent(
                 .padding(16.dp)
         ) {
             Text(
-                text = transactionalSms.originalSms?.msgBody ?: "Body not found",
+                text = originalSms.msgBody,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -266,5 +282,4 @@ private fun DetailItem(title : String, value: String) {
 @Composable
 fun PreviewTransactionDetails(){
     val transaction = DUMMY_TRANSACTIONS.last()
-    TransactionDetailsContent(transactionalSms = transaction, {}, {}, {})
 }

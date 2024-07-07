@@ -1,6 +1,7 @@
 package dev.nomadicprogrammer.spendly.database
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -19,4 +20,7 @@ interface TransactionDao {
 
     @Query("UPDATE TransactionEntity SET category = :category WHERE transactionId = :transactionId")
     suspend fun updateTransactionCategory(transactionId: String, category: String) : Int
+
+    @Delete
+    suspend fun deleteTransaction(transactionEntity: TransactionEntity) : Int
 }

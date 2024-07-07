@@ -1,7 +1,8 @@
 package dev.nomadicprogrammer.spendly.transaction.presentation.view
 
-import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
+import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 
 data class TransactionDetailsState(
-    val transactionStateHolder: TransactionStateHolder?= null
+    val originalSms: Sms? = null,
+    val transactionDeleted: Boolean = false
 )

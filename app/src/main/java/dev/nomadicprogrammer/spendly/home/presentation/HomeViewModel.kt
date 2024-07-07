@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.base.DateUtils
-import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
@@ -31,7 +30,6 @@ class HomeViewModel @Inject constructor(
     private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
     private val updateTransactionsUseCase: UpdateTransactionsUseCase,
     private val originalSmsFetchUseCase: OriginalSmsFetchUseCase,
-    val transactionCategoryResource: List<TransactionCategoryResource>,
     private val transactionCategoryResourceProvider: TransactionCategoryResourceProvider
 ) : ViewModel() {
     private val TAG = HomeViewModel::class.java.simpleName
