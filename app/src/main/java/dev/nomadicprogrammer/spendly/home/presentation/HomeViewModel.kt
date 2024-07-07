@@ -9,7 +9,7 @@ import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
-import dev.nomadicprogrammer.spendly.transaction.domain.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.transaction.edit.UpdateTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.SpendAnalyserUseCase
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit

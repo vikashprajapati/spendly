@@ -1,11 +1,10 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.view
+package dev.nomadicprogrammer.spendly.transaction.showAll
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +20,6 @@ import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.navigation.TransactionDetail
 import dev.nomadicprogrammer.spendly.ui.components.TransactionItemCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllTransactions(navController: NavController, homeViewModel: HomeViewModel){
     val uiState by homeViewModel.state.collectAsState()

@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.view
+package dev.nomadicprogrammer.spendly.transaction.view.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.background

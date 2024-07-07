@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.domain
+package dev.nomadicprogrammer.spendly.transaction.edit
 
 import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms

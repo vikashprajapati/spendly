@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.view
+package dev.nomadicprogrammer.spendly.transaction.view.presentation
 
 import dev.nomadicprogrammer.spendly.smsparser.common.model.Sms
 

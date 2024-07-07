@@ -1,6 +1,5 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.create
+package dev.nomadicprogrammer.spendly.transaction.create.presentation
 
-import dev.nomadicprogrammer.spendly.smsparser.common.usecases.TransactionCategory
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 

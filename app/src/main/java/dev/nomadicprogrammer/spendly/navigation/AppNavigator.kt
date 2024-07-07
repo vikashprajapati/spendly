@@ -27,9 +27,9 @@ import dev.nomadicprogrammer.spendly.home.presentation.Home
 import dev.nomadicprogrammer.spendly.home.presentation.HomeEvent
 import dev.nomadicprogrammer.spendly.home.presentation.HomeViewModel
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.transaction.presentation.create.CreateTransaction
-import dev.nomadicprogrammer.spendly.transaction.presentation.view.AllTransactions
-import dev.nomadicprogrammer.spendly.transaction.presentation.view.TransactionDetails
+import dev.nomadicprogrammer.spendly.transaction.create.presentation.CreateTransaction
+import dev.nomadicprogrammer.spendly.transaction.showAll.AllTransactions
+import dev.nomadicprogrammer.spendly.transaction.view.presentation.TransactionDetails
 
 
 fun AnimatedContentTransitionScope<NavBackStackEntry>.enterTransition() : EnterTransition {

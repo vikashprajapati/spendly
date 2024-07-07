@@ -1,7 +1,7 @@
-package dev.nomadicprogrammer.spendly.transaction.data
+package dev.nomadicprogrammer.spendly.transaction.create.domain
 
 import android.util.Log
-import dev.nomadicprogrammer.spendly.transaction.presentation.create.CreateTransactionState
+import dev.nomadicprogrammer.spendly.transaction.create.presentation.CreateTransactionState
 
 data class UiValidationStatus(
     val isValid: Boolean,

@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.create
+package dev.nomadicprogrammer.spendly.transaction.create.presentation
 
 import dev.nomadicprogrammer.spendly.base.TransactionCategoryResource
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType

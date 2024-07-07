@@ -1,4 +1,4 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.create
+package dev.nomadicprogrammer.spendly.transaction.create.presentation
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -8,8 +8,8 @@ import dev.nomadicprogrammer.spendly.base.TransactionCategoryResourceProvider
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionType
-import dev.nomadicprogrammer.spendly.transaction.data.ValidateCreateTransactionStateUseCase
-import dev.nomadicprogrammer.spendly.transaction.data.Validator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.ValidateCreateTransactionStateUseCase
+import dev.nomadicprogrammer.spendly.transaction.create.domain.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +30,9 @@ class CreateTransactionViewModel @Inject constructor(
     private val transactionCategoryResourceProvider: TransactionCategoryResourceProvider,
     private val categories: Categories
 ) : ViewModel() {
-    private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(CreateTransactionState())
+    private val _state : MutableStateFlow<CreateTransactionState> = MutableStateFlow(
+        CreateTransactionState()
+    )
     val state : StateFlow<CreateTransactionState> = _state
 
     private val _toastMessage : MutableSharedFlow<String?> = MutableSharedFlow()

@@ -1,6 +1,5 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.view
+package dev.nomadicprogrammer.spendly.transaction.view.presentation
 
-import dev.nomadicprogrammer.spendly.base.TransactionStateHolder
 import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.TransactionalSms
 
 sealed class TransactionDetailsEvent

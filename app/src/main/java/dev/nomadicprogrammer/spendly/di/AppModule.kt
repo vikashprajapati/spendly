@@ -15,16 +15,16 @@ import dev.nomadicprogrammer.spendly.database.TransactionDao
 import dev.nomadicprogrammer.spendly.home.data.GetAllTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.SaveTransactionsUseCase
 import dev.nomadicprogrammer.spendly.home.data.TransactionRepository
-import dev.nomadicprogrammer.spendly.transaction.domain.UpdateTransactionsUseCase
+import dev.nomadicprogrammer.spendly.transaction.edit.UpdateTransactionsUseCase
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.BundledCategories
 import dev.nomadicprogrammer.spendly.smsparser.common.usecases.Categories
-import dev.nomadicprogrammer.spendly.transaction.data.AmountValidator
-import dev.nomadicprogrammer.spendly.transaction.data.CategoryValidator
-import dev.nomadicprogrammer.spendly.transaction.data.DateValidator
-import dev.nomadicprogrammer.spendly.transaction.data.SecondPartyValidator
-import dev.nomadicprogrammer.spendly.transaction.data.TransactionMetadataValidator
-import dev.nomadicprogrammer.spendly.transaction.data.ValidateCreateTransactionStateUseCase
-import dev.nomadicprogrammer.spendly.transaction.data.Validator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.AmountValidator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.CategoryValidator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.DateValidator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.SecondPartyValidator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.TransactionMetadataValidator
+import dev.nomadicprogrammer.spendly.transaction.create.domain.ValidateCreateTransactionStateUseCase
+import dev.nomadicprogrammer.spendly.transaction.create.domain.Validator
 import javax.inject.Named
 import javax.inject.Singleton
 

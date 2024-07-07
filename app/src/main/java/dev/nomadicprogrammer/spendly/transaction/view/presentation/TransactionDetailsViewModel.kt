@@ -1,12 +1,10 @@
-package dev.nomadicprogrammer.spendly.transaction.presentation.view
+package dev.nomadicprogrammer.spendly.transaction.view.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.nomadicprogrammer.spendly.home.data.OriginalSmsFetchUseCase
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Credit
-import dev.nomadicprogrammer.spendly.smsparser.transactionsclassifier.model.Debit
-import dev.nomadicprogrammer.spendly.transaction.domain.TransactionDeleteUseCase
+import dev.nomadicprogrammer.spendly.transaction.view.domain.TransactionDeleteUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +18,9 @@ class TransactionDetailsViewModel @Inject constructor(
     private val originalSmsFetchUseCase: OriginalSmsFetchUseCase,
     private val deleteTransactionUseCase: TransactionDeleteUseCase
 ) : ViewModel() {
-    private val _state : MutableStateFlow<TransactionDetailsState> = MutableStateFlow(TransactionDetailsState())
+    private val _state : MutableStateFlow<TransactionDetailsState> = MutableStateFlow(
+        TransactionDetailsState()
+    )
     val state : StateFlow<TransactionDetailsState> = _state
 
     private val _toastMessage = MutableSharedFlow<String?>()
